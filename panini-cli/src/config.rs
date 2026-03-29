@@ -22,6 +22,7 @@ pub struct Config {
 pub enum Provider {
     Openai,
     Anthropic,
+    Google,
 }
 
 impl Config {

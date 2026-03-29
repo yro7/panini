@@ -25,7 +25,7 @@ Pāṇini doesn't impose a universal schema — you define exactly the features 
 - **No universal schema.** Each language defines its own morphology enum with exactly the features it needs. Polish has 7 cases and verbal aspect. Arabic has triliteral roots and wazn patterns. There is no lowest-common-denominator `Morphology` struct.
 - **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The LLM's JSON output is parsed into these types and rejected if it doesn't conform.
 - **LLM as untrusted source.** Responses are validated against a JSON schema, deserialized into typed structs, then post-processed. On parse failure, the raw output and error are returned for retry with self-correction.
-- **Provider-agnostic.** The `LlmClient` trait is a single async method (`chat_completion`). Wrap any provider (OpenAI, Anthropic, Google, local) in a few lines.
+- **Provider-agnostic via rig.** The engine accepts any `rig::completion::CompletionModel` — OpenAI, Anthropic, Google Gemini, Mistral, Ollama, or any custom provider.
 - **Opt-in complexity.** A simple language (Polish) needs a morphology enum and a few directives. An agglutinative language (Turkish) can opt into morpheme inventories, segmentation, and validation. You only implement what you need.
 
 ## Workspace structure
@@ -51,9 +51,9 @@ Core traits and types:
 
 The extraction pipeline:
 
-- **`extract_features_via_llm()`** -- core function. Takes a `LinguisticDefinition`, an `LlmClient`, an `ExtractionRequest`, and prompt config. Returns typed `FeatureExtractionResponse`.
-- **`LlmClient`** trait -- single `chat_completion` method. Implement this to plug in your provider.
-- **Prompt assembly** -- builds the system prompt from language directives, extraction schema, learner profile, and skill context.
+- **`extract_features_via_llm()`** -- core function. Takes a `LinguisticDefinition`, a `rig::completion::CompletionModel`, an `ExtractionRequest`, and prompt config. Returns a typed `FeatureExtractionResponse`.
+- **Prompt assembly** -- builds the system prompt from language directives, the auto-generated JSON schema, learner profile, and skill context.
+- **Response parsing & validation** -- deserializes the LLM output into your typed structs; on failure returns an `ExtractionParseError` carrying the raw text for retry.
 
 ### panini-langs
 
@@ -71,50 +71,158 @@ Procedural macro crate:
 
 ## Usage
 
+### As a library (Rust API)
+
+Add `panini-engine` and `rig-core` to your `Cargo.toml`:
+
+```toml
+panini-engine = { path = "…" }
+panini-langs   = { path = "…" }
+rig-core       = "0.33"
+```
+
+Then call `extract_features_via_llm` with any `rig::completion::CompletionModel`:
+
 ```rust
-use panini::{extract_features_via_llm, ExtractionRequest, LlmClient};
-use panini::panini_core::traits::LinguisticDefinition;
+use panini_engine::{extract_features_via_llm, ExtractionRequest};
+use panini_engine::prompts::ExtractorPrompts;
 use panini_langs::polish::Polish;
+use rig::client::CompletionClient;
+use rig::providers::openai;
 
-// 1. Implement LlmClient for your provider
-struct MyLlmClient { /* ... */ }
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let client = openai::Client::new("sk-…")?;
+    let model  = client.completion_model("gpt-4o");
+    let prompts = ExtractorPrompts::load("prompts/default.yml")?;
 
-#[async_trait::async_trait]
-impl LlmClient for MyLlmClient {
-    async fn chat_completion(
-        &self,
-        request: &panini::panini_engine::llm::LlmRequest,
-    ) -> anyhow::Result<panini::panini_engine::llm::LlmResponse> {
-        // Call your LLM provider here
-        todo!()
-    }
+    let request = ExtractionRequest {
+        content: "Dał kotowi mleko.".to_string(),
+        targets: vec!["kotowi".to_string()],
+        pedagogical_context: Some("Dative case".to_string()),
+        skill_path: Some("grammar/cases/dative".to_string()),
+        learner_ui_language: "English".to_string(),
+        linguistic_background: vec![],
+        user_prompt: None,
+    };
+
+    let result = extract_features_via_llm(
+        &Polish,
+        &model,
+        &request,
+        0.2,   // temperature
+        4096,  // max tokens
+        None,  // no previous attempt
+        &prompts,
+    ).await?;
+
+    println!("{:#?}", result.target_features);
+    Ok(())
 }
+```
 
-// 2. Build an extraction request
-let request = ExtractionRequest {
-    content: card_json.to_string(),
-    targets: vec!["kotowi".to_string()],
-    pedagogical_context: Some("Dative case".to_string()),
-    skill_path: Some("grammar/cases/dative".to_string()),
-    learner_ui_language: "en".to_string(),
-    linguistic_background: vec![],
-    user_prompt: None,
-};
+### As a standalone CLI
 
-// 3. Extract features
-let result = extract_features_via_llm(
-    &Polish,
-    &my_client,
-    &request,
-    0.0,          // temperature
-    4096,         // max tokens
-    None,         // no previous attempt
-    &prompts,
-).await?;
+**1. Install**
 
-// result.target_features  -- Vec<ExtractedFeature<PolishMorphology>>
-// result.pedagogical_explanation -- HTML string
-// result.multiword_expressions -- Vec<MultiwordExpression>
+```bash
+# from the workspace root
+cargo install --path panini-cli
+
+# or build locally
+cargo build -p panini-cli --release
+```
+
+**2. Create a config file** (copy from `panini.example.toml`):
+
+```toml
+# panini.toml
+provider     = "google"           # openai | anthropic | google
+model        = "gemini-2.0-flash"
+language     = "pol"              # pol | tur | ara
+api_key      = "${GEMINI_API_KEY}"
+prompts_file = "panini-cli/prompts/default.yml"
+```
+
+**3. Run**
+
+```bash
+export GEMINI_API_KEY="…"
+
+panini extract \
+  --config panini.toml \
+  --text "Studentka czyta interesującą książkę." \
+  --target studentka --target czyta --target książkę
+
+# List supported languages
+panini languages
+
+# Pipe output to jq
+panini extract --config panini.toml --text "…" --target "…" \
+  | jq '.target_features'
+```
+
+**CLI options**
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--config` | `panini.toml` | Path to TOML config |
+| `--text` | *(required)* | Sentence / card content to analyse |
+| `--target` | *(required, repeatable)* | Target word(s) to focus extraction on |
+| `--temperature` | `0.2` | Sampling temperature |
+| `--max-tokens` | `4096` | Max tokens for LLM response |
+| `--ui-language` | `English` | Learner's UI language for pedagogical explanation |
+
+## Examples
+
+### Polish — case & aspect
+
+**Input:** `Studentka czyta interesującą książkę w bibliotece.`  
+**Targets:** `studentka`, `czyta`, `książkę`
+
+```json
+{
+  "target_features": [
+    { "word": "studentka", "morphology": { "pos": "noun",  "lemma": "studentka", "gender": "feminine", "case": "nominative" } },
+    { "word": "czyta",     "morphology": { "pos": "verb",  "lemma": "czytać",    "tense": "present",   "aspect": "imperfective" } },
+    { "word": "książkę",   "morphology": { "pos": "noun",  "lemma": "książka",   "gender": "feminine", "case": "accusative" } }
+  ],
+  "context_features": [
+    { "word": "interesującą", "morphology": { "pos": "adjective",  "lemma": "interesujący", "gender": "feminine", "case": "accusative" } },
+    { "word": "w",            "morphology": { "pos": "adposition", "lemma": "w",            "governed_case": "locative" } },
+    { "word": "bibliotece",   "morphology": { "pos": "noun",       "lemma": "biblioteka",   "gender": "feminine", "case": "locative" } }
+  ]
+}
+```
+
+---
+
+### Turkish — agglutinative morpheme segmentation
+
+**Input:** `Öğrenciler kütüphanede kitap okuyorlar.`  
+**Targets:** `öğrenciler`, `okuyorlar`
+
+```json
+{
+  "target_features": [
+    { "word": "öğrenciler", "morphology": { "pos": "noun", "lemma": "öğrenci", "case": "nominative", "number": "plural" } },
+    { "word": "okuyorlar",  "morphology": { "pos": "verb", "lemma": "okumak",  "tense": "present", "mood": "indicative",
+                                            "voice": "active", "person": "third", "number": "plural", "polarity": "positive" } }
+  ],
+  "morpheme_segmentation": [
+    {
+      "word": "öğrenciler",
+      "morphemes": [{ "surface": "ler", "base_form": "lAr", "function": { "category": "number", "value": "plural" } }]
+    },
+    {
+      "word": "okuyorlar",
+      "morphemes": [
+        { "surface": "yor", "base_form": "(I)yor", "function": { "category": "tense",     "value": "present" } },
+        { "surface": "lar", "base_form": "lAr",    "function": { "category": "agreement", "person": "third", "number": "plural" } }
+      ]
+    }
+  ]
+}
 ```
 
 ## Adding a language

@@ -153,6 +153,21 @@ async fn run_extraction(
             )
             .await
         }
+        Provider::Google => {
+            let client = rig::providers::gemini::Client::new(&config.api_key)
+                .map_err(|e| anyhow::anyhow!("Failed to create Gemini client: {e}"))?;
+            let model = client.completion_model(&config.model);
+            registry::extract_erased(
+                &config.language,
+                &model,
+                request,
+                temperature,
+                max_tokens,
+                None,
+                prompts,
+            )
+            .await
+        }
     }
 }
 
