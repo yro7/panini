@@ -6,69 +6,6 @@ Pāṇini lets you define *what* linguistic features to extract and *how* to ext
 
 Pāṇini doesn't impose a universal schema — you define exactly the features that matter for your language, and the framework builds the extraction pipeline around your definitions.
 
-## What you define, what the framework does
-
-**You define:**
-- A **morphology enum** — the features you want extracted (POS, case, tense, aspect, gender… whatever your language needs)
-- **Extraction directives** — natural-language instructions that guide the LLM on how to analyze your language
-- **Optional morpheme segmentation** — for agglutinative languages, a morpheme inventory with validation rules
-- **Optional post-processing** — hooks to validate or enrich the LLM's output after parsing
-
-**The framework handles:**
-- **Prompt assembly** — combines your directives, the generated schema, learner context, and pedagogical focus into a structured prompt
-- **JSON schema generation** — automatically derived from your Rust types, so the LLM is constrained to return exactly what you defined
-- **LLM orchestration** — provider-agnostic; bring your own client (OpenAI, Anthropic, Google, local)
-- **Response parsing & validation** — deserializes the LLM output into your typed structs, rejects malformed responses, supports retry with self-correction
-
-## Design principles
-
-- **No universal schema.** Each language defines its own morphology enum with exactly the features it needs. Polish has 7 cases and verbal aspect. Arabic has triliteral roots and wazn patterns. There is no lowest-common-denominator `Morphology` struct.
-- **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The LLM's JSON output is parsed into these types and rejected if it doesn't conform.
-- **LLM as untrusted source.** Responses are validated against a JSON schema, deserialized into typed structs, then post-processed. On parse failure, the raw output and error are returned for retry with self-correction.
-- **Provider-agnostic via rig.** The engine accepts any `rig::completion::CompletionModel` — OpenAI, Anthropic, Google Gemini, Mistral, Ollama, or any custom provider.
-- **Opt-in complexity.** A simple language (Polish) needs a morphology enum and a few directives. An agglutinative language (Turkish) can opt into morpheme inventories, segmentation, and validation. You only implement what you need.
-
-## Workspace structure
-
-```
-panini/              # Facade crate, re-exports everything
-panini-core/         # Traits, domain types, morphology enums
-panini-engine/       # LLM extraction pipeline, prompt assembly
-panini-langs/        # Per-language implementations (Polish, Arabic, Turkish)
-panini-macro/        # #[derive(MorphologyInfo)] proc macro
-```
-
-### panini-core
-
-Core traits and types:
-
-- **`LinguisticDefinition`** -- the main trait a language implements. Defines `Morphology` and `GrammaticalFunction` associated types, ISO code, scripts, extraction directives.
-- **`MorphologyInfo`** -- derived trait providing `.lemma()`, `.pos_tag()`, `.pos_label()` on morphology enums.
-- **`Agglutinative`** -- opt-in trait for morpheme segmentation (inventory, directives, validation).
-- **`FeatureExtractionResponse<M, F>`** -- the structured output: pedagogical explanation, target/context features, multiword expressions, optional morpheme segmentation.
-
-### panini-engine
-
-The extraction pipeline:
-
-- **`extract_features_via_llm()`** -- core function. Takes a `LinguisticDefinition`, a `rig::completion::CompletionModel`, an `ExtractionRequest`, and prompt config. Returns a typed `FeatureExtractionResponse`.
-- **Prompt assembly** -- builds the system prompt from language directives, the auto-generated JSON schema, learner profile, and skill context.
-- **Response parsing & validation** -- deserializes the LLM output into your typed structs; on failure returns an `ExtractionParseError` carrying the raw text for retry.
-
-### panini-langs
-
-Reference language implementations:
-
-- **Polish** -- 7 cases, 3 genders, verbal aspect, 5 POS categories
-- **Arabic** -- triliteral roots, wazn patterns, case/state, reverse gender agreement
-- **Turkish** -- agglutinative, with full morpheme inventory and segmentation
-
-### panini-macro
-
-Procedural macro crate:
-
-- **`#[derive(MorphologyInfo)]`** -- generates `lemma()`, `pos_tag()`, `pos_label()` implementations and a `<Name>PosTag` enum from a `#[serde(tag = "pos")]` morphology enum.
-
 ## Usage
 
 ### As a library (Rust API)
@@ -223,6 +160,38 @@ panini extract --config panini.toml --text "…" --target "…" \
     }
   ]
 }
+```
+
+## What you define, what the framework does
+
+**You define:**
+- A **morphology enum** — the features you want extracted (POS, case, tense, aspect, gender… whatever your language needs)
+- **Extraction directives** — natural-language instructions that guide the LLM on how to analyze your language
+- **Optional morpheme segmentation** — for agglutinative languages, a morpheme inventory with validation rules
+- **Optional post-processing** — hooks to validate or enrich the LLM's output after parsing
+
+**The framework handles:**
+- **Prompt assembly** — combines your directives, the generated schema, learner context, and pedagogical focus into a structured prompt
+- **JSON schema generation** — automatically derived from your Rust types, so the LLM is constrained to return exactly what you defined
+- **LLM orchestration** — provider-agnostic; bring your own client (OpenAI, Anthropic, Google, local)
+- **Response parsing & validation** — deserializes the LLM output into your typed structs, rejects malformed responses, supports retry with self-correction
+
+## Design principles
+
+- **No universal schema.** Each language defines its own morphology enum with exactly the features it needs. Polish has 7 cases and verbal aspect. Arabic has triliteral roots and wazn patterns. There is no lowest-common-denominator `Morphology` struct.
+- **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The LLM's JSON output is parsed into these types and rejected if it doesn't conform.
+- **LLM as untrusted source.** Responses are validated against a JSON schema, deserialized into typed structs, then post-processed. On parse failure, the raw output and error are returned for retry with self-correction.
+- **Provider-agnostic via rig.** The engine accepts any `rig::completion::CompletionModel` — OpenAI, Anthropic, Google Gemini, Mistral, Ollama, or any custom provider.
+- **Opt-in complexity.** A simple language (Polish) needs a morphology enum and a few directives. An agglutinative language (Turkish) can opt into morpheme inventories, segmentation, and validation. You only implement what you need.
+
+## Workspace structure
+
+```
+panini/              # Facade crate, re-exports everything
+panini-core/         # Traits, domain types, morphology enums
+panini-engine/       # LLM extraction pipeline, prompt assembly
+panini-langs/        # Per-language implementations (Polish, Arabic, Turkish)
+panini-macro/        # #[derive(MorphologyInfo)] proc macro
 ```
 
 ## Adding a language
