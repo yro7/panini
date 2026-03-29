@@ -1,10 +1,24 @@
-# Panini
+# Pāṇini
 
-**Language-agnostic morphological feature extraction, powered by LLMs.**
+**A framework for defining and running linguistic feature extraction with LLMs.**
 
-Named after [Panini](https://en.wikipedia.org/wiki/P%C4%81%E1%B9%87ini), the ancient Sanskrit grammarian who formalized the first known generative grammar.
+Pāṇini lets you define *what* linguistic features to extract and *how* to extract them, for any language : You describe your language's morphology as Rust types, write extraction directives, and the framework handles the rest: prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation.
 
-Panini takes text in any language and extracts structured morphological features (lemma, case, gender, aspect, tense, voice...) using an LLM, guided by language-specific type systems and directives. It is provider-agnostic: bring your own LLM client.
+Pāṇini doesn't impose a universal schema — you define exactly the features that matter for your language, and the framework builds the extraction pipeline around your definitions.
+
+## What you define, what the framework does
+
+**You define:**
+- A **morphology enum** — the features you want extracted (POS, case, tense, aspect, gender… whatever your language needs)
+- **Extraction directives** — natural-language instructions that guide the LLM on how to analyze your language
+- **Optional morpheme segmentation** — for agglutinative languages, a morpheme inventory with validation rules
+- **Optional post-processing** — hooks to validate or enrich the LLM's output after parsing
+
+**The framework handles:**
+- **Prompt assembly** — combines your directives, the generated schema, learner context, and pedagogical focus into a structured prompt
+- **JSON schema generation** — automatically derived from your Rust types, so the LLM is constrained to return exactly what you defined
+- **LLM orchestration** — provider-agnostic; bring your own client (OpenAI, Anthropic, Google, local)
+- **Response parsing & validation** — deserializes the LLM output into your typed structs, rejects malformed responses, supports retry with self-correction
 
 ## Design principles
 
@@ -12,7 +26,7 @@ Panini takes text in any language and extracts structured morphological features
 - **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The LLM's JSON output is parsed into these types and rejected if it doesn't conform.
 - **LLM as untrusted source.** Responses are validated against a JSON schema, deserialized into typed structs, then post-processed. On parse failure, the raw output and error are returned for retry with self-correction.
 - **Provider-agnostic.** The `LlmClient` trait is a single async method (`chat_completion`). Wrap any provider (OpenAI, Anthropic, Google, local) in a few lines.
-- **Agglutination support.** Languages like Turkish opt into the `Agglutinative` trait, which adds morpheme inventory, segmentation, and validation on top of the base extraction.
+- **Opt-in complexity.** A simple language (Polish) needs a morphology enum and a few directives. An agglutinative language (Turkish) can opt into morpheme inventories, segmentation, and validation. You only implement what you need.
 
 ## Workspace structure
 
