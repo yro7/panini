@@ -1,6 +1,6 @@
 # Pāṇini
 
-**A framework for defining and running linguistic feature extraction with LLMs.**
+**A LLM-powered linguistic feature extraction framework.**
 
 Pāṇini lets you define *what* linguistic features to extract and *how* to extract them, for any language : You describe your language's morphology as Rust types, write extraction directives, and the framework handles the rest: prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation.
 
