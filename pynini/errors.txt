@@ -1,0 +1,485 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling unicode-ident v1.0.24
+   Compiling libc v0.2.183
+    Checking cfg-if v1.0.4
+    Checking memchr v2.8.0
+    Checking pin-project-lite v0.2.17
+    Checking futures-core v0.3.32
+    Checking smallvec v1.15.1
+    Checking once_cell v1.21.4
+    Checking itoa v1.0.18
+   Compiling autocfg v1.5.0
+   Compiling shlex v1.3.0
+   Compiling find-msvc-tools v0.1.9
+    Checking bytes v1.11.1
+   Compiling parking_lot_core v0.9.12
+   Compiling version_check v0.9.5
+    Checking scopeguard v1.2.0
+    Checking futures-sink v0.3.32
+   Compiling fs_extra v1.3.0
+    Checking lock_api v0.4.14
+   Compiling dunce v1.0.5
+   Compiling target-lexicon v0.12.16
+    Checking stable_deref_trait v1.2.1
+   Compiling serde_core v1.0.228
+    Checking slab v0.4.12
+    Checking futures-channel v0.3.32
+    Checking zeroize v1.8.2
+   Compiling serde v1.0.228
+    Checking futures-io v0.3.32
+    Checking futures-task v0.3.32
+   Compiling aws-lc-rs v1.16.2
+    Checking http v1.4.0
+    Checking rustls-pki-types v1.14.0
+   Compiling num-traits v0.2.19
+   Compiling zerocopy v0.8.48
+    Checking core-foundation-sys v0.8.7
+   Compiling jobserver v0.1.34
+   Compiling syn v2.0.117
+    Checking errno v0.3.14
+    Checking socket2 v0.6.3
+    Checking parking_lot v0.12.5
+    Checking mio v1.2.0
+    Checking signal-hook-registry v1.4.8
+   Compiling pyo3-build-config v0.22.6
+   Compiling cc v1.2.58
+    Checking equivalent v1.0.2
+    Checking foldhash v0.2.0
+    Checking allocator-api2 v0.2.21
+    Checking untrusted v0.9.0
+   Compiling typenum v1.19.0
+   Compiling zmij v1.0.21
+    Checking writeable v0.6.2
+   Compiling httparse v1.10.1
+   Compiling rustls v0.23.37
+    Checking litemap v0.8.1
+    Checking hashbrown v0.16.1
+   Compiling generic-array v0.14.7
+    Checking tracing-core v0.1.36
+   Compiling serde_json v1.0.149
+   Compiling icu_normalizer_data v2.1.1
+    Checking bitflags v2.11.0
+   Compiling icu_properties_data v2.1.2
+    Checking subtle v2.6.1
+   Compiling ref-cast v1.0.25
+   Compiling cmake v0.1.58
+    Checking indexmap v2.13.0
+    Checking http-body v1.0.1
+   Compiling system-configuration-sys v0.6.0
+    Checking percent-encoding v2.3.2
+    Checking getrandom v0.2.17
+    Checking fnv v1.0.7
+    Checking atomic-waker v1.1.2
+    Checking tower-service v0.3.3
+    Checking try-lock v0.2.5
+    Checking rand_core v0.6.4
+    Checking want v0.3.1
+    Checking num-integer v0.1.46
+   Compiling aws-lc-sys v0.39.1
+    Checking core-foundation v0.9.4
+    Checking aho-corasick v1.1.4
+   Compiling unicase v2.9.0
+    Checking log v0.4.29
+    Checking pin-utils v0.1.0
+    Checking regex-syntax v0.8.10
+    Checking system-configuration v0.7.0
+   Compiling mime_guess v2.0.5
+   Compiling pyo3-ffi v0.22.6
+   Compiling pyo3-macros-backend v0.22.6
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking core-foundation v0.10.1
+    Checking security-framework-sys v2.17.0
+    Checking sync_wrapper v1.0.2
+    Checking utf8_iter v1.0.4
+    Checking siphasher v1.0.2
+    Checking base64 v0.22.1
+    Checking ipnet v2.12.0
+   Compiling thiserror v1.0.69
+   Compiling thiserror v2.0.18
+    Checking tower-layer v0.3.3
+   Compiling getrandom v0.3.4
+    Checking security-framework v3.7.0
+    Checking phf_shared v0.11.3
+    Checking digest v0.10.7
+    Checking num-bigint v0.4.6
+    Checking form_urlencoded v1.2.2
+    Checking cpufeatures v0.2.17
+   Compiling ahash v0.8.12
+   Compiling memoffset v0.9.1
+    Checking mime v0.3.17
+    Checking uuid v1.23.0
+    Checking dyn-clone v1.0.20
+   Compiling anyhow v1.0.102
+    Checking data-encoding v2.10.0
+    Checking iri-string v0.7.11
+   Compiling heck v0.5.0
+    Checking sha1 v0.10.6
+    Checking phf v0.11.3
+   Compiling pyo3 v0.22.6
+    Checking num-iter v0.1.45
+    Checking http-body-util v0.1.3
+    Checking num-complex v0.4.6
+    Checking regex-automata v0.4.14
+    Checking webpki-roots v1.0.6
+    Checking encoding_rs v0.8.35
+    Checking borrow-or-share v0.2.4
+    Checking minimal-lexical v0.2.1
+    Checking utf-8 v0.7.6
+    Checking num-rational v0.4.2
+    Checking byteorder v1.5.0
+   Compiling synstructure v0.13.2
+   Compiling serde_derive_internals v0.29.1
+   Compiling unicode-general-category v1.1.0
+    Checking ppv-lite86 v0.2.21
+    Checking bit-vec v0.8.0
+    Checking rand_chacha v0.3.1
+    Checking num v0.4.3
+    Checking nom v7.1.3
+    Checking rand v0.8.5
+    Checking bit-set v0.8.0
+    Checking webpki-roots v0.26.11
+    Checking isolang v2.4.0
+   Compiling serde_yml v0.0.12
+   Compiling indoc v2.0.7
+    Checking lazy_static v1.5.0
+    Checking vsimd v0.8.0
+    Checking outref v0.5.2
+    Checking unindent v0.2.4
+    Checking iso15924 v0.1.0
+    Checking fraction v0.15.3
+   Compiling zerofrom-derive v0.1.6
+   Compiling yoke-derive v0.8.1
+   Compiling tokio-macros v2.6.1
+   Compiling zerovec-derive v0.11.2
+   Compiling serde_derive v1.0.228
+   Compiling futures-macro v0.3.32
+   Compiling displaydoc v0.2.5
+    Checking tokio v1.50.0
+   Compiling tracing-attributes v0.1.31
+    Checking zerofrom v0.1.6
+   Compiling ref-cast-impl v1.0.25
+   Compiling schemars_derive v1.2.1
+    Checking yoke v0.8.1
+    Checking zerovec v0.11.5
+    Checking futures-util v0.3.32
+    Checking zerotrie v0.2.3
+   Compiling thiserror-impl v2.0.18
+    Checking tinystr v0.8.2
+    Checking icu_locale_core v2.1.1
+    Checking potential_utf v0.1.4
+    Checking tracing v0.1.44
+    Checking icu_collections v2.1.1
+   Compiling thiserror-impl v1.0.69
+    Checking regex v1.12.3
+   Compiling pin-project-internal v1.1.11
+    Checking icu_provider v2.1.1
+   Compiling pyo3-macros v0.22.6
+   Compiling async-stream-impl v0.3.6
+    Checking icu_normalizer v2.1.1
+    Checking icu_properties v2.1.2
+    Checking async-stream v0.3.6
+    Checking fancy-regex v0.17.0
+    Checking eventsource-stream v0.2.3
+    Checking uuid-simd v0.8.0
+    Checking nanoid v0.4.0
+    Checking pin-project v1.1.11
+    Checking libyml v0.0.5
+    Checking ordered-float v5.3.0
+    Checking futures-timer v3.0.3
+    Checking ryu v1.0.23
+    Checking futures-executor v0.3.32
+    Checking num-cmp v0.1.0
+    Checking schemars v1.2.1
+    Checking idna_adapter v1.2.1
+    Checking fluent-uri v0.4.1
+    Checking futures v0.3.32
+    Checking idna v1.1.0
+    Checking tracing-futures v0.2.5
+    Checking email_address v0.2.9
+    Checking fastrand v2.3.0
+    Checking glob v0.3.3
+    Checking as-any v0.3.2
+    Checking bytecount v0.6.9
+    Checking url v2.5.8
+   Compiling panini-macro v0.1.0 (/Users/marin.decanini/Documents/PROJETS/Panini-temp/panini-macro)
+    Checking referencing v0.45.0
+    Checking panini-core v0.1.0 (/Users/marin.decanini/Documents/PROJETS/Panini-temp/panini-core)
+    Checking tokio-util v0.7.18
+    Checking tower v0.5.3
+    Checking pythonize v0.22.0
+    Checking pyo3-async-runtimes v0.22.0
+    Checking panini-langs v0.1.0 (/Users/marin.decanini/Documents/PROJETS/Panini-temp/panini-langs)
+    Checking h2 v0.4.13
+    Checking tower-http v0.6.8
+    Checking hyper v1.8.1
+    Checking hyper-util v0.1.20
+    Checking rustls-webpki v0.103.10
+    Checking tokio-rustls v0.26.4
+    Checking rustls-platform-verifier v0.6.2
+    Checking tungstenite v0.23.0
+    Checking hyper-rustls v0.27.7
+    Checking reqwest v0.13.2
+    Checking tokio-tungstenite v0.23.1
+    Checking rig-core v0.33.0
+    Checking jsonschema v0.45.0
+    Checking panini-engine v0.1.0 (/Users/marin.decanini/Documents/PROJETS/Panini-temp/panini-engine)
+    Checking pynini v0.1.0 (/Users/marin.decanini/Documents/PROJETS/Panini-temp/pynini)
+error[E0432]: unresolved import `panini_langs::registry`
+  --> pynini/src/lib.rs:8:5
+   |
+ 8 | use panini_langs::registry;
+   |     ^^^^^^^^^^^^^^^^^^^^^^ no `registry` in the root
+   |
+note: found an item that was configured out
+  --> /Users/marin.decanini/Documents/PROJETS/Panini-temp/panini-langs/src/lib.rs:10:9
+   |
+ 9 | #[cfg(feature = "registry")]
+   |       -------------------- the item is gated behind the `registry` feature
+10 | pub mod registry;
+   |         ^^^^^^^^
+
+error[E0599]: no method named `completion_model` found for struct `Client<Ext, H>` in the current scope
+  --> pynini/src/lib.rs:64:32
+   |
+64 |             let model = client.completion_model(&model_name);
+   |                                ^^^^^^^^^^^^^^^^ method not found in `Client<OpenAIResponsesExt>`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: the following traits which provide `completion_model` are implemented but not in scope; perhaps you want to import one of them
+   |
+ 1 + use rig::client::CompletionClient;
+   |
+ 1 + use rig::client::completion::CompletionClientDyn;
+   |
+
+error[E0282]: type annotations needed
+  --> pynini/src/lib.rs:65:17
+   |
+65 |             let result = registry::extract_erased_with_components(
+   |                 ^^^^^^
+...
+76 |             Ok(result.into_raw())
+   |                ------ type must be known at this point
+   |
+help: consider giving `result` an explicit type
+   |
+65 |             let result: /* Type */ = registry::extract_erased_with_components(
+   |                       ++++++++++++
+
+error[E0599]: no method named `completion_model` found for struct `Client<Ext, H>` in the current scope
+  --> pynini/src/lib.rs:81:32
+   |
+81 |             let model = client.completion_model(&model_name);
+   |                                ^^^^^^^^^^^^^^^^ method not found in `Client<AnthropicExt>`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: the following traits which provide `completion_model` are implemented but not in scope; perhaps you want to import one of them
+   |
+ 1 + use rig::client::CompletionClient;
+   |
+ 1 + use rig::client::completion::CompletionClientDyn;
+   |
+
+error[E0282]: type annotations needed
+  --> pynini/src/lib.rs:82:17
+   |
+82 |             let result = registry::extract_erased_with_components(
+   |                 ^^^^^^
+...
+93 |             Ok(result.into_raw())
+   |                ------ type must be known at this point
+   |
+help: consider giving `result` an explicit type
+   |
+82 |             let result: /* Type */ = registry::extract_erased_with_components(
+   |                       ++++++++++++
+
+error[E0599]: no method named `completion_model` found for struct `Client<Ext, H>` in the current scope
+  --> pynini/src/lib.rs:98:32
+   |
+98 |             let model = client.completion_model(&model_name);
+   |                                ^^^^^^^^^^^^^^^^ method not found in `Client<GeminiExt>`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: the following traits which provide `completion_model` are implemented but not in scope; perhaps you want to import one of them
+   |
+ 1 + use rig::client::CompletionClient;
+   |
+ 1 + use rig::client::completion::CompletionClientDyn;
+   |
+
+error[E0282]: type annotations needed
+   --> pynini/src/lib.rs:99:17
+    |
+ 99 | ...   let result = registry::extract_erased_with_components(
+    |           ^^^^^^
+...
+110 | ...   Ok(result.into_raw())
+    |          ------ type must be known at this point
+    |
+help: consider giving `result` an explicit type
+    |
+ 99 |             let result: /* Type */ = registry::extract_erased_with_components(
+    |                       ++++++++++++
+
+error[E0308]: `?` operator has incompatible types
+   --> pynini/src/lib.rs:162:8
+    |
+162 |     Ok(pythonize(py, &result)?)
+    |        ^^^^^^^^^^^^^^^^^^^^^^^ expected `Py<PyAny>`, found `Bound<'_, PyAny>`
+    |
+    = note: `?` operator cannot convert from `pyo3::Bound<'_, pyo3::PyAny>` to `Py<pyo3::PyAny>`
+    = note: expected struct `Py<pyo3::PyAny>`
+               found struct `pyo3::Bound<'_, pyo3::PyAny>`
+help: call `Into::into` on this expression to convert `pyo3::Bound<'_, pyo3::PyAny>` into `Py<pyo3::PyAny>`
+    |
+162 |     Ok(pythonize(py, &result)?.into())
+    |                               +++++++
+
+error[E0308]: `?` operator has incompatible types
+   --> pynini/src/lib.rs:202:58
+    |
+202 | ...PyObject> { Ok(pythonize(py, &result)?) })
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^ expected `Py<PyAny>`, found `Bound<'_, PyAny>`
+    |
+    = note: `?` operator cannot convert from `pyo3::Bound<'_, pyo3::PyAny>` to `Py<pyo3::PyAny>`
+    = note: expected struct `Py<pyo3::PyAny>`
+               found struct `pyo3::Bound<'_, pyo3::PyAny>`
+help: call `Into::into` on this expression to convert `pyo3::Bound<'_, pyo3::PyAny>` into `Py<pyo3::PyAny>`
+    |
+202 |         Python::with_gil(|py| -> PyResult<PyObject> { Ok(pythonize(py, &result)?.into()) })
+    |                                                                                 +++++++
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:122:15
+    |
+122 |     provider: String,
+    |               ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+    = note: `#[warn(unsafe_op_in_unsafe_fn)]` (part of `#[warn(rust_2024_compatibility)]`) on by default
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:123:12
+    |
+123 |     model: String,
+    |            ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:124:14
+    |
+124 |     api_key: String,
+    |              ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:125:15
+    |
+125 |     language: String,
+    |               ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:126:11
+    |
+126 |     text: String,
+    |           ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:127:14
+    |
+127 |     targets: Vec<String>,
+    |              ^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:128:14
+    |
+128 |     prompts: Bound<'_, PyAny>,
+    |              ^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:171:15
+    |
+171 |     provider: String,
+    |               ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:172:12
+    |
+172 |     model: String,
+    |            ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:173:14
+    |
+173 |     api_key: String,
+    |              ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:174:15
+    |
+174 |     language: String,
+    |               ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:175:11
+    |
+175 |     text: String,
+    |           ^^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:176:14
+    |
+176 |     targets: Vec<String>,
+    |              ^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+warning[E0133]: call to unsafe function `pyo3::impl_::extract_argument::unwrap_required_argument` is unsafe and requires unsafe block
+   --> pynini/src/lib.rs:177:14
+    |
+177 |     prompts: Bound<'_, PyAny>,
+    |              ^^^^^ call to unsafe function
+    |
+    = note: for more information, see <https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-op-in-unsafe-fn.html>
+    = note: consult the function's documentation for information on how to avoid undefined behavior
+
+Some errors have detailed explanations: E0133, E0282, E0308, E0432, E0599.
+For more information about an error, try `rustc --explain E0133`.
+warning: `pynini` (lib) generated 14 warnings
+error: could not compile `pynini` (lib) due to 9 previous errors; 14 warnings emitted
