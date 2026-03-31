@@ -49,6 +49,11 @@ enum Command {
         /// Optional learner UI language name (e.g. "French").
         #[arg(long, default_value = "English")]
         ui_language: String,
+
+        /// Comma-separated list of components to extract (e.g. "pedagogical_explanation,morphology").
+        /// When omitted, uses the legacy monolithic extraction.
+        #[arg(long)]
+        components: Option<String>,
     },
 
     /// List supported language codes.
@@ -84,6 +89,7 @@ async fn main() -> Result<()> {
             temperature,
             max_tokens,
             ui_language,
+            components,
         } => {
             let config = Config::load(&config_path)
                 .with_context(|| format!("Loading config from '{config_path}'"))?;
@@ -100,9 +106,16 @@ async fn main() -> Result<()> {
                 user_prompt: None,
             };
 
-            let result = run_extraction(&config, &prompts, &request, temperature, max_tokens)
-                .await
-                .context("Feature extraction failed")?;
+            let result = if let Some(comp_str) = components {
+                let keys: Vec<&str> = comp_str.split(',').map(|s| s.trim()).collect();
+                run_component_extraction(&config, &prompts, &request, &keys, temperature, max_tokens)
+                    .await
+                    .context("Component extraction failed")?
+            } else {
+                run_extraction(&config, &prompts, &request, temperature, max_tokens)
+                    .await
+                    .context("Feature extraction failed")?
+            };
 
             println!("{}", serde_json::to_string_pretty(&result)?);
         }
@@ -167,6 +180,69 @@ async fn run_extraction(
                 prompts,
             )
             .await
+        }
+    }
+}
+
+async fn run_component_extraction(
+    config: &Config,
+    prompts: &ExtractorPrompts,
+    request: &ExtractionRequest,
+    component_keys: &[&str],
+    temperature: f32,
+    max_tokens: u32,
+) -> Result<serde_json::Value> {
+    match config.provider {
+        Provider::Openai => {
+            let client = rig::providers::openai::Client::new(&config.api_key)
+                .map_err(|e| anyhow::anyhow!("Failed to create OpenAI client: {e}"))?;
+            let model = client.completion_model(&config.model);
+            let result = registry::extract_erased_with_components(
+                &config.language,
+                &model,
+                request,
+                Some(component_keys),
+                temperature,
+                max_tokens,
+                None,
+                prompts,
+            )
+            .await?;
+            Ok(result.into_raw())
+        }
+        Provider::Anthropic => {
+            let client = rig::providers::anthropic::Client::new(&config.api_key)
+                .map_err(|e| anyhow::anyhow!("Failed to create Anthropic client: {e}"))?;
+            let model = client.completion_model(&config.model);
+            let result = registry::extract_erased_with_components(
+                &config.language,
+                &model,
+                request,
+                Some(component_keys),
+                temperature,
+                max_tokens,
+                None,
+                prompts,
+            )
+            .await?;
+            Ok(result.into_raw())
+        }
+        Provider::Google => {
+            let client = rig::providers::gemini::Client::new(&config.api_key)
+                .map_err(|e| anyhow::anyhow!("Failed to create Gemini client: {e}"))?;
+            let model = client.completion_model(&config.model);
+            let result = registry::extract_erased_with_components(
+                &config.language,
+                &model,
+                request,
+                Some(component_keys),
+                temperature,
+                max_tokens,
+                None,
+                prompts,
+            )
+            .await?;
+            Ok(result.into_raw())
         }
     }
 }
