@@ -1,3 +1,4 @@
+mod add_language;
 mod config;
 
 use anyhow::{Context, Result};
@@ -58,6 +59,33 @@ enum Command {
 
     /// List supported language codes.
     Languages,
+
+    /// Generate a new language implementation using an LLM.
+    AddLanguage {
+        /// Path to the TOML configuration file (for provider/model/api_key).
+        #[arg(long, default_value = "panini.toml")]
+        config: String,
+
+        /// The language to generate (English name, e.g. "Japanese", "Finnish").
+        #[arg(long)]
+        language: String,
+
+        /// ISO 639-3 code (e.g. "jpn", "fin"). If omitted, you must provide it.
+        #[arg(long)]
+        iso_code: Option<String>,
+
+        /// Whether the language is agglutinative (triggers Agglutinative trait generation).
+        #[arg(long, default_value_t = false)]
+        agglutinative: bool,
+
+        /// Sampling temperature for generation.
+        #[arg(long, default_value_t = 0.3)]
+        temperature: f32,
+
+        /// Skip the cargo check validation step.
+        #[arg(long, default_value_t = false)]
+        skip_check: bool,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -81,6 +109,27 @@ async fn main() -> Result<()> {
             for code in registry::supported_languages() {
                 println!("{code}");
             }
+        }
+        Command::AddLanguage {
+            config: config_path,
+            language,
+            iso_code,
+            agglutinative,
+            temperature,
+            skip_check,
+        } => {
+            let config = Config::load(&config_path)
+                .with_context(|| format!("Loading config from '{config_path}'"))?;
+
+            add_language::run(
+                &config,
+                &language,
+                iso_code.as_deref(),
+                agglutinative,
+                temperature,
+                skip_check,
+            )
+            .await?;
         }
         Command::Extract {
             config: config_path,
