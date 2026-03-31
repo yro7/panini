@@ -38,9 +38,11 @@ let result = registry::extract_erased_with_components(
 |-----|-----------|-------------|---------------|
 | `morphology` | `MorphologyAnalysis` | POS tagging, lemmatization, case/tense/aspect/gender — language-specific morphological features | All languages |
 | `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap) | All languages |
-| `morpheme_segmentation` | `MorphemeSegmentation` | Morpheme-by-morpheme segmentation with grammatical function labels | Agglutinative languages only |
+| `morpheme_segmentation` | `MorphemeSegmentation` | Morpheme-by-morpheme segmentation with grammatical function labels | Agglutinative languages only* |
 | `multiword_expressions` | `MultiwordExpressions` | Extracts idioms, collocations, and phrasal expressions | All languages |
 | `leipzig_alignment` | `LeipzigAlignment` | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules) | All languages |
+
+*Agglutinative languages are marked with a "Agglutinative" trait implementation in the framework. You can define the implementation for any language, even for low-agglutination languages like french, etc.
 
 ### Output examples
 
