@@ -34,13 +34,13 @@ let result = registry::extract_erased_with_components(
 
 ### Available components
 
-| Key | Component | Description | Compatibility |
-|-----|-----------|-------------|---------------|
-| `morphology` | `MorphologyAnalysis` | POS tagging, lemmatization, case/tense/aspect/gender — language-specific morphological features | All languages |
-| `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap) | All languages |
-| `morpheme_segmentation` | `MorphemeSegmentation` | Morpheme-by-morpheme segmentation with grammatical function labels | Agglutinative languages only* |
-| `multiword_expressions` | `MultiwordExpressions` | Extracts idioms, collocations, and phrasal expressions | All languages |
-| `leipzig_alignment` | `LeipzigAlignment` | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules) | All languages |
+| Key                       | Component                | Description                                                                                     | Compatibility                 |
+| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------- |
+| `morphology`              | `MorphologyAnalysis`     | POS tagging, lemmatization, case/tense/aspect/gender — language-specific morphological features | All languages                 |
+| `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap)                | All languages                 |
+| `morpheme_segmentation`   | `MorphemeSegmentation`   | Morpheme-by-morpheme segmentation with grammatical function labels                              | Agglutinative languages only* |
+| `multiword_expressions`   | `MultiwordExpressions`   | Extracts idioms, collocations, and phrasal expressions                                          | All languages                 |
+| `leipzig_alignment`       | `LeipzigAlignment`       | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
 
 *Agglutinative languages are marked with a "Agglutinative" trait implementation in the framework. You can define the implementation for any language, even for low-agglutination languages like french, etc.
 
@@ -235,15 +235,15 @@ panini extract --config panini.toml --text "…" --target "…" \
 
 **CLI options**
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--config` | `panini.toml` | Path to TOML config |
-| `--text` | *(required)* | Sentence / card content to analyse |
-| `--target` | *(required, repeatable)* | Target word(s) to focus extraction on |
-| `--components` | *(all)* | Comma-separated list of components to run |
-| `--temperature` | `0.2` | Sampling temperature |
-| `--max-tokens` | `4096` | Max tokens for LLM response |
-| `--ui-language` | `English` | Learner's UI language for pedagogical explanation |
+| Flag            | Default                  | Description                                       |
+| --------------- | ------------------------ | ------------------------------------------------- |
+| `--config`      | `panini.toml`            | Path to TOML config                               |
+| `--text`        | *(required)*             | Sentence / card content to analyse                |
+| `--target`      | *(required, repeatable)* | Target word(s) to focus extraction on             |
+| `--components`  | *(all)*                  | Comma-separated list of components to run         |
+| `--temperature` | `0.2`                    | Sampling temperature                              |
+| `--max-tokens`  | `4096`                   | Max tokens for LLM response                       |
+| `--ui-language` | `English`                | Learner's UI language for pedagogical explanation |
 
 ## What you define, what the framework does
 
@@ -279,6 +279,16 @@ panini-macro/        # #[derive(MorphologyInfo)] proc macro
 ```
 
 ## Adding a language
+
+### Automatically with the LLM script
+
+Fill your `panini.toml` config, choose a language (with its ISO 639-3 code) and run:
+
+`cargo run -p panini-cli -- add-language --language "French" --iso-code fra --config panini.toml`
+
+You should ALWAYS check the file output, especially for linguistic definitions, to ensure the LLM properly described the language.
+
+### Manually
 
 1. Create `panini-langs/src/<language>.rs`
 2. Define a `Morphology` enum with `#[derive(MorphologyInfo)]` and `#[serde(tag = "pos")]` -- every variant must have `lemma: String` as its first field
