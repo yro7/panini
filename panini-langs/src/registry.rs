@@ -11,7 +11,7 @@ use panini_core::components::*;
 use panini_engine::{extract_features_via_llm, extract_with_components, ExtractionRequest, PreviousAttempt};
 use panini_engine::prompts::ExtractorPrompts;
 
-use crate::{Arabic, Polish, Turkish};
+use crate::{Arabic, French, Polish, Turkish};
 
 /// Extracts morphological features for any supported language, returning
 /// the result serialized as a `serde_json::Value`.
@@ -66,6 +66,19 @@ pub async fn extract_erased<M: CompletionModel>(
             .await?;
             Ok(serde_json::to_value(&result)?)
         }
+        "fra" => {
+            let result = extract_features_via_llm(
+                &French,
+                model,
+                request,
+                temperature,
+                max_tokens,
+                previous_attempt,
+                extractor_prompts,
+            )
+            .await?;
+            Ok(serde_json::to_value(&result)?)
+        }
         _ => Err(anyhow!("Unsupported language: {lang_code}")),
     }
 }
@@ -93,6 +106,9 @@ pub async fn extract_erased_with_components<M: CompletionModel>(
         }
         "ara" => {
             extract_for_language(&Arabic, model, request, component_keys, temperature, max_tokens, previous_attempt, extractor_prompts).await
+        }
+        "fra" => {
+            extract_for_language(&French, model, request, component_keys, temperature, max_tokens, previous_attempt, extractor_prompts).await
         }
         _ => Err(anyhow!("Unsupported language: {lang_code}")),
     }
@@ -170,7 +186,7 @@ where
 
 /// Returns all supported ISO 639-3 language codes.
 pub fn supported_languages() -> &'static [&'static str] {
-    &["pol", "tur", "ara"]
+    &["pol", "tur", "ara", "fra"]
 }
 
 #[cfg(test)]
