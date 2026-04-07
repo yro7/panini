@@ -9,25 +9,36 @@ use panini_langs::registry;
 use rig::client::CompletionClient;
 use rig::providers::{anthropic, gemini, openai};
 
-/// Helper to load Prompts from a dictionary or a path.
-fn load_prompts(prompts_input: &Bound<'_, PyAny>) -> PyResult<ExtractorPrompts> {
-    if let Ok(path) = prompts_input.downcast::<PyString>() {
+const DEFAULT_PROMPTS_YAML: &str =
+    include_str!("../../panini-cli/prompts/default.yml");
+
+fn default_prompts() -> ExtractorPrompts {
+    serde_yml::from_str(DEFAULT_PROMPTS_YAML)
+        .expect("embedded default prompts must be valid YAML")
+}
+
+/// Helper to load Prompts from a dictionary, a path, or fall back to embedded defaults.
+fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorPrompts> {
+    let Some(input) = prompts_input else {
+        return Ok(default_prompts());
+    };
+    if let Ok(path) = input.downcast::<PyString>() {
         let path_str = path.to_str()?;
         ExtractorPrompts::load(path_str).map_err(|e| {
             pyo3::exceptions::PyValueError::new_err(format!("Failed to load prompts from path: {}", e))
         })
-    } else if prompts_input.is_instance_of::<PyDict>() {
-        depythonize(prompts_input.as_any()).map_err(|e| {
+    } else if input.is_instance_of::<PyDict>() {
+        depythonize(input.as_any()).map_err(|e| {
             pyo3::exceptions::PyValueError::new_err(format!("Invalid prompts dictionary: {}", e))
         })
     } else {
         Err(pyo3::exceptions::PyTypeError::new_err(
-            "prompts must be a string path or a dictionary",
+            "prompts must be a string path, a dictionary, or None",
         ))
     }
 }
 
-/// Helper to create request.
+/// Helper to create an extraction request.
 fn create_request(text: String, targets: Vec<String>, ui_language: String) -> ExtractionRequest {
     ExtractionRequest {
         content: text,
@@ -116,7 +127,7 @@ async fn do_extract(
 
 /// Extracts morphological features for one or more target words synchronously.
 #[pyfunction]
-#[pyo3(signature = (provider, model, api_key, language, text, targets, prompts, temperature=0.2, max_tokens=4096, ui_language="English".to_string(), components=None))]
+#[pyo3(signature = (provider, model, api_key, language, text, targets, prompts=None, temperature=0.2, max_tokens=4096, ui_language="English".to_string(), components=None))]
 #[allow(clippy::too_many_arguments)]
 fn extract(
     py: Python<'_>,
@@ -126,13 +137,13 @@ fn extract(
     language: String,
     text: String,
     targets: Vec<String>,
-    prompts: Bound<'_, PyAny>,
+    prompts: Option<Bound<'_, PyAny>>,
     temperature: f32,
     max_tokens: u32,
     ui_language: String,
     components: Option<Vec<String>>,
 ) -> PyResult<PyObject> {
-    let prompts_obj = load_prompts(&prompts)?;
+    let prompts_obj = load_prompts(prompts.as_ref())?;
 
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -165,7 +176,7 @@ fn extract(
 
 /// Extracts morphological features for one or more target words asynchronously.
 #[pyfunction]
-#[pyo3(signature = (provider, model, api_key, language, text, targets, prompts, temperature=0.2, max_tokens=4096, ui_language="English".to_string(), components=None))]
+#[pyo3(signature = (provider, model, api_key, language, text, targets, prompts=None, temperature=0.2, max_tokens=4096, ui_language="English".to_string(), components=None))]
 #[allow(clippy::too_many_arguments)]
 fn async_extract<'py>(
     py: Python<'py>,
@@ -175,13 +186,13 @@ fn async_extract<'py>(
     language: String,
     text: String,
     targets: Vec<String>,
-    prompts: Bound<'_, PyAny>,
+    prompts: Option<Bound<'_, PyAny>>,
     temperature: f32,
     max_tokens: u32,
     ui_language: String,
     components: Option<Vec<String>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    let prompts_obj = load_prompts(&prompts)?;
+    let prompts_obj = load_prompts(prompts.as_ref())?;
 
     future_into_py(py, async move {
         let result = do_extract(
@@ -204,10 +215,32 @@ fn async_extract<'py>(
     })
 }
 
-/// The pynini Python module implemented in Rust.
+/// Returns the list of supported ISO 639-3 language codes.
+#[pyfunction]
+fn supported_languages() -> Vec<&'static str> {
+    registry::supported_languages().to_vec()
+}
+
+/// Returns the current package version.
+#[pyfunction]
+fn version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
+
+/// Returns the built-in default extraction prompts as a Python dict.
+#[pyfunction]
+fn get_default_prompts(py: Python<'_>) -> PyResult<PyObject> {
+    let prompts = default_prompts();
+    Ok(pythonize(py, &prompts)?.into())
+}
+
+/// The panini Python module implemented in Rust.
 #[pymodule]
-fn pynini(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn panini(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(extract, m)?)?;
     m.add_function(wrap_pyfunction!(async_extract, m)?)?;
+    m.add_function(wrap_pyfunction!(supported_languages, m)?)?;
+    m.add_function(wrap_pyfunction!(version, m)?)?;
+    m.add_function(wrap_pyfunction!(get_default_prompts, m)?)?;
     Ok(())
 }
