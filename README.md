@@ -153,7 +153,6 @@ Then call `extract_features_via_llm` with any `rig::completion::CompletionModel`
 use panini_engine::{extract_features_via_llm, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
 use panini_langs::polish::Polish;
-use rig::client::CompletionClient;
 use rig::providers::openai;
 
 #[tokio::main]
@@ -162,23 +161,18 @@ async fn main() -> anyhow::Result<()> {
     let model  = client.completion_model("gpt-4o");
     let prompts = ExtractorPrompts::load("prompts/default.yml")?;
 
-    let request = ExtractionRequest {
-        content: "Dał kotowi mleko.".to_string(),
-        targets: vec!["kotowi".to_string()],
-        pedagogical_context: Some("Dative case".to_string()),
-        skill_path: Some("grammar/cases/dative".to_string()),
-        learner_ui_language: "English".to_string(),
-        linguistic_background: vec![],
-        user_prompt: None,
-    };
+    let request = ExtractionRequest::builder()
+        .content("Dał kotowi mleko.")
+        .targets(vec!["kotowi".to_string()])
+        .build();
 
     let result = extract_features_via_llm(
         &Polish,
         &model,
         &request,
-        0.2,   // temperature
-        4096,  // max tokens
-        None,  // no previous attempt
+        0.2,
+        4096,
+        None,
         &prompts,
     ).await?;
 

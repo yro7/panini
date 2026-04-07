@@ -60,7 +60,7 @@ pub async fn extract_erased<M: CompletionModel>(
                 request,
                 temperature,
                 max_tokens,
-                previous_attempt,
+                previous_attempt, // TODO REFACTOR THEE SHITE
                 extractor_prompts,
             )
             .await?;
