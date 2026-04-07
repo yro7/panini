@@ -6,3 +6,5 @@ Cargo.lock
 *.db
 .venv
 panini.toml
+
+techn_debt.md
