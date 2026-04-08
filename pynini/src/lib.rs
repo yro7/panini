@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyString};
+use pyo3::types::PyDict;
 use pyo3_async_runtimes::tokio::future_into_py;
 use pythonize::{depythonize, pythonize};
 use serde_json::Value;
@@ -22,9 +22,8 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
     let Some(input) = prompts_input else {
         return Ok(default_prompts());
     };
-    if let Ok(path) = input.downcast::<PyString>() {
-        let path_str = path.to_str()?;
-        ExtractorPrompts::load(path_str).map_err(|e| {
+    if let Ok(path_str) = input.extract::<String>() {
+        ExtractorPrompts::load(&path_str).map_err(|e| {
             pyo3::exceptions::PyValueError::new_err(format!("Failed to load prompts from path: {}", e))
         })
     } else if input.is_instance_of::<PyDict>() {
