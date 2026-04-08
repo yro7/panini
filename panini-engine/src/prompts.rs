@@ -56,7 +56,7 @@ impl ExtractorPrompts {
 /// Re-export from panini-core for backwards compatibility.
 pub use panini_core::component::LanguageLevel;
 
-/// Generic extraction request — decoupled from Panglot's GenerationRequest.
+/// Generic extraction request
 #[derive(bon::Builder)]
 pub struct ExtractionRequest {
     /// The text/card JSON to extract features from.
