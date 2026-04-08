@@ -1,14 +1,38 @@
-# Pāṇini
+<div align="center">
+  <h1>Pāṇini</h1>
+  <p><b>A LLM-powered linguistic feature extraction framework</b></p>
+  <p>
+    <a href="https://crates.io/crates/panini-engine"><img src="https://img.shields.io/crates/v/panini-engine.svg" alt="Crates.io" /></a>
+    <a href="https://pypi.org/project/panini-lang/"><img src="https://img.shields.io/pypi/v/panini-lang.svg" alt="PyPI" /></a>
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+  </p>
+  <p>
+    Usage: <a href="#python">Python</a> | <a href="#as-a-library-rust-api">Rust</a> | <a href="#as-a-standalone-cli">CLI</a>
+  </p>
+</div>
 
-**A LLM-powered linguistic feature extraction framework.**
+<br>
 
 Pāṇini lets you define *what* linguistic features to extract and *how* to extract them, for any language : You describe your language's morphology as Rust types, write extraction directives, and the framework handles the rest: prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation.
 
 Pāṇini doesn't impose a universal schema — you define exactly the features that matter for your language, and the framework builds the extraction pipeline around your definitions.
 
-## Composable analysis components
+## Table of Contents
+- [Extraction Capabilities](#extraction-capabilities)
+  - [Available components](#available-components)
+  - [Examples](#output-examples)
+- [Usage](#usage)
+  - [As a library (Rust API)](#as-a-library-rust-api)
+  - [As a standalone CLI](#as-a-standalone-cli)
+  - [Python](#python)
+- [Adding a language](#adding-a-language)
+- [Adding an analysis component](#adding-an-analysis-component)
+- [Building](#building)
+- [License](#license)
 
-Extraction is built around **composable components** (`AnalysisComponent`). Each component owns one top-level key in the JSON output and contributes its own schema fragment and prompt fragment. You choose which components to run per request — pick only what you need.
+## Extraction Capabilities
+
+Extraction is built around **composable components** (`AnalysisComponent`). Each component provides a different axis of analysis or extracts specific features. You choose which components to run per request — pick only what you need.
 
 By default, all compatible components are run. You can restrict the selection with `--components`:
 
@@ -238,6 +262,29 @@ panini extract --config panini.toml --text "…" --target "…" \
 | `--temperature` | `0.2`                    | Sampling temperature                              |
 | `--max-tokens`  | `4096`                   | Max tokens for LLM response                       |
 | `--ui-language` | `English`                | Learner's UI language for pedagogical explanation |
+
+### Python
+
+```bash
+pip install panini-lang
+```
+
+```python
+from panini import extract
+
+result = extract(
+    provider="openai",        # "openai" | "anthropic" | "google"
+    model="gpt-4o",
+    api_key="sk-...",
+    language="pol",           # ISO 639-3 code
+    text="Dał kotowi mleko.",
+    targets=["kotowi"],
+)
+```
+
+→ See [pynini/README.md](pynini/README.md) for the full Python API reference.
+
+---
 
 ## What you define, what the framework does
 
