@@ -5,6 +5,7 @@
     <a href="https://crates.io/crates/panini-engine"><img src="https://img.shields.io/crates/v/panini-engine.svg" alt="Crates.io" /></a>
     <a href="https://pypi.org/project/panini-lang/"><img src="https://img.shields.io/pypi/v/panini-lang.svg" alt="PyPI" /></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
+    <a href="https://github.com/yro7/panini/actions/workflows/publish-panini-lang.yml"><img src="https://github.com/yro7/panini/actions/workflows/publish-panini-lang.yml/badge.svg" alt="Publish to PyPI" /></a>
   </p>
   <p>
     Usage: <a href="#python">Python</a> | <a href="#as-a-library-rust-api">Rust</a> | <a href="#as-a-standalone-cli">CLI</a>
@@ -13,9 +14,7 @@
 
 <br>
 
-Pāṇini lets you define *what* linguistic features to extract and *how* to extract them, for any language : You describe your language's morphology as Rust types, write extraction directives, and the framework handles the rest: prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation.
-
-Pāṇini doesn't impose a universal schema — you define exactly the features that matter for your language, and the framework builds the extraction pipeline around your definitions.
+Pāṇini is a linguistic feature extraction framework: describe your language's morphology as Rust types, write extraction directives, and the pipeline handles the rest — prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation. No universal schema imposed; you define exactly the features your language needs.
 
 ## Table of Contents
 - [Extraction Capabilities](#extraction-capabilities)
@@ -181,7 +180,7 @@ use rig::providers::openai;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let client = openai::Client::new("sk-…")?;
+    let client = openai::Client::new(&std::env::var("OPENAI_API_KEY")?)?;
     let model  = client.completion_model("gpt-4o");
     let prompts = ExtractorPrompts::load("prompts/default.yml")?;
 
@@ -224,14 +223,14 @@ cargo build -p panini-cli --release
 provider     = "google"           # openai | anthropic | google
 model        = "gemini-2.0-flash"
 language     = "pol"              # pol | tur | ara
-api_key      = "${GEMINI_API_KEY}"
+api_key      = "$GEMINI_API_KEY"
 prompts_file = "panini-cli/prompts/default.yml"
 ```
 
 **3. Run**
 
 ```bash
-export GEMINI_API_KEY="…"
+export GEMINI_API_KEY="$GEMINI_API_KEY"
 
 panini extract \
   --config panini.toml \
@@ -321,7 +320,7 @@ panini-macro/        # #[derive(MorphologyInfo)] proc macro
 
 ## Adding a language
 
-### Automatically with the LLM script
+### Automatically (LLM-assisted)
 
 Fill your `panini.toml` config, choose a language (with its ISO 639-3 code) and run:
 
@@ -329,7 +328,7 @@ Fill your `panini.toml` config, choose a language (with its ISO 639-3 code) and 
 
 You should ALWAYS check the file output, especially for linguistic definitions, to ensure the LLM properly described the language.
 
-### Manually
+### Manually (step by step)
 
 1. Create `panini-langs/src/<language>.rs`
 2. Define a `Morphology` enum with `#[derive(MorphologyInfo)]` and `#[serde(tag = "pos")]` -- every variant must have `lemma: String` as its first field
