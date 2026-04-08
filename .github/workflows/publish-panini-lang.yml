@@ -28,7 +28,7 @@ jobs:
         with:
           working-directory: pynini
           target: ${{ matrix.target }}
-          args: --release --out dist
+          args: --release --out dist --features pyo3/abi3-py38
           manylinux: auto
 
       - uses: actions/upload-artifact@v4
