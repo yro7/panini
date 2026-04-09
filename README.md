@@ -173,7 +173,7 @@ rig-core       = "0.33"
 Then call `extract_features_via_llm` with any `rig::completion::CompletionModel`:
 
 ```rust
-use panini_engine::{extract_features_via_llm, ExtractionRequest};
+use panini_engine::{extract_features_via_llm, ExtractionOptions, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
 use panini_langs::polish::Polish;
 use rig::providers::openai;
@@ -189,15 +189,14 @@ async fn main() -> anyhow::Result<()> {
         .targets(vec!["kotowi".to_string()])
         .build();
 
-    let result = extract_features_via_llm(
-        &Polish,
-        &model,
-        &request,
-        0.2,
-        4096,
-        None,
-        &prompts,
-    ).await?;
+    let options = ExtractionOptions {
+        temperature: 0.2,
+        max_tokens: 4096,
+        previous_attempt: None,
+        extractor_prompts: &prompts,
+    };
+
+    let result = extract_features_via_llm(&Polish, &model, &request, options).await?;
 
     println!("{:#?}", result.target_features);
     Ok(())
@@ -315,7 +314,7 @@ panini-core/         # Traits, domain types, morphology enums, components
   src/components/    # AnalysisComponent implementations
 panini-engine/       # LLM extraction pipeline, prompt assembly, schema composer
 panini-langs/        # Per-language implementations (Polish, Arabic, Turkish)
-panini-macro/        # #[derive(MorphologyInfo)] proc macro
+panini-macro/        # #[derive(MorphologyInfo)], #[derive(PaniniResult)] proc macros
 ```
 
 ## Adding a language
@@ -348,7 +347,7 @@ use std::fmt::Debug;
 use crate::component::{AnalysisComponent, ComponentContext};
 use crate::traits::LinguisticDefinition;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MyComponent;
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for MyComponent {
