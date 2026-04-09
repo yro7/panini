@@ -271,7 +271,7 @@ fn build_system_prompt(agglutinative: bool) -> String {
             and `#[serde(rename_all = \"snake_case\")]`.\n\
          5. Reuse shared enums from `panini_core::traits` (Person, BinaryNumber, TernaryNumber, BinaryGender, TernaryGender, SlavicAspect, BinaryVoice) where semantically appropriate.\n\
          6. The unit struct must be `pub struct <Name>;` with no fields.\n\
-         7. The `iso_code()` method must return `IsoLang::<Variant>` — the variant must exist in the `isolang` crate (Rust crate `isolang` v2.4).\n\
+         7. Define `const ISO_CODE: &'static str = \"<iso639-3 code>\";` — the code must be a valid ISO 639-3 three-letter code.\n\
          8. Import only from: `use serde::{Deserialize, Serialize};` and `use panini_core::traits::{...};`\n\
          9. Use UPOS tag set for morphology variants (Adjective, Adposition, Adverb, Auxiliary, CoordinatingConjunction, Determiner, Interjection, Noun, Numeral, Particle, Pronoun, ProperNoun, Punctuation, SubordinatingConjunction, Symbol, Verb, Other).\n"
     );
@@ -395,28 +395,14 @@ fn patch_registry_rs(
     workspace_root: &Path,
     _module_name: &str,
     struct_name: &str,
-    iso_code: &str,
+    _iso_code: &str,
 ) -> Result<()> {
     let reg_path = workspace_root.join("panini-langs/src/registry.rs");
     let mut content = std::fs::read_to_string(&reg_path)
         .with_context(|| format!("Reading {}", reg_path.display()))?;
 
-    // Check if already patched (idempotent).
-    if content.contains(&format!("\"{iso_code}\"")) {
-        return Ok(());
-    }
-
-    // 1. Patch the import line: use crate::{Arabic, Polish, Turkish};
     content = patch_import_line(&content, struct_name)?;
-
-    // 2. Patch extract_erased match: insert before `_ => Err(anyhow!(...`
-    content = patch_extract_erased(&content, iso_code, struct_name)?;
-
-    // 3. Patch extract_erased_with_components match: insert before `_ => Err(anyhow!(...`
-    content = patch_extract_with_components(&content, iso_code, struct_name)?;
-
-    // 4. Patch supported_languages array.
-    content = patch_supported_languages(&content, iso_code)?;
+    content = patch_macro_invocation(&content, struct_name)?;
 
     std::fs::write(&reg_path, &content)
         .with_context(|| format!("Writing {}", reg_path.display()))?;
@@ -461,84 +447,27 @@ fn patch_import_line(content: &str, struct_name: &str) -> Result<String> {
     Ok(result)
 }
 
-fn patch_extract_erased(content: &str, iso_code: &str, struct_name: &str) -> Result<String> {
-    // Find the first `_ => Err(anyhow!("Unsupported language:` which is in extract_erased.
-    let marker = "_ => Err(anyhow!(\"Unsupported language: {lang_code}\"))";
-    let pos = content.find(marker).ok_or_else(|| {
-        anyhow!("Could not find extract_erased wildcard arm in registry.rs")
-    })?;
-
-    let new_arm = format!(
-        "\"{iso_code}\" => {{\n\
-         \x20           let result = extract_features_via_llm(\n\
-         \x20               &{struct_name},\n\
-         \x20               model,\n\
-         \x20               request,\n\
-         \x20               temperature,\n\
-         \x20               max_tokens,\n\
-         \x20               previous_attempt,\n\
-         \x20               extractor_prompts,\n\
-         \x20           )\n\
-         \x20           .await?;\n\
-         \x20           Ok(serde_json::to_value(&result)?)\n\
-         \x20       }}\n\
-         \x20       "
-    );
-
-    let mut result = String::with_capacity(content.len() + new_arm.len());
-    result.push_str(&content[..pos]);
-    result.push_str(&new_arm);
-    result.push_str(&content[pos..]);
-
-    Ok(result)
-}
-
-fn patch_extract_with_components(
-    content: &str,
-    iso_code: &str,
-    struct_name: &str,
-) -> Result<String> {
-    // Find the second `_ => Err(anyhow!("Unsupported language:` — skip the first one.
-    let marker = "_ => Err(anyhow!(\"Unsupported language: {lang_code}\"))";
-    let first = content.find(marker).ok_or_else(|| {
-        anyhow!("Could not find first wildcard arm in registry.rs")
-    })?;
-    let second_offset = content[first + marker.len()..].find(marker).ok_or_else(|| {
-        anyhow!("Could not find second wildcard arm (extract_erased_with_components) in registry.rs")
-    })?;
-    let pos = first + marker.len() + second_offset;
-
-    let new_arm = format!(
-        "\"{iso_code}\" => {{\n\
-         \x20           extract_for_language(&{struct_name}, model, request, component_keys, temperature, max_tokens, previous_attempt, extractor_prompts).await\n\
-         \x20       }}\n\
-         \x20       "
-    );
-
-    let mut result = String::with_capacity(content.len() + new_arm.len());
-    result.push_str(&content[..pos]);
-    result.push_str(&new_arm);
-    result.push_str(&content[pos..]);
-
-    Ok(result)
-}
-
-fn patch_supported_languages(content: &str, iso_code: &str) -> Result<String> {
-    let marker = "&[\"pol\"";
+fn patch_macro_invocation(content: &str, struct_name: &str) -> Result<String> {
+    let marker = "generate_registry!(";
     let start = content.find(marker).ok_or_else(|| {
-        anyhow!("Could not find supported_languages array marker '{marker}' in registry.rs")
+        anyhow!("Could not find 'generate_registry!(' in registry.rs")
     })?;
-    let end = content[start..].find(']').ok_or_else(|| {
-        anyhow!("Could not find closing ']' for supported_languages array")
+    let close = content[start..].find(");").ok_or_else(|| {
+        anyhow!("Could not find closing ');' for generate_registry! macro")
     })? + start;
 
-    let current = &content[start..end];
-    let new_array = format!("{current}, \"{iso_code}\"");
+    let inner = &content[start + marker.len()..close];
 
-    let mut result = String::with_capacity(content.len() + 16);
-    result.push_str(&content[..start]);
-    result.push_str(&new_array);
-    result.push_str(&content[end..]);
+    // Idempotent: skip if already present.
+    if inner.split(',').any(|s| s.trim() == struct_name) {
+        return Ok(content.to_string());
+    }
+
+    let mut result = String::with_capacity(content.len() + struct_name.len() + 4);
+    result.push_str(&content[..close]);
+    result.push_str(", ");
+    result.push_str(struct_name);
+    result.push_str(&content[close..]);
 
     Ok(result)
 }
@@ -632,9 +561,16 @@ mod tests {
     }
 
     #[test]
-    fn test_patch_supported_languages() {
-        let content = "    &[\"pol\", \"tur\", \"ara\"]\n";
-        let result = patch_supported_languages(content, "fra").unwrap();
-        assert!(result.contains("\"fra\""));
+    fn test_patch_macro_invocation() {
+        let content = "generate_registry!(Polish, Turkish, Arabic);";
+        let result = patch_macro_invocation(content, "French").unwrap();
+        assert_eq!(result, "generate_registry!(Polish, Turkish, Arabic, French);");
+    }
+
+    #[test]
+    fn test_patch_macro_invocation_idempotent() {
+        let content = "generate_registry!(Polish, Turkish, Arabic);";
+        let result = patch_macro_invocation(content, "Turkish").unwrap();
+        assert_eq!(result, content);
     }
 }
