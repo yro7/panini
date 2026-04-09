@@ -59,9 +59,9 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     extractor_prompts: &ExtractorPrompts,
     components: &[&dyn AnalysisComponent<L>],
 ) -> Result<String, crate::prompts::PromptBuilderError> {
-    use std::collections::HashMap;
-    use isolang::Language as IsoLang;
     use crate::prompts::interpolate;
+    use isolang::Language as IsoLang;
+    use std::collections::HashMap;
 
     let cfg = extractor_prompts;
 
@@ -177,7 +177,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use panini_core::traits::{IsoLang, MorphologyInfo, Script, TypologicalFeature};
+    use panini_core::traits::{MorphologyInfo, Script, TypologicalFeature};
     use serde::{Deserialize, Serialize};
 
     // ── Minimal test language ──────────────────────────────────────────────
@@ -211,7 +211,10 @@ mod tests {
     }
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    enum TestPosTag { Noun, Verb }
+    enum TestPosTag {
+        Noun,
+        Verb,
+    }
 
     struct TestLang;
 
@@ -219,11 +222,20 @@ mod tests {
         type Morphology = TestMorphology;
         type GrammaticalFunction = ();
 
-        fn iso_code(&self) -> IsoLang { IsoLang::Eng }
-        fn supported_scripts(&self) -> &[Script] { &[Script::LATN] }
-        fn default_script(&self) -> Script { Script::LATN }
-        fn extraction_directives(&self) -> &str { "Test directives" }
-        fn typological_features(&self) -> &[TypologicalFeature] { &[] }
+        const ISO_CODE: &'static str = "eng";
+
+        fn supported_scripts(&self) -> &[Script] {
+            &[Script::LATN]
+        }
+        fn default_script(&self) -> Script {
+            Script::LATN
+        }
+        fn extraction_directives(&self) -> &str {
+            "Test directives"
+        }
+        fn typological_features(&self) -> &[TypologicalFeature] {
+            &[]
+        }
     }
 
     // ── Fake components for testing ────────────────────────────────────────
@@ -232,23 +244,33 @@ mod tests {
     struct FakeComponentA;
 
     impl AnalysisComponent<TestLang> for FakeComponentA {
-        fn name(&self) -> &'static str { "A" }
-        fn schema_key(&self) -> &'static str { "alpha" }
+        fn name(&self) -> &'static str {
+            "A"
+        }
+        fn schema_key(&self) -> &'static str {
+            "alpha"
+        }
         fn schema_fragment(&self, _lang: &TestLang) -> serde_json::Value {
             serde_json::json!({ "type": "string" })
         }
         fn prompt_fragment(&self, _lang: &TestLang, _ctx: &ComponentContext) -> String {
             "Do alpha.".to_string()
         }
-        fn output_instruction(&self) -> Option<&str> { Some("Alpha rule.") }
+        fn output_instruction(&self) -> Option<&str> {
+            Some("Alpha rule.")
+        }
     }
 
     #[derive(Debug)]
     struct FakeComponentB;
 
     impl AnalysisComponent<TestLang> for FakeComponentB {
-        fn name(&self) -> &'static str { "B" }
-        fn schema_key(&self) -> &'static str { "beta" }
+        fn name(&self) -> &'static str {
+            "B"
+        }
+        fn schema_key(&self) -> &'static str {
+            "beta"
+        }
         fn schema_fragment(&self, _lang: &TestLang) -> serde_json::Value {
             serde_json::json!({ "type": "number" })
         }
@@ -261,9 +283,15 @@ mod tests {
 
     #[test]
     fn single_component_produces_valid_schema() {
-        let schema = compose_schema(&TestLang, &[&FakeComponentA as &dyn AnalysisComponent<TestLang>]);
+        let schema = compose_schema(
+            &TestLang,
+            &[&FakeComponentA as &dyn AnalysisComponent<TestLang>],
+        );
         assert_eq!(schema["properties"]["alpha"]["type"], "string");
-        assert!(schema["required"].as_array().unwrap().contains(&serde_json::json!("alpha")));
+        assert!(schema["required"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!("alpha")));
     }
 
     #[test]
