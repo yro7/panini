@@ -5,8 +5,10 @@ use crate::domain::MultiwordExpression;
 use crate::traits::LinguisticDefinition;
 
 /// Extracts multi-word expressions (idioms, collocations, phrasal expressions).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MultiwordExpressions;
+
+impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for MultiwordExpressions {}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for MultiwordExpressions {
     fn name(&self) -> &'static str {

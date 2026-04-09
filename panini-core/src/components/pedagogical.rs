@@ -4,8 +4,10 @@ use crate::component::{AnalysisComponent, ComponentContext};
 use crate::traits::LinguisticDefinition;
 
 /// Produces a pedagogical explanation of the sentence in the learner's language.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct PedagogicalExplanation;
+
+impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for PedagogicalExplanation {}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for PedagogicalExplanation {
     fn name(&self) -> &'static str {

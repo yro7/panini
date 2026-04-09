@@ -8,8 +8,28 @@ use crate::traits::{LinguisticDefinition, TypologicalFeature};
 ///
 /// This component is only compatible with languages that have the
 /// `Agglutination` typological feature.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MorphemeSegmentation;
+
+/// Compile-time compatibility gate: `MorphemeSegmentation` can only be used
+/// with languages that implement `Agglutinative`. The `#[derive(PaniniResult)]`
+/// macro emits a `ComponentRequires<L>` bound for each component, so using
+/// `MorphemeSegmentation` with a non-agglutinative language causes a compile error.
+impl<L: LinguisticDefinition + crate::morpheme::Agglutinative> crate::component::ComponentRequires<L>
+    for MorphemeSegmentation
+where
+    <L::Morphology as crate::traits::MorphologyInfo>::PosTag:
+        std::fmt::Debug + Clone + Copy + PartialEq + Eq + std::hash::Hash + 'static,
+    L::GrammaticalFunction: std::fmt::Debug
+        + Clone
+        + PartialEq
+        + serde::Serialize
+        + for<'de> serde::Deserialize<'de>
+        + schemars::JsonSchema
+        + Send
+        + Sync
+        + 'static,
+{}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     fn name(&self) -> &'static str {

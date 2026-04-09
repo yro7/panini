@@ -5,8 +5,10 @@ use crate::domain::ExtractedFeature;
 use crate::traits::LinguisticDefinition;
 
 /// Produces morphological feature extraction for target and context words.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct MorphologyAnalysis;
+
+impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for MorphologyAnalysis {}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
     fn name(&self) -> &'static str {
