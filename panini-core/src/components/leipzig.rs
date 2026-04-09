@@ -5,8 +5,10 @@ use crate::traits::LinguisticDefinition;
 
 /// Produces a Leipzig-style interlinear morpheme-by-morpheme gloss
 /// following the Leipzig Glossing Rules conventions.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct LeipzigAlignment;
+
+impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for LeipzigAlignment {}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigAlignment {
     fn name(&self) -> &'static str {
