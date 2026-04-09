@@ -137,6 +137,14 @@ impl ExtractionResult {
     }
 }
 
+/// Marker trait for compile-time validation of component-language compatibility.
+///
+/// Used by `#[derive(PaniniResult)]` to enforce that a component is valid for
+/// the language `L`. Universal components implement this for all `L: LinguisticDefinition`.
+/// Restricted components (e.g. `MorphemeSegmentation`) add trait bounds
+/// (e.g. `L: Agglutinative`), causing a compile error if used with an incompatible language.
+pub trait ComponentRequires<L> {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
