@@ -1,4 +1,5 @@
 /// Describes whether a field is an open set (String, arbitrary values) or a closed set (enum).
+#[derive(Debug, Clone)]
 pub enum FieldKind {
     /// Open set — values are arbitrary (e.g. `lemma`, `base_form`).
     Open,
@@ -7,6 +8,7 @@ pub enum FieldKind {
 }
 
 /// Descriptor for a single aggregable field.
+#[derive(Debug, Clone)]
 pub struct FieldDescriptor {
     pub name: String,
     pub kind: FieldKind,
@@ -56,3 +58,5 @@ pub trait Aggregable {
     fn instance_descriptors(&self) -> Vec<FieldDescriptor>;
     fn observations(&self) -> Vec<Vec<(String, String)>>;
 }
+
+pub mod digest;

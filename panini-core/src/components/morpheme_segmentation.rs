@@ -15,8 +15,8 @@ pub struct MorphemeSegmentation;
 /// with languages that implement `Agglutinative`. The `#[derive(PaniniResult)]`
 /// macro emits a `ComponentRequires<L>` bound for each component, so using
 /// `MorphemeSegmentation` with a non-agglutinative language causes a compile error.
-impl<L: LinguisticDefinition + crate::morpheme::Agglutinative> crate::component::ComponentRequires<L>
-    for MorphemeSegmentation
+impl<L: LinguisticDefinition + crate::morpheme::Agglutinative>
+    crate::component::ComponentRequires<L> for MorphemeSegmentation
 where
     <L::Morphology as crate::traits::MorphologyInfo>::PosTag:
         std::fmt::Debug + Clone + Copy + PartialEq + Eq + std::hash::Hash + 'static,
@@ -29,7 +29,8 @@ where
         + Send
         + Sync
         + 'static,
-{}
+{
+}
 
 impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     fn name(&self) -> &'static str {
@@ -47,8 +48,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     }
 
     fn prompt_fragment(&self, lang: &L, _ctx: &ComponentContext) -> String {
-        lang.extra_extraction_directives()
-            .unwrap_or_default()
+        lang.extra_extraction_directives().unwrap_or_default()
     }
 
     fn post_process(&self, lang: &L, section: &mut serde_json::Value) -> Result<(), String> {
