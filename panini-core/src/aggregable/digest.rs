@@ -156,6 +156,49 @@ impl AggregationResult {
     pub fn group_count(&self) -> usize {
         self.by_group.len()
     }
+
+    /// Print the aggregation result in a human-readable format.
+    pub fn print(&self) {
+        let mut groups: Vec<_> = self.by_group.keys().collect();
+        groups.sort();
+
+        for group in groups {
+            let group_data = &self.by_group[group];
+            println!("\n[{}] total: {}", group.to_uppercase(), group_data.total);
+
+            let mut dims: Vec<_> = group_data.dimensions.keys().collect();
+            dims.sort();
+
+            for dim_name in dims {
+                let dim = &group_data.dimensions[dim_name];
+                match dim {
+                    Dimension::Dist(d) => {
+                        let seen = d.seen_count();
+                        let total = d.total_count();
+                        print!("  |- {} [{}/{}]: ", dim_name, seen, total);
+                        let mut variants: Vec<_> = d.counts.iter().collect();
+                        variants.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
+                        let summary: Vec<_> =
+                            variants.iter().map(|(k, c)| format!("{k}({c})")).collect();
+                        println!("{}", summary.join(", "));
+                    }
+                    Dimension::Inv(i) => {
+                        let unique = i.counts.len();
+                        print!("  |- {} [{}unique]: ", dim_name, unique);
+                        let mut entries: Vec<_> = i.counts.iter().collect();
+                        entries.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
+                        let summary: Vec<_> = entries
+                            .iter()
+                            .take(5)
+                            .map(|(k, c)| format!("{k}({c})"))
+                            .collect();
+                        let suffix = if entries.len() > 5 { ", ..." } else { "" };
+                        println!("{}{}", summary.join(", "), suffix);
+                    }
+                }
+            }
+        }
+    }
 }
 
 impl<A: Aggregable> FromIterator<A> for AggregationResult {
@@ -272,6 +315,7 @@ impl Aggregator for BasicAggregator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::FieldDescriptor;
 
     // Mock Aggregable for testing
     #[derive(Debug, Clone)]
