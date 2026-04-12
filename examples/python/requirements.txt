@@ -1,4 +1,4 @@
-panini-lang>=0.1.0
+panini-lang>=0.2.0
 python-dotenv
 openai
 anthropic
