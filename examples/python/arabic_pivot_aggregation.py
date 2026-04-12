@@ -35,8 +35,9 @@ def run_arabic_aggregation():
             api_key=api_key,
             language="ara",
             text=batch_text,
-            targets=[], 
-            components=["morphology"]
+            targets=[],
+            components=["morphology"],
+            max_tokens=8192
         )
 
         # Record results into aggregators

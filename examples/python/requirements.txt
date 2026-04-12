@@ -3,4 +3,3 @@ python-dotenv
 openai
 anthropic
 google-generativeai
-pip install git+https://github.com/yro7/panini.git#subdirectory=pynini
