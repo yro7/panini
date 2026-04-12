@@ -69,7 +69,6 @@ async fn main() -> Result<()> {
             Some(&["morphology"]),
             0.2,
             20000,
-            None,
             &prompts,
         ).await?;
 
