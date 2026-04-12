@@ -1,6 +1,7 @@
 import sys
 import panini
 import asyncio
+import os
 
 print(f"Loaded panini library: {panini}")
 print(f"dir(panini): {dir(panini)}")
@@ -8,14 +9,17 @@ print(f"Version: {panini.version()}")
 print(f"Supported languages: {panini.supported_languages()}")
 print(f"Default prompts keys: {list(panini.get_default_prompts().keys())}")
 
+API_KEY = os.getenv("GOOGLE_API_KEY")
+MODEL = "gemini-2.5-flash-lite"
 async def run_tests():
+
     # 1. Synchronous test — uses embedded default prompts, expects auth error with fake key
     try:
         print("\n--- Testing Synchronous Extraction (default prompts) ---")
         res = panini.extract(
             provider="google",
-            model="gemini-3-flash-preview",
-            api_key="sk-random",
+            model=MODEL,
+            api_key=API_KEY,
             language="pol",
             text="Nie wiem",
             targets=["wiem"],
@@ -30,8 +34,8 @@ async def run_tests():
         print("\n--- Testing Asynchronous Extraction (default prompts) ---")
         res = await panini.async_extract(
             provider="google",
-            model="gemini-3-flash-preview",
-            api_key="sk-random",
+            model=MODEL,
+            api_key=API_KEY,
             language="fra",
             text="Je ne sais pas",
             targets=["sais"],
