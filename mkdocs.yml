@@ -67,6 +67,7 @@ nav:
       - The Aggregable Concept: aggregation/index.md
       - Working with Digests: aggregation/digests.md
       - Custom Aggregations: aggregation/custom.md
+  - 💻 Examples: examples.md
 
 extra_css:
   - https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap
