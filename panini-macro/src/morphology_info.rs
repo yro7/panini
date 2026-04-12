@@ -45,8 +45,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
             let aggregable: Vec<(&syn::Field, FieldClass)> = fields
                 .iter()
                 .filter(|f| {
-                    let is_lemma = f.ident.as_ref().is_some_and(|id| id == "lemma");
-                    !is_lemma && !is_option_type(&f.ty)
+                    !is_option_type(&f.ty)
                 })
                 .map(|f| (f, classify(&f.ty)))
                 .collect();
@@ -173,6 +172,59 @@ pub fn derive(input: TokenStream) -> TokenStream {
         })
         .collect();
 
+    // ── Field Getters ──
+    //
+    // For every unique aggregable field name found across all variants, generate
+    // a `pub fn field_name(&self) -> Option<String>` getter.
+    let mut all_fields = std::collections::HashSet::new();
+    for info in &variant_infos {
+        for (f, _) in &info.aggregable {
+            all_fields.insert(f.ident.as_ref().unwrap().to_string());
+        }
+    }
+
+    let field_getters: Vec<_> = all_fields
+        .into_iter()
+        .map(|field_name| {
+            let method_name = quote::format_ident!("{}", field_name);
+            let arms = variant_infos.iter().map(|info| {
+                let variant_ident = info.ident;
+                let field = info
+                    .aggregable
+                    .iter()
+                    .find(|(f, _)| f.ident.as_ref().unwrap() == &field_name);
+
+                match field {
+                    Some((f, class)) => {
+                        let field_ident = f.ident.as_ref().unwrap();
+                        match class {
+                            FieldClass::String => quote! {
+                                Self::#variant_ident { #field_ident, .. } => Some(#field_ident.clone()),
+                            },
+                            FieldClass::Bool => quote! {
+                                Self::#variant_ident { #field_ident, .. } => Some(#field_ident.to_string()),
+                            },
+                            FieldClass::Closed => quote! {
+                                Self::#variant_ident { #field_ident, .. } => Some(panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string()),
+                            },
+                        }
+                    }
+                    None => quote! {
+                        Self::#variant_ident { .. } => None,
+                    },
+                }
+            });
+
+            quote! {
+                pub fn #method_name(&self) -> Option<String> {
+                    match self {
+                        #(#arms)*
+                    }
+                }
+            }
+        })
+        .collect();
+
     let expanded = quote! {
         /// Auto-generated POS tag enum for use in `MorphemeDefinition::applies_to`.
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -200,6 +252,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     #(#pos_label_arms)*
                 }
             }
+        }
+
+        impl #name {
+            #(#field_getters)*
         }
 
         impl panini_core::aggregable::Aggregable for #name
