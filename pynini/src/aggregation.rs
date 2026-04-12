@@ -112,14 +112,14 @@ impl PyAggregationResult {
     }
 }
 
-#[pyclass]
+#[pyclass(name = "BasicAggregator")]
 #[derive(Default)]
-pub struct BasicAggregatorWrapper {
+pub struct PyBasicAggregator {
     inner: Option<BasicAggregator>,
 }
 
 #[pymethods]
-impl BasicAggregatorWrapper {
+impl PyBasicAggregator {
     #[new]
     fn new() -> Self {
         Self {
@@ -156,7 +156,7 @@ impl BasicAggregatorWrapper {
     }
 }
 
-impl BasicAggregatorWrapper {
+impl PyBasicAggregator {
     fn inner_mut(&mut self) -> PyResult<&mut BasicAggregator> {
         self.inner.as_mut().ok_or_else(|| {
             pyo3::exceptions::PyRuntimeError::new_err("Aggregator has already been finished")
