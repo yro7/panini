@@ -56,7 +56,6 @@ async fn main() -> Result<()> {
             Some(&["morpheme_segmentation"]),
             0.2,
             8192,
-            None,
             &prompts,
         ).await?;
 

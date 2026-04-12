@@ -80,7 +80,6 @@ async fn do_extract(
                 component_refs.as_deref(),
                 temperature,
                 max_tokens,
-                None,
                 &prompts,
             )
             .await?;
@@ -97,7 +96,6 @@ async fn do_extract(
                 component_refs.as_deref(),
                 temperature,
                 max_tokens,
-                None,
                 &prompts,
             )
             .await?;
@@ -114,7 +112,6 @@ async fn do_extract(
                 component_refs.as_deref(),
                 temperature,
                 max_tokens,
-                None,
                 &prompts,
             )
             .await?;
