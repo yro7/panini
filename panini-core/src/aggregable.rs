@@ -46,6 +46,17 @@ impl<T: ClosedValues> AggregableFields for T {
     }
 }
 
+/// Implement AggregableFields for () (used by non-agglutinative languages).
+impl AggregableFields for () {
+    fn descriptors() -> Vec<FieldDescriptor> {
+        vec![]
+    }
+
+    fn field_values(&self) -> Vec<(String, String)> {
+        vec![]
+    }
+}
+
 /// Implemented by a top-level aggregation target (Morphology enum, WordSegmentation).
 ///
 /// - `group_key()` — the bucket name (e.g. "Noun", "Verb", "morpheme").
