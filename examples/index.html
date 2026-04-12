@@ -10,31 +10,29 @@
       
       
       
-        <link rel="canonical" href="https://yro7.github.io/panini/guides/cli/">
+        <link rel="canonical" href="https://yro7.github.io/panini/examples/">
       
       
-        <link rel="prev" href="../..">
+        <link rel="prev" href="../aggregation/custom/">
       
-      
-        <link rel="next" href="../python/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>CLI - Pāṇini</title>
+        <title>💻 Examples - Pāṇini</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -55,7 +53,7 @@
     
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -80,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#command-line-interface-cli" class="md-skip">
+        <a href="#code-examples" class="md-skip">
           Skip to content
         </a>
       
@@ -96,7 +94,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Pāṇini" class="md-header__button md-logo" aria-label="Pāṇini" data-md-component="logo">
+    <a href=".." title="Pāṇini" class="md-header__button md-logo" aria-label="Pāṇini" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -116,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              CLI
+              💻 Examples
             
           </span>
         </div>
@@ -222,7 +220,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Pāṇini" class="md-nav__button md-logo" aria-label="Pāṇini" data-md-component="logo">
+    <a href=".." title="Pāṇini" class="md-nav__button md-logo" aria-label="Pāṇini" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -240,7 +238,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -264,8 +262,6 @@
       
   
   
-    
-  
   
   
     
@@ -278,11 +274,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -303,7 +299,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -318,37 +314,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    CLI
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../guides/cli/" class="md-nav__link">
         
   
   
@@ -364,137 +333,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🔧 Installation
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-paninitoml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🚀 Configuration (panini.toml)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#core-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🏗 Core Commands
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🏗 Core Commands">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-extract" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. extract
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-languages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. languages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-add-language" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. add-language
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#productivity-tips" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🪄 Productivity Tips
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🪄 Productivity Tips">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#pipes-and-json-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pipes and JSON Output
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -507,7 +345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../python/" class="md-nav__link">
+      <a href="../guides/python/" class="md-nav__link">
         
   
   
@@ -535,7 +373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rust/" class="md-nav__link">
+      <a href="../guides/rust/" class="md-nav__link">
         
   
   
@@ -622,7 +460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../languages/" class="md-nav__link">
+      <a href="../languages/" class="md-nav__link">
         
   
   
@@ -650,7 +488,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../languages/adding/" class="md-nav__link">
+      <a href="../languages/adding/" class="md-nav__link">
         
   
   
@@ -678,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../languages/agglutination/" class="md-nav__link">
+      <a href="../languages/agglutination/" class="md-nav__link">
         
   
   
@@ -765,7 +603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../components/" class="md-nav__link">
+      <a href="../components/" class="md-nav__link">
         
   
   
@@ -793,7 +631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../components/creating/" class="md-nav__link">
+      <a href="../components/creating/" class="md-nav__link">
         
   
   
@@ -821,7 +659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../components/pipeline/" class="md-nav__link">
+      <a href="../components/pipeline/" class="md-nav__link">
         
   
   
@@ -908,7 +746,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aggregation/" class="md-nav__link">
+      <a href="../aggregation/" class="md-nav__link">
         
   
   
@@ -936,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aggregation/digests/" class="md-nav__link">
+      <a href="../aggregation/digests/" class="md-nav__link">
         
   
   
@@ -964,7 +802,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aggregation/custom/" class="md-nav__link">
+      <a href="../aggregation/custom/" class="md-nav__link">
         
   
   
@@ -996,10 +834,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../examples/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    💻 Examples
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1015,6 +880,143 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#turkish-agglutinative-segmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🇹🇷 Turkish: Agglutinative Segmentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🇹🇷 Turkish: Agglutinative Segmentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-concept-morpheme-inventory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Concept: Morpheme Inventory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arabic-morphological-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🇦🇪 Arabic: Morphological Aggregation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🇦🇪 Arabic: Morphological Aggregation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pivoted-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pivoted Aggregation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualizing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Visualizing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Visualizing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pos-category-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PoS Category Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-distribution-arabic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case Distribution (Arabic)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-frequency-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root Frequency Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lexicon-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Lexicon Explorer
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1046,66 +1048,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#turkish-agglutinative-segmentation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔧 Installation
+        🇹🇷 Turkish: Agglutinative Segmentation
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-paninitoml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🚀 Configuration (panini.toml)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#core-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🏗 Core Commands
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="🏗 Core Commands">
+    <nav class="md-nav" aria-label="🇹🇷 Turkish: Agglutinative Segmentation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-extract" class="md-nav__link">
+  <a href="#key-concept-morpheme-inventory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. extract
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-languages" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. languages
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-add-language" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. add-language
+        Key Concept: Morpheme Inventory
       
     </span>
   </a>
@@ -1118,33 +1076,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#productivity-tips" class="md-nav__link">
+  <a href="#arabic-morphological-aggregation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🪄 Productivity Tips
+        🇦🇪 Arabic: Morphological Aggregation
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🪄 Productivity Tips">
+    <nav class="md-nav" aria-label="🇦🇪 Arabic: Morphological Aggregation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#pipes-and-json-output" class="md-nav__link">
+  <a href="#pivoted-aggregation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pipes and JSON Output
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
+        Pivoted Aggregation
       
     </span>
   </a>
@@ -1153,6 +1100,67 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#visualizing-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Visualizing Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Visualizing Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pos-category-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PoS Category Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-distribution-arabic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Case Distribution (Arabic)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#root-frequency-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Root Frequency Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lexicon-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Lexicon Explorer
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1173,82 +1181,66 @@
 
 
 
-<h1 id="command-line-interface-cli">Command Line Interface (CLI)</h1>
+<h1 id="code-examples">Code Examples</h1>
+<p>Explore how Pāṇini handles real-world linguistic data across different languages and analysis modes.</p>
+<h2 id="turkish-agglutinative-segmentation">🇹🇷 Turkish: Agglutinative Segmentation</h2>
+<h3 id="key-concept-morpheme-inventory">Key Concept: Morpheme Inventory</h3>
+<p>Turkish is a highly agglutinative language where a single word can contain multiple grammatical functions. Pāṇini uses an <code>Inventory</code> to match surface forms to grammatical meanings.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Example of Turkish segmentation</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">result</span> <span class="o">=</span> <span class="n">panini</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">language</span><span class="o">=</span><span class="s2">&quot;tur&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">text</span><span class="o">=</span><span class="s2">&quot;gelmeyecekler&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">components</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;morpheme_segmentation&quot;</span><span class="p">]</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Output Example:</strong>
+*   Word: <code>gelmeyecekler</code>
+    *   <code>gel</code> (Verb Root)
+    *   <code>ma</code> (Negative)
+    *   <code>y</code> (Buffer)
+    *   <code>ecek</code> (Future)
+    *   <code>ler</code> (3rd Person Plural)</p>
 <hr />
-<h2 id="installation">🔧 Installation</h2>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># From the workspace root</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cargo<span class="w"> </span>install<span class="w"> </span>--path<span class="w"> </span>panini-cli
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Or via cargo run (development)</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>cargo<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span>panini-cli<span class="w"> </span>--<span class="w"> </span><span class="o">[</span>commands<span class="o">]</span>
-</span></code></pre></div>
-<p><strong>Success Output:</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Finished dev [unoptimized + debuginfo] target(s) in 0.01s
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Running `target/debug/panini [commands]`
-</span></code></pre></div></p>
-<hr />
-<h2 id="configuration-paninitoml">🚀 Configuration (<code>panini.toml</code>)</h2>
-<p>The CLI uses a TOML configuration file to store your API keys and model preferences.</p>
-<div class="language-toml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># panini.toml</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">provider</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;google&quot;</span><span class="w">           </span><span class="c1"># openai | anthropic | google</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">model</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gemini-2.0-flash&quot;</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">language</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pol&quot;</span><span class="w">              </span><span class="c1"># pol | tur | ara</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">api_key</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;$GEMINI_API_KEY&quot;</span><span class="w">  </span><span class="c1"># Environment variable support</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">prompts_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;panini-cli/prompts/default.yml&quot;</span>
-</span></code></pre></div>
-<hr />
-<h2 id="core-commands">🏗 Core Commands</h2>
-<h3 id="1-extract">1. <code>extract</code></h3>
-<p>The main extraction tool.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">  </span>--target<span class="w"> </span>studentka<span class="w"> </span>--target<span class="w"> </span>czyta
-</span></code></pre></div>
-<p><strong>Extraction Result (Simplified):</strong>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;word&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;studentka&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;morphology&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;lemma&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;studentka&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pos&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;noun&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;case&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nominative&quot;</span><span class="w"> </span><span class="p">}</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
-</span></code></pre></div></p>
-<p><strong>Useful Options:</strong>
-- <code>--components</code>: Comma-separated list (e.g., <code>morphology,leipzig</code>).
-- <code>--temperature</code>: Adjust LLM creativity (defaults to 0.2).
-- <code>--ui-language</code>: Language for pedagogical explanations (Defaults to English).</p>
-<h3 id="2-languages">2. <code>languages</code></h3>
-<p>Displays the list of all ISO codes supported by your current installation.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>panini<span class="w"> </span>languages
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="c1"># =&gt; Supported languages: pol, tur, ara, fra...</span>
-</span></code></pre></div>
-<h3 id="3-add-language">3. <code>add-language</code></h3>
-<p>Launches the LLM-assisted process for generating the code for a new language.</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="w">  </span>--config<span class="w"> </span>panini.toml
-</span></code></pre></div>
-<p><strong>Generation Output:</strong>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>[INFO] Analyzing Japanese morphology...
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>[INFO] Generated src/japanese.rs
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>[INFO] Registered &#39;jpn&#39; in registry.rs
-</span></code></pre></div></p>
-<div class="admonition warning">
-<p class="admonition-title">LLM Scaffolding Warning</p>
-<p>The <code>add-language</code> tool is a powerful automation that relies on an LLM to describe linguistic types.
-- <strong>Verify Everything</strong>: You must always manually verify the generated Rust types and extraction directives.
-- <strong>Use High-End Models</strong>: Always use "Pro" or "Ultra" class models (e.g., Gemini 1.5 Pro, GPT-4o, Claude 3.5 Sonnet) for the best results.
-- <strong>Linguistic Review</strong>: We strongly recommend having the generated configuration reviewed by a professional linguist or native speaker.</p>
-</div>
-<hr />
-<h2 id="productivity-tips">🪄 Productivity Tips</h2>
-<h3 id="pipes-and-json-output">Pipes and JSON Output</h3>
-<p>The <code>panini</code> binary outputs pure JSON to stdout. You can use <code>jq</code> to filter results:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span>--target<span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.morphology.target_features&#39;</span>
-</span></code></pre></div>
-<h3 id="logging">Logging</h3>
-<p>Use the <code>RUST_LOG</code> environment variable to see prompt assembly details or API calls:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">RUST_LOG</span><span class="o">=</span>info<span class="w"> </span>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<h2 id="arabic-morphological-aggregation">🇦🇪 Arabic: Morphological Aggregation</h2>
+<p>The Arabic example showcases Pāṇini's ability to perform statistical analysis over a corpora, specifically focusing on the 3-consonantal root system.</p>
+<h3 id="pivoted-aggregation">Pivoted Aggregation</h3>
+<p>In Semitic languages, verbs, nouns and adjectives can be constructed from a 3-consonantal root. For example, the root <strong>k-t-b</strong> (ك ت ب) related to "writing" generates: 
+- <strong>kataba</strong> (كَتَبَ) — "he wrote" (verb)
+- <strong>kitāb</strong> (كِتَاب) — "book" (noun)
+- <strong>kātib</strong> (كَاتِب) — "writer" (noun)
+- <strong>maktaba</strong> (مَكْتَبَة) — "library" (noun)</p>
+<p>Therefore, for those languages, it is often useful to aggregate data <em>by root</em> rather than by word. Panini's <code>record_pivoted</code> allows you to define a "pivot" callback to group results dynamically.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Aggregate by root</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">aggregator</span><span class="o">.</span><span class="n">record_pivoted</span><span class="p">(</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">lang_code</span><span class="o">=</span><span class="s2">&quot;ara&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">result</span><span class="o">=</span><span class="n">extraction_result</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">pivot_callback</span><span class="o">=</span><span class="k">lambda</span> <span class="n">feat</span><span class="p">:</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">feat</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="s2">&quot;no-root&quot;</span><span class="p">)</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="p">)</span>
 </span></code></pre></div>
 <hr />
-<div class="admonition tip">
-<p class="admonition-title">Scaffolding with the CLI</p>
-<p>The <code>add-language</code> command doesn't just generate an <code>.rs</code> file; it also attempts to register the language in <code>registry.rs</code>. Always check the changes after execution.</p>
-</div>
+<h2 id="visualizing-results">📊 Visualizing Results</h2>
+<p>Pāṇini's aggregation data can be easily exported for visualization. Below are samples generated using the <code>helper.py</code> utility included in the examples.</p>
+<h3 id="pos-category-distribution">PoS Category Distribution</h3>
+<p>Understand the balance of nouns, verbs, and adjectives in your corpus.
+<img alt="PoS Distribution" src="../assets/images/pos_distribution.png" /></p>
+<h3 id="case-distribution-arabic">Case Distribution (Arabic)</h3>
+<p>Explore how case markers are used across the analyzed text.
+<img alt="Arabic Case Example" src="../assets/images/arabic_case_example.png" /></p>
+<h3 id="root-frequency-analysis">Root Frequency Analysis</h3>
+<p>Identify the most productive roots in your linguistic data.
+<img alt="Root Distribution" src="../assets/images/root_distribution.png" /></p>
+<hr />
+<h2 id="lexicon-explorer">🚀 Lexicon Explorer</h2>
+<p>For a truly immersive experience, the Python examples include a <strong>Lexicon Explorer</strong> dashboard built with D3.js.</p>
+<ul>
+<li><strong>Interactive Network</strong>: View the relationships between roots and their lexical realizations.</li>
+<li><strong>Dynamic Pivoting</strong>: Switch between views (Root, PoS, Case, Aspect) in real-time.</li>
+<li><strong>Deep Insight</strong>: Hover over nodes to see the full morphological trait set.</li>
+</ul>
+<blockquote>
+<p>[!TIP]
+Run the Arabic aggregation example in the <code>examples/python</code> directory to generate your own <code>lexicon_data.json</code> and launch the dashboard!</p>
+</blockquote>
 
 
 
@@ -1304,10 +1296,10 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
       
