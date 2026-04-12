@@ -1,0 +1,1702 @@
+[
+  {
+    "pos": "ADPOSITION",
+    "lemma": "في",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مكتبة",
+    "root": "ك ت ب",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "كَتَبَ",
+    "root": "ك ت ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "كَاتِب",
+    "root": "ك ت ب",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "كِتَاب",
+    "root": "ك ت ب",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "جَدِيد",
+    "root": "ج د د",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "COORDINATING_CONJUNCTION",
+    "lemma": "وَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "وَضَعَ",
+    "root": "و ض ع",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَكْتُوب",
+    "root": "ك ت ب",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "عَلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَكْتَب",
+    "root": "ك ت ب",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "ذَهَبَ",
+    "root": "ذ ه ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُدَرِّس",
+    "root": "د ر س",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "إِلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَدْرَسَة",
+    "root": "د ر س",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PARTICLE",
+    "lemma": "لِـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "دَرَّسَ",
+    "root": "د ر س",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "subjunctive"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "طَالِب",
+    "root": "ط ل ب",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "دَرْس",
+    "root": "د ر س",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PARTICLE",
+    "lemma": "فَـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "دِرَاسَة",
+    "root": "د ر س",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "مُفِيد",
+    "root": "ف ي د",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "لِـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "جَمِيع",
+    "root": "ج م ع",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "اِسْتَخْدَمَ",
+    "root": "خ د م",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "عَالِم",
+    "root": "ع ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حَاسُوب",
+    "root": "ح س ب",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "لِـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "إِجْرَاء",
+    "root": "ج ر ي",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حِسَاب",
+    "root": "ح س ب",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "مُعَقَّد",
+    "root": "ع ق د",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حِسَاب",
+    "root": "ح س ب",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "خَاصّ",
+    "root": "خ ص ص",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PARTICLE",
+    "lemma": "سَـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "كَتَبَ",
+    "root": "ك ت ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "future",
+    "mood": "indicative"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "رِسَالَة",
+    "root": "ر س ل",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "إِلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "صَدِيق",
+    "root": "ص د ق",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "قَرَأَ",
+    "root": "ق ر أ",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "قَارِئ",
+    "root": "ق ر أ",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "قُرْآن",
+    "root": "ق ر أ",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "كَرِيم",
+    "root": "ك ر م",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَسْجِد",
+    "root": "س ج د",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "بِـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "صَوْت",
+    "root": "ص و ت",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "جَمِيل",
+    "root": "ج م ل",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "نَزَلَ",
+    "root": "ن ز ل",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَطَر",
+    "root": "م ط ر",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "مِن",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "سَمَاء",
+    "root": "س م و",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "COORDINATING_CONJUNCTION",
+    "lemma": "وَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "نَزَلَ",
+    "root": "ن ز ل",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُسَافِر",
+    "root": "س ف ر",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَنْزِل",
+    "root": "ن ز ل",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "قَرِيب",
+    "root": "ق ر ب",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "سَلَام",
+    "root": "س ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PRONOUN",
+    "lemma": "عَلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "COORDINATING_CONJUNCTION",
+    "lemma": "فَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "سَلَام",
+    "root": "س ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "هُوَ",
+    "root": "ه و",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "أَسَاس",
+    "root": "أ س س",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "تَعَاوُن",
+    "root": "ع و ن",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "بَيْنَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "شَعْب",
+    "root": "ش ع ب",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "اسْتَلَمَ",
+    "root": "س ل م",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُوَظَّف",
+    "root": "و ظ ف",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "رِسَالَة",
+    "root": "ر س ل",
+    "case": "accusative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "رَسْمِيّ",
+    "root": "ر س م",
+    "case": "accusative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "مِن",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُدِير",
+    "root": "د و ر",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "شَرِكَة",
+    "root": "ش ر ك",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "ذَهَبَ",
+    "root": "ذ ه ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "وَلَد",
+    "root": "و ل د",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "إِلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حَدِيقَة",
+    "root": "ح د ق",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "لَعِبَ",
+    "root": "ل ع ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "subjunctive"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "مَعَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "صَدِيق",
+    "root": "ص د ق",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَسَاء",
+    "root": "م س و",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "عَمِلَ",
+    "root": "ع م ل",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُهَنْدِس",
+    "root": "ه ن د س",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مُعْمَل",
+    "root": "ع م ل",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "لِـ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مَصْنَع",
+    "root": "ص ن ع",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "جَدِيد",
+    "root": "ج د د",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "سماء",
+    "root": "س م و",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "صافية",
+    "root": "ص ف و",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "COORDINATING_CONJUNCTION",
+    "lemma": "و",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "شمس",
+    "root": "ش م س",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "أشرق",
+    "root": "ش ر ق",
+    "case": "None",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "indicative"
+  },
+  {
+    "pos": "ADVERB",
+    "lemma": "غداً",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PARTICLE",
+    "lemma": "إن",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "شاء",
+    "root": "ش ي أ",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "الله",
+    "root": "أ ل ه",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PARTICLE",
+    "lemma": "هل",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "قرأ",
+    "root": "ق ر أ",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "كتاب",
+    "root": "ك ت ب",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PRONOUN",
+    "lemma": "الذي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "اشترى",
+    "root": "ش ر ي",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "من",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مكتبة",
+    "root": "ك ت ب",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADVERB",
+    "lemma": "أمس",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "تعلم",
+    "root": "ع ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "في",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "صغر",
+    "root": "ص غ ر",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "ك",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "نقش",
+    "root": "ن ق ش",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "على",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حجر",
+    "root": "ح ج ر",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "سكن",
+    "root": "س ك ن",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "ناس",
+    "root": "ن و س",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "في",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "منزل",
+    "root": "ن ز ل",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "مختلف",
+    "root": "خ ل ف",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "تصميم",
+    "root": "ص م م",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "في",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PRONOUN",
+    "lemma": "هذه",
+    "root": "no-root",
+    "case": "None",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مدينة",
+    "root": "م د ن",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "حسب",
+    "root": "ح س ب",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "محاسب",
+    "root": "ح س ب",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "ربح",
+    "root": "ر ب ح",
+    "case": "accusative",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "سنوي",
+    "root": "س ن و",
+    "case": "accusative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "ل",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "شركة",
+    "root": "ش ر ك",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "في",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "مكتب",
+    "root": "ك ت ب",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "صَدَاقَة",
+    "root": "ص د ق",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PRONOUN",
+    "lemma": "هِيَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "أَجْمَل",
+    "root": "ج م ل",
+    "case": "nominative",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "شَيْء",
+    "root": "ش ي أ",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "حَيَاة",
+    "root": "ح ي ي",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "بَيْنَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "نَاس",
+    "root": "ن و س",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "عِلْم",
+    "root": "ع ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "نُور",
+    "root": "ن و ر",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "COORDINATING_CONJUNCTION",
+    "lemma": "وَ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "جَهْل",
+    "root": "ج ه ل",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "ظَلَام",
+    "root": "ظ ل م",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "تَعَلَّمَ",
+    "root": "ع ل م",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "jussive"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "عِلْم",
+    "root": "ع ل م",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "نَافِع",
+    "root": "ن ف ع",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "سَاعَدَ",
+    "root": "س ع د",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "jussive"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "رَجُل",
+    "root": "ر ج ل",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "عَجُوز",
+    "root": "ع ج ز",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "عَلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "عُبُور",
+    "root": "ع ب ر",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "طَرِيق",
+    "root": "ط ر ق",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "مُزْدَحِم",
+    "root": "ز ح م",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "سَافَرَ",
+    "root": "س ف ر",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "indicative"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "سَائِح",
+    "root": "س ي ح",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "إِلَى",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "PROPER_NOUN",
+    "lemma": "قَاهِرَة",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "لِ",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "شَاهَدَ",
+    "root": "ش ه د",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "present",
+    "mood": "subjunctive"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "أَهْرَام",
+    "root": "ه ر م",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "عَظِيم",
+    "root": "ع ظ م",
+    "case": "genitive",
+    "gender": "feminine",
+    "number": "plural",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "كِتَاب",
+    "root": "ك ت ب",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADJECTIVE",
+    "lemma": "خَيْر",
+    "root": "خ ي ر",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "جَلِيس",
+    "root": "ج ل س",
+    "case": "nominative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "ADPOSITION",
+    "lemma": "فِي",
+    "root": "no-root",
+    "case": "None",
+    "gender": "None",
+    "number": "None",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "زَمَان",
+    "root": "ز م ن",
+    "case": "genitive",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  },
+  {
+    "pos": "VERB",
+    "lemma": "جَعَلَ",
+    "root": "ج ع ل",
+    "case": "None",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "past",
+    "mood": "jussive"
+  },
+  {
+    "pos": "NOUN",
+    "lemma": "رَفِيق",
+    "root": "ر ف ق",
+    "case": "accusative",
+    "gender": "masculine",
+    "number": "singular",
+    "tense": "None",
+    "mood": "None"
+  }
+]
