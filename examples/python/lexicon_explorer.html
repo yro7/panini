@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panini Lexicon Explorer</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --verb-color: #ff7b72;
+            --noun-color: #7ee787;
+            --adj-color: #d2a8ff;
+            --case-color: #a5d6ff;
+            --aspect-color: #ffa657;
+            --border: #30363d;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            background: var(--bg-color);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn.active {
+            background: var(--panel-bg);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 5;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(22, 27, 34, 0.95);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            visibility: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            z-index: 100;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .cors-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: var(--panel-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            max-width: 500px;
+            visibility: hidden;
+        }
+
+        .cors-error h2 { color: var(--verb-color); }
+        .cors-error code { background: #000; padding: 4px 8px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Panini Lexicon Explorer (ARA)</h1>
+        <div class="controls">
+            <button class="btn active" onclick="updateView('root')">By Root</button>
+            <button class="btn" onclick="updateView('pos')">By PoS</button>
+            <button class="btn" onclick="updateView('case')">By Case</button>
+            <button class="btn" onclick="updateView('tense')">By Aspect</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="graph"></div>
+        
+        <div id="legend" class="legend">
+            <div class="legend-item"><div class="dot" style="background: white;"></div> Pivot Node</div>
+            <div class="legend-item"><div class="dot" style="background: var(--verb-color);"></div> Verb</div>
+            <div class="legend-item"><div class="dot" style="background: var(--noun-color);"></div> Noun</div>
+            <div class="legend-item"><div class="dot" style="background: var(--adj-color);"></div> Adjective</div>
+            <div class="legend-item"><div class="dot" style="background: var(--case-color);"></div> Case Node</div>
+            <div class="legend-item"><div class="dot" style="background: var(--aspect-color);"></div> Aspect Node</div>
+        </div>
+
+        <div id="tooltip" class="tooltip"></div>
+
+        <div id="cors-notice" class="cors-error">
+            <h2>Data Access Required</h2>
+            <p>To load <code>lexicon_data.json</code>, please run a local web server in this directory:</p>
+            <code>python -m http.server</code>
+            <p>Then open <a href="http://localhost:8000/lexicon_explorer.html" style="color: var(--accent)">http://localhost:8000/lexicon_explorer.html</a></p>
+        </div>
+    </main>
+
+    <script>
+        let rawData = [];
+        let simulation, svg, container;
+        const width = window.innerWidth;
+        const height = window.innerHeight - 80;
+
+        const colors = {
+            'VERB': '#ff7b72',
+            'NOUN': '#7ee787',
+            'ADJECTIVE': '#d2a8ff',
+            'ADPOSITION': '#8b949e',
+            'PRONOUN': '#ffa657',
+            'PIVOT': '#ffffff'
+        };
+
+        async function init() {
+            try {
+                const response = await fetch('lexicon_data.json');
+                rawData = await response.json();
+                setupSVG();
+                updateView('root');
+            } catch (e) {
+                console.error("CORS or Load error:", e);
+                document.getElementById('cors-notice').style.visibility = 'visible';
+            }
+        }
+
+        function setupSVG() {
+            svg = d3.select("#graph")
+                .append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .call(d3.zoom().on("zoom", (event) => {
+                    container.attr("transform", event.transform);
+                }));
+
+            container = svg.append("g");
+        }
+
+        function updateView(mode) {
+            // Update UI buttons
+            d3.selectAll(".btn").classed("active", function() {
+                return d3.select(this).text().toLowerCase().includes(mode);
+            });
+
+            const nodes = [];
+            const links = [];
+            const pivots = new Set();
+
+            // Word nodes
+            rawData.forEach((item, index) => {
+                const wordId = `word-${index}`;
+                nodes.push({
+                    id: wordId,
+                    label: item.lemma,
+                    group: item.pos,
+                    type: 'word',
+                    data: item
+                });
+
+                let pivotKey = item[mode];
+                if (pivotKey && pivotKey !== 'None' && pivotKey !== 'no-root') {
+                    pivots.add(pivotKey);
+                    links.push({ source: pivotKey, target: wordId });
+                }
+            });
+
+            // Pivot nodes
+            pivots.forEach(p => {
+                nodes.push({
+                    id: p,
+                    label: p,
+                    group: 'PIVOT',
+                    type: 'pivot'
+                });
+            });
+
+            render(nodes, links);
+        }
+
+        function render(nodes, links) {
+            if (simulation) simulation.stop();
+            container.selectAll("*").remove();
+
+            simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-75))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius(d => d.type === 'pivot' ? 80 : 40));
+
+            const link = container.append("g")
+                .selectAll("line")
+                .data(links)
+                .join("line")
+                .attr("stroke", "#30363d")
+                .attr("stroke-opacity", 0.6)
+                .attr("stroke-width", 1);
+
+            const node = container.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .join("g")
+                .call(drag(simulation));
+
+            node.append("circle")
+                .attr("r", d => d.type === 'pivot' ? 30 : 8)
+                .attr("fill", d => colors[d.group] || '#58a6ff')
+                .attr("stroke", "#0d1117")
+                .attr("stroke-width", 2);
+
+            node.append("text")
+                .text(d => d.label)
+                .attr("x", d => d.type === 'pivot' ? 40 : 15)
+                .attr("y", 5)
+                .attr("fill", "#e6edf3")
+                .style("font-size", d => d.type === 'pivot' ? "60px" : "11px")
+                .style("font-weight", d => d.type === 'pivot' ? "700" : "400")
+                .style("pointer-events", "none")
+                .style("text-shadow", "0 2px 4px rgba(0,0,0,0.5)");
+
+            node.on("mouseover", showTooltip)
+                .on("mouseout", hideTooltip);
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("transform", d => `translate(${d.x},${d.y})`);
+            });
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = d3.select("#tooltip");
+            let content = `<div class="tooltip-title">${d.label}</div>`;
+            
+            if (d.type === 'word') {
+                content += `<div><b>PoS:</b> ${d.data.pos}</div>`;
+                content += `<div><b>Root:</b> ${d.data.root}</div>`;
+                if (d.data.case !== 'None') content += `<div><b>Case:</b> ${d.data.case}</div>`;
+                if (d.data.tense !== 'None') content += `<div><b>Tense:</b> ${d.data.tense}</div>`;
+            } else {
+                content += `<div>(Pivot Node)</div>`;
+            }
+
+            tooltip.style("visibility", "visible")
+                .html(content)
+                .style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 20) + "px");
+        }
+
+        function hideTooltip() {
+            d3.select("#tooltip").style("visibility", "hidden");
+        }
+
+        function drag(simulation) {
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+            return d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+        }
+
+        window.addEventListener('resize', () => {
+            // Update width/height on resize if needed
+        });
+
+        init();
+    </script>
+</body>
+</html>
