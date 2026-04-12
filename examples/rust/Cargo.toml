@@ -1,0 +1,26 @@
+[package]
+name = "panini-examples"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+panini = { path = "../../panini" }
+panini-core = { path = "../../panini-core" }
+panini-langs = { path = "../../panini-langs", features = ["registry"] }
+panini-engine = { path = "../../panini-engine" }
+rig-core = "0.33"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+dotenv = "0.15"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+
+
+[[bin]]
+name = "turkish_segmentation"
+path = "src/bin/turkish_segmentation.rs"
+
+[[bin]]
+name = "arabic_pivot_aggregation"
+path = "src/bin/arabic_pivot_aggregation.rs"
