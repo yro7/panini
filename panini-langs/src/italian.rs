@@ -4,7 +4,7 @@ use panini_core::traits::{
     BinaryGender, BinaryNumber, LinguisticDefinition, Person, Script, TypologicalFeature,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
 #[serde(rename_all = "snake_case")]
 pub enum ItalianTense {
     Present,
@@ -13,7 +13,7 @@ pub enum ItalianTense {
     Imperfect,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
 #[serde(rename_all = "snake_case")]
 pub enum ItalianMood {
     Indicative,
@@ -25,7 +25,7 @@ pub enum ItalianMood {
     Participle,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
 #[serde(rename_all = "snake_case")]
 pub enum ItalianPronounType {
     Personal,
