@@ -5,12 +5,15 @@
     <a href="https://crates.io/crates/panini-engine"><img src="https://img.shields.io/crates/v/panini-engine.svg" alt="Crates.io" /></a>
     <a href="https://pypi.org/project/panini-lang/"><img src="https://img.shields.io/pypi/v/panini-lang.svg" alt="PyPI" /></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
-    <a href="https://github.com/yro7/panini/actions/workflows/publish-panini-lang.yml"><img src="https://github.com/yro7/panini/actions/workflows/publish-panini-lang.yml/badge.svg" alt="Publish to PyPI" /></a>
   </p>
   <p>
-    Usage: <a href="#python">Python</a> | <a href="#as-a-library-rust-api">Rust</a> | <a href="#as-a-standalone-cli">CLI</a>
+    <b><a href="https://yro7.github.io/panini/">Official Documentation (MkDocs)</a></b>
+  </p>
+  <p>
+    Usage: <a href="docs/guides/python.md">Python</a> | <a href="docs/guides/rust.md">Rust</a> | <a href="docs/guides/cli.md">CLI</a>
   </p>
 </div>
+
 
 <br>
 
