@@ -24,9 +24,7 @@ fn panini(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<aggregation::PyInventory>()?;
     m.add_class::<aggregation::PyGroupResult>()?;
     m.add_class::<aggregation::PyAggregationResult>()?;
-    m.add_class::<aggregation::BasicAggregatorWrapper>()?;
-    // Rename to BasicAggregator for Python
-    m.add("BasicAggregator", m.getattr("BasicAggregatorWrapper")?)?;
+    m.add_class::<aggregation::PyBasicAggregator>()?;
 
     Ok(())
 }
