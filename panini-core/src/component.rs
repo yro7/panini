@@ -96,7 +96,10 @@ impl ExtractionResult {
     /// Create a new `ExtractionResult` from a raw JSON object and the list
     /// of component keys that were requested.
     pub fn new(raw: serde_json::Value, requested_keys: Vec<&'static str>) -> Self {
-        Self { raw, requested_keys }
+        Self {
+            raw,
+            requested_keys,
+        }
     }
 
     /// Deserialize a component's section into a concrete type.
@@ -107,9 +110,11 @@ impl ExtractionResult {
             .ok_or_else(|| ExtractionResultError::KeyNotFound {
                 key: key.to_string(),
             })?;
-        serde_json::from_value(section.clone()).map_err(|e| ExtractionResultError::DeserializeError {
-            key: key.to_string(),
-            source: e,
+        serde_json::from_value(section.clone()).map_err(|e| {
+            ExtractionResultError::DeserializeError {
+                key: key.to_string(),
+                source: e,
+            }
         })
     }
 

@@ -40,7 +40,8 @@ pub fn normalize_pos_tags(json: &str) -> String {
 
     re.replace_all(json, |caps: &regex::Captures| {
         let raw_val = caps[1].to_lowercase();
-        let normalized = ud_map.iter()
+        let normalized = ud_map
+            .iter()
             .find(|(abbr, _)| *abbr == raw_val)
             .map(|(_, canonical)| *canonical)
             .unwrap_or_else(|| {
@@ -48,7 +49,8 @@ pub fn normalize_pos_tags(json: &str) -> String {
                 return &raw_val;
             });
         format!(r#""pos": "{}""#, normalized)
-    }).to_string()
+    })
+    .to_string()
 }
 
 #[cfg(test)]
@@ -58,34 +60,55 @@ mod tests {
     #[test]
     fn normalize_pos_lowercases() {
         let input = r#"{"pos": "Noun", "lemma": "dom"}"#;
-        assert_eq!(normalize_pos_tags(input), r#"{"pos": "noun", "lemma": "dom"}"#);
+        assert_eq!(
+            normalize_pos_tags(input),
+            r#"{"pos": "noun", "lemma": "dom"}"#
+        );
     }
 
     #[test]
     fn normalize_pos_maps_ud_abbreviations() {
         let input = r#"{"pos": "ADJ", "lemma": "duży"}"#;
-        assert_eq!(normalize_pos_tags(input), r#"{"pos": "adjective", "lemma": "duży"}"#);
+        assert_eq!(
+            normalize_pos_tags(input),
+            r#"{"pos": "adjective", "lemma": "duży"}"#
+        );
 
         let input2 = r#"{"pos": "prep", "lemma": "na"}"#;
-        assert_eq!(normalize_pos_tags(input2), r#"{"pos": "adposition", "lemma": "na"}"#);
+        assert_eq!(
+            normalize_pos_tags(input2),
+            r#"{"pos": "adposition", "lemma": "na"}"#
+        );
 
         let input3 = r#"{"pos": "ADP", "lemma": "na"}"#;
-        assert_eq!(normalize_pos_tags(input3), r#"{"pos": "adposition", "lemma": "na"}"#);
+        assert_eq!(
+            normalize_pos_tags(input3),
+            r#"{"pos": "adposition", "lemma": "na"}"#
+        );
     }
 
     #[test]
     fn normalize_pos_maps_long_form_aliases() {
         let input = r#"{"pos": "preposition", "lemma": "w"}"#;
-        assert_eq!(normalize_pos_tags(input), r#"{"pos": "adposition", "lemma": "w"}"#);
+        assert_eq!(
+            normalize_pos_tags(input),
+            r#"{"pos": "adposition", "lemma": "w"}"#
+        );
 
         let input2 = r#"{"pos": "Preposition", "lemma": "na"}"#;
-        assert_eq!(normalize_pos_tags(input2), r#"{"pos": "adposition", "lemma": "na"}"#);
+        assert_eq!(
+            normalize_pos_tags(input2),
+            r#"{"pos": "adposition", "lemma": "na"}"#
+        );
     }
 
     #[test]
     fn normalize_pos_handles_multiple_occurrences() {
         let input = r#"[{"pos": "PREP"}, {"pos": "Verb"}]"#;
-        assert_eq!(normalize_pos_tags(input), r#"[{"pos": "adposition"}, {"pos": "verb"}]"#);
+        assert_eq!(
+            normalize_pos_tags(input),
+            r#"[{"pos": "adposition"}, {"pos": "verb"}]"#
+        );
     }
 
     #[test]
