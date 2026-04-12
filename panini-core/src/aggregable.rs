@@ -57,6 +57,38 @@ pub trait Aggregable {
     fn group_key(&self) -> String;
     fn instance_descriptors(&self) -> Vec<FieldDescriptor>;
     fn observations(&self) -> Vec<Vec<(String, String)>>;
+
+    /// Create a wrapper that overrides the group key using a closure.
+    fn pivoted<F>(&self, f: F) -> Pivoted<'_, Self, F>
+    where
+        Self: Sized,
+        F: Fn(&Self) -> String,
+    {
+        Pivoted {
+            inner: self,
+            key_extractor: f,
+        }
+    }
+}
+
+/// Wrapper for an [`Aggregable`] item that overrides its group key.
+pub struct Pivoted<'a, A: Aggregable, F: Fn(&A) -> String> {
+    pub inner: &'a A,
+    pub key_extractor: F,
+}
+
+impl<'a, A: Aggregable, F: Fn(&A) -> String> Aggregable for Pivoted<'a, A, F> {
+    fn group_key(&self) -> String {
+        (self.key_extractor)(self.inner)
+    }
+
+    fn instance_descriptors(&self) -> Vec<FieldDescriptor> {
+        self.inner.instance_descriptors()
+    }
+
+    fn observations(&self) -> Vec<Vec<(String, String)>> {
+        self.inner.observations()
+    }
 }
 
 pub mod digest;
