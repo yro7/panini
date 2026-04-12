@@ -65,8 +65,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
 
     fn output_instruction(&self) -> Option<&str> {
         Some(concat!(
-            "── MORPHOLOGY RULES ─────────────────────────────────────────────────────\n",
-            "The morphology output must contain exactly two lists:\n",
+            "MORPHOLOGY RULES \n",
+            "Fill the `morphology` key with exactly two lists:\n",
             "  \"target_features\"  — morphological features for each constituent word of\n",
             "                       the TARGET WORDS supplied in the user message.\n",
             "  \"context_features\" — morphological features for every OTHER word in the\n",
@@ -75,10 +75,10 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
             "   defined in the schema. NEVER invent variants such as \"phrase\", \"punctuation\",\n",
             "   \"clause\", or anything not listed.\n",
             "2. Punctuation tokens (`,` `.` `!` `?` `—` `«» ` etc.) must be OMITTED entirely.\n",
-            "   Do not include them even with pos = \"punctuation\".\n",
-            "3. Every required field for the chosen `pos` variant MUST be present.\n",
-            "   Optional fields must match the schema's definition (omit if not applicable).\n",
-            "4. Lemmas must always be in the dictionary (citation) form of the target language."
+            "3. Every field MUST exactly match the enum variants in the schema (e.g., do not \n",
+            "   use \"masculine\" as a value for a \"number\" field; use \"singular\", \"dual\", or \"plural\").\n",
+            "4. Optional fields must match the schema's definition (omit if not applicable).\n",
+            "5. Lemmas must always be in the dictionary (citation) form of the target language."
         ))
     }
 

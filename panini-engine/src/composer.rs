@@ -149,11 +149,17 @@ pub fn compose_prompt<L: LinguisticDefinition>(
         linguistic_background: &request.linguistic_background,
     };
 
+    let mut component_instructions = Vec::new();
     for comp in components {
         let fragment = comp.prompt_fragment(lang, &comp_ctx);
         if !fragment.is_empty() {
-            blocks.push(wrap_tag(comp.schema_key(), &fragment));
+            component_instructions.push(wrap_tag(comp.schema_key(), &fragment));
         }
+    }
+
+    if !component_instructions.is_empty() {
+        blocks.push("ANALYSIS COMPONENT INSTRUCTIONS".to_string());
+        blocks.extend(component_instructions);
     }
 
     // Composed output instruction
