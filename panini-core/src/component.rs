@@ -52,11 +52,17 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
     }
 
     /// Validate this component's section of the parsed JSON.
+    ///
+    /// # Errors
+    /// Returns a validation error string if the section does not conform to expected constraints.
     fn validate(&self, _lang: &L, _section: &serde_json::Value) -> Result<(), String> {
         Ok(())
     }
 
     /// Post-process this component's section of the parsed JSON (in place).
+    ///
+    /// # Errors
+    /// Returns an error string if post-processing logic fails.
     fn post_process(&self, _lang: &L, _section: &mut serde_json::Value) -> Result<(), String> {
         Ok(())
     }

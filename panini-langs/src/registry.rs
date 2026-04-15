@@ -60,14 +60,16 @@ where
         ("leipzig_alignment", &leipzig),
     ];
 
-    let selected: Vec<&dyn AnalysisComponent<L>> = match component_keys {
-        Some(keys) => all_components
-            .iter()
-            .filter(|(k, _)| keys.contains(k))
-            .map(|(_, c)| *c)
-            .collect(),
-        None => all_components.iter().map(|(_, c)| *c).collect(),
-    };
+    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
+        || all_components.iter().map(|(_, c)| *c).collect(),
+        |keys| {
+            all_components
+                .iter()
+                .filter(|(k, _)| keys.contains(k))
+                .map(|(_, c)| *c)
+                .collect()
+        },
+    );
 
     let mut options = ExtractionOptions::new(extractor_prompts);
     options.temperature = temperature;
@@ -91,6 +93,9 @@ macro_rules! generate_registry {
         ///
         /// `component_keys` selects which analyses to include (e.g. `["pedagogical_explanation", "morphology"]`).
         /// If `None`, all compatible components are used.
+        ///
+        /// # Errors
+        /// Returns an error if the language code is unsupported, or if extraction fails.
         pub async fn extract_erased_with_components<M: CompletionModel>(
             lang_code: &str,
             model: &M,

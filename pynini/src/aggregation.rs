@@ -1,3 +1,4 @@
+#![allow(clippy::useless_conversion, clippy::needless_pass_by_value)]
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pythonize::{depythonize, pythonize};
