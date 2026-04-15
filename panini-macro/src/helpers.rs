@@ -40,8 +40,11 @@ pub fn get_serde_value(attrs: &[Attribute], key: &str) -> Option<String> {
 }
 
 /// Compute the serialized string for a variant name given enum-level `rename_all`.
-pub fn variant_serialized_name(variant_name: &str, rename_all: &Option<String>) -> String {
-    match rename_all.as_deref() {
+pub fn variant_serialized_name(variant_name: &str, rename_all: Option<&String>) -> String {
+
+    match rename_all.map(String::as_str) {
+
+
         Some("snake_case") => pascal_to_snake_case(variant_name),
         Some("lowercase") => variant_name.to_lowercase(),
         Some("UPPERCASE") => variant_name.to_uppercase(),
