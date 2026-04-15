@@ -35,7 +35,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         .iter()
         .map(|v| {
             get_serde_value(&v.attrs, "rename")
-                .unwrap_or_else(|| variant_serialized_name(&v.ident.to_string(), &rename_all))
+                .unwrap_or_else(|| variant_serialized_name(&v.ident.to_string(), rename_all.as_ref()))
         })
         .collect();
 
@@ -48,8 +48,9 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     Self::#ident => (#cat_str.to_string(), #cat_str.to_string()),
                 };
             }
-            _ => panic!("AggregableFields: tuple variants are not supported"),
+            Fields::Unnamed(_) => panic!("AggregableFields: tuple variants are not supported"),
         };
+
 
         let field_idents: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();
 

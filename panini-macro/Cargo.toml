@@ -7,6 +7,8 @@ repository = "https://github.com/yro7/panini.git"
 license = "MIT"
 keywords = ["linguistics", "nlp", "llm", "extraction", "macros"]
 categories = ["development-tools::procedural-macros", "science", "text-processing"]
+readme = "../README.md"
+
 
 [lib]
 proc-macro = true
