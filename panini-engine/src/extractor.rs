@@ -108,6 +108,10 @@ impl<'a> ExtractionOptions<'a> {
 ///
 /// This is the entry-point that supports selecting which analyses to include.
 /// It includes an automatic self-correction loop (Retry) in case of validation errors.
+///
+/// # Errors
+/// Returns an extraction error if the LLM completion fails, or JSON parsing
+/// / validation fails after all retry attempts are exhausted.
 pub async fn extract_with_components<L, M>(
     language: &L,
     model: &M,

@@ -1,3 +1,5 @@
+#![allow(clippy::useless_conversion, clippy::needless_pass_by_value)]
+
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pyo3_async_runtimes::tokio::future_into_py;
@@ -22,19 +24,28 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
     let Some(input) = prompts_input else {
         return Ok(default_prompts());
     };
-    if let Ok(path_str) = input.extract::<String>() {
-        ExtractorPrompts::load(&path_str).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Failed to load prompts from path: {e}"))
-        })
-    } else if input.is_instance_of::<PyDict>() {
-        depythonize(input.as_any()).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Invalid prompts dictionary: {e}"))
-        })
-    } else {
-        Err(pyo3::exceptions::PyTypeError::new_err(
-            "prompts must be a string path, a dictionary, or None",
-        ))
-    }
+    input.extract::<String>().map_or_else(
+        |_| {
+            if input.is_instance_of::<PyDict>() {
+                depythonize(input.as_any()).map_err(|e| {
+                    pyo3::exceptions::PyValueError::new_err(format!(
+                        "Invalid prompts dictionary: {e}"
+                    ))
+                })
+            } else {
+                Err(pyo3::exceptions::PyTypeError::new_err(
+                    "prompts must be a string path, a dictionary, or None",
+                ))
+            }
+        },
+        |path_str| {
+            ExtractorPrompts::load(&path_str).map_err(|e| {
+                pyo3::exceptions::PyValueError::new_err(format!(
+                    "Failed to load prompts from path: {e}"
+                ))
+            })
+        },
+    )
 }
 
 /// Helper to create an extraction request.
@@ -50,6 +61,8 @@ const fn create_request(text: String, targets: Vec<String>, ui_language: String)
     }
 }
 
+// To exactly match the Python packages. For Python users, it's easier to have all args in the function signature
+#[allow(clippy::too_many_arguments)]
 async fn do_extract(
     provider: String,
     model_name: String,
