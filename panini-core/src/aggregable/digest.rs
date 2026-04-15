@@ -43,6 +43,7 @@ impl Distribution {
 
     /// Coverage percentage (0.0 to 1.0)
     #[must_use] 
+    #[allow(clippy::cast_precision_loss)]
     pub fn coverage_percent(&self) -> f64 {
         if self.possible.is_empty() {
             0.0
@@ -375,7 +376,7 @@ mod tests {
             .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
         let item2 = MockAggregable::new("Noun", descriptors.clone())
             .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
-        let item3 = MockAggregable::new("Noun", descriptors.clone())
+        let item3 = MockAggregable::new("Noun", descriptors)
             .with_observation(vec![("case".to_string(), "Accusative".to_string())]);
 
         let mut agg = BasicAggregator::new();
@@ -446,7 +447,7 @@ mod tests {
             ("case".to_string(), "Nominative".to_string()),
             ("lemma".to_string(), "pies".to_string()),
         ]);
-        let item2 = MockAggregable::new("Noun", descriptors.clone()).with_observation(vec![
+        let item2 = MockAggregable::new("Noun", descriptors).with_observation(vec![
             ("case".to_string(), "Accusative".to_string()),
             ("lemma".to_string(), "kot".to_string()),
         ]);
@@ -484,11 +485,11 @@ mod tests {
 
         let item1 = MockAggregable::new("Noun", descriptors.clone())
             .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
-        let item2 = MockAggregable::new("Noun", descriptors.clone())
+        let item2 = MockAggregable::new("Noun", descriptors)
             .with_observation(vec![("case".to_string(), "Accusative".to_string())]);
 
-        let result1: AggregationResult = [item1].into_iter().collect();
-        let result2: AggregationResult = [item2].into_iter().collect();
+        let result1: AggregationResult = std::iter::once(item1).collect();
+        let result2: AggregationResult = std::iter::once(item2).collect();
 
         let mut merged = result1;
         merged.merge(result2);
@@ -511,7 +512,7 @@ mod tests {
         let items = vec![
             MockAggregable::new("Noun", descriptors.clone())
                 .with_observation(vec![("case".to_string(), "Nominative".to_string())]),
-            MockAggregable::new("Noun", descriptors.clone())
+            MockAggregable::new("Noun", descriptors)
                 .with_observation(vec![("case".to_string(), "Accusative".to_string())]),
         ];
 
@@ -530,7 +531,7 @@ mod tests {
 
         let items1 = vec![MockAggregable::new("Noun", descriptors.clone())
             .with_observation(vec![("case".to_string(), "Nominative".to_string())])];
-        let items2 = vec![MockAggregable::new("Noun", descriptors.clone())
+        let items2 = vec![MockAggregable::new("Noun", descriptors)
             .with_observation(vec![("case".to_string(), "Accusative".to_string())])];
 
         let mut result = AggregationResult::default();

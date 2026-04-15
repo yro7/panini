@@ -53,6 +53,9 @@ impl Script {
     }
 
     /// Looks up the full ISO 15924 data for this script.
+    ///
+    /// # Panics
+    /// Panics if the internal script code is invalid (should never happen if constructed safely).
     #[must_use] 
     pub fn resolve(&self) -> &'static iso15924::ScriptCode<'static> {
         iso15924::ScriptCode::by_code(self.0)
@@ -172,6 +175,9 @@ pub trait LinguisticDefinition {
     }
 
     /// Post-process the morpheme segmentation returned by the LLM.
+    ///
+    /// # Errors
+    /// Returns a string describing any validation errors encountered during post-processing.
     fn post_process_extraction(
         &self,
         _segmentation: &mut Option<

@@ -43,6 +43,10 @@ pub struct SkillContextPrompts {
 }
 
 impl ExtractorPrompts {
+    /// Load prompts from a YAML file.
+    ///
+    /// # Errors
+    /// Returns an error if the file cannot be read or parsed.
     pub fn load(path: &str) -> Result<Self, PromptBuilderError> {
         let content = std::fs::read_to_string(path)
             .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to read {path}: {e}")))?;
@@ -86,7 +90,13 @@ pub fn wrap_tag(tag: &str, content: &str) -> String {
 }
 
 /// Interpolates placeholders in a template string
-pub fn interpolate<V: AsRef<str>>(template: &str, context: &HashMap<&str, V>) -> Result<String, PromptBuilderError> {
+///
+/// # Panics
+/// Panics if the internal regex fails to compile.
+///
+/// # Errors
+/// Returns an error if a placeholder requires a value not present in the context.
+pub fn interpolate<V: AsRef<str>, S: std::hash::BuildHasher>(template: &str, context: &HashMap<&str, V, S>) -> Result<String, PromptBuilderError> {
     let placeholder_re = Regex::new(r"\{(\w+)\}").unwrap();
     let mut result = template.to_string();
 
@@ -106,6 +116,9 @@ pub fn interpolate<V: AsRef<str>>(template: &str, context: &HashMap<&str, V>) ->
 // ----- Feature Extractor Prompt Context -----
 
 /// Builds the system prompt for the feature extractor.
+///
+/// # Errors
+/// Returns an error if prompt interpolation fails (e.g. missing context variables).
 pub fn build_extraction_prompt<L: LinguisticDefinition>(
     language: &L,
     request: &ExtractionRequest,

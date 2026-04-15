@@ -118,6 +118,8 @@ pub async fn run(
 
 // ─── Generation with self-correction ─────────────────────────────────────────
 
+// To exactly match the Python packages. For Python users, it's easier to have all args in the function signature
+#[allow(clippy::too_many_arguments)]
 async fn generate_with_retries<M: CompletionModel>(
     model: &M,
     language: &str,
@@ -310,7 +312,8 @@ fn build_user_prompt(
     );
 
     if let Some(code) = iso_code {
-        prompt.push_str(&format!(" (ISO 639-3: {code})"));
+        use std::fmt::Write;
+        write!(prompt, " (ISO 639-3: {code})").unwrap();
     }
 
     if agglutinative {
@@ -322,12 +325,13 @@ fn build_user_prompt(
     prompt.push_str("\n\nInclude all PoS categories relevant to this language's morphology, with linguistically accurate fields (cases, genders, tenses, moods, aspects, etc.).");
 
     if let Some(err) = previous_error {
-        prompt.push_str(&format!(
+        use std::fmt::Write;
+        write!(prompt,
             "\n\n## PREVIOUS ATTEMPT FAILED\n\
              The code you generated previously failed to compile. Here are the errors:\n\n\
              {err}\n\n\
              Please fix ALL the compilation errors and output the corrected complete file."
-        ));
+        ).unwrap();
     }
 
     prompt
@@ -515,13 +519,10 @@ fn to_pascal_case(s: &str) -> String {
         .filter(|word| !word.is_empty())
         .map(|word| {
             let mut chars = word.chars();
-            match chars.next() {
-                None => String::new(),
-                Some(first) => {
-                    let upper: String = first.to_uppercase().collect();
-                    upper + &chars.as_str().to_lowercase()
-                }
-            }
+            chars.next().map_or_else(String::new, |first| {
+                let upper: String = first.to_uppercase().collect();
+                upper + &chars.as_str().to_lowercase()
+            })
         })
         .collect()
 }
