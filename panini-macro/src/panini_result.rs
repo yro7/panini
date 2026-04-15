@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::*;
+use crate::helpers::is_option_type;
 
 // ─── PaniniResult derive macro ────────────────────────────────────────────────
 
@@ -12,9 +12,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     // We expect EXACTLY one generic parameter L (the language type) for now.
     let type_params: Vec<_> = generics.type_params().collect();
-    if type_params.len() != 1 {
-        panic!("PaniniResult: struct must have exactly one type parameter (the language type L). Support for multiple generics requires implementing a #[panini(lang = \"L\")] attribute.");
-    }
+    assert!(type_params.len() == 1, "PaniniResult: struct must have exactly one type parameter (the language type L). Support for multiple generics requires implementing a #[panini(lang = \"L\")] attribute.");
     let lang_ident = &type_params[0].ident;
 
     let fields = match &input.data {
@@ -49,8 +47,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         let Some(path) = component_path else {
             panic!(
-                "PaniniResult: field `{}` must have a #[component(Name)] attribute",
-                field_ident
+                "PaniniResult: field `{field_ident}` must have a #[component(Name)] attribute"
             );
         };
 

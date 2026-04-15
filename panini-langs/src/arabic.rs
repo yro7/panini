@@ -73,7 +73,7 @@ pub enum ArabicVerbForm {
     I, II, III, IV, V, VI, VII, VIII, IX, X, XI, XII, XIII, XIV, XV,
 }
 
-/// A morphological feature representing a Part of Speech (PoS) in Modern Standard Arabic.
+/// A morphological feature representing a Part of Speech (`PoS`) in Modern Standard Arabic.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::MorphologyInfo)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicMorphology {
@@ -156,7 +156,7 @@ impl LinguisticDefinition for Arabic {
         Script::ARAB
     }
 
-    fn extraction_directives(&self) -> &str {
+    fn extraction_directives(&self) -> &'static str {
         "1. Extract lemma and root.\n\
          2. Provide the pattern only if the word is derived.\n\
          3. For nouns: include gender (masculine/feminine), number, case, state, and definiteness.\n\

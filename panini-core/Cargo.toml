@@ -2,6 +2,11 @@
 name = "panini-core"
 version = "0.2.0"
 edition = "2024"
+description = "Core traits and types for the Panini linguistic feature extraction framework"
+repository = "https://github.com/yro7/panini.git"
+license = "MIT"
+keywords = ["linguistics", "nlp", "llm", "extraction"]
+categories = ["science", "text-processing"]
 
 [dependencies]
 panini-macro = { path = "../panini-macro" }

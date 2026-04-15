@@ -39,7 +39,7 @@ pub async fn run(
     }
 
     let workspace_root = find_workspace_root()?;
-    let module_name = language.to_lowercase().replace(' ', "_").replace('-', "_");
+    let module_name = language.to_lowercase().replace([' ', '-'], "_");
     let struct_name = to_pascal_case(language);
     let lang_file = workspace_root
         .join("panini-langs/src")
@@ -200,7 +200,7 @@ async fn call_llm<M: CompletionModel>(
     let builder = model
         .completion_request(user_prompt.as_str())
         .preamble(system_prompt)
-        .temperature(temperature as f64)
+        .temperature(f64::from(temperature))
         .max_tokens(8192u64);
 
     let response = builder.send().await?;
@@ -342,8 +342,7 @@ fn clean_generated_code(raw: &str) -> String {
     let stripped = if trimmed.starts_with("```") {
         let after_first_fence = trimmed
             .find('\n')
-            .map(|i| &trimmed[i + 1..])
-            .unwrap_or(trimmed);
+            .map_or(trimmed, |i| &trimmed[i + 1..]);
         after_first_fence
             .strip_suffix("```")
             .unwrap_or(after_first_fence)
@@ -512,7 +511,7 @@ fn find_workspace_root() -> Result<PathBuf> {
 }
 
 fn to_pascal_case(s: &str) -> String {
-    s.split(|c: char| c == ' ' || c == '-' || c == '_')
+    s.split([' ', '-', '_'])
         .filter(|word| !word.is_empty())
         .map(|word| {
             let mut chars = word.chars();

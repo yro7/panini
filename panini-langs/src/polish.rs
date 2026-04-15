@@ -25,7 +25,8 @@ pub enum PolishGender {
 }
 
 impl PolishGender {
-    pub fn is_masculine(&self) -> bool {
+    #[must_use] 
+    pub const fn is_masculine(&self) -> bool {
         matches!(
             self,
             Self::MasculinePersonal | Self::MasculineAnimate | Self::MasculineInanimate
@@ -117,7 +118,7 @@ impl LinguisticDefinition for Polish {
         &[TypologicalFeature::Conjugation]
     }
 
-    fn extraction_directives(&self) -> &str {
+    fn extraction_directives(&self) -> &'static str {
         "Do not forget to specify 'cases' when extracting the features."
     }
 }

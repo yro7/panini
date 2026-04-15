@@ -144,7 +144,7 @@ impl LinguisticDefinition for Italian {
         &[TypologicalFeature::Conjugation]
     }
 
-    fn extraction_directives(&self) -> &str {
+    fn extraction_directives(&self) -> &'static str {
         "1. Identify the dictionary form (lemma) for all words (e.g., masculine singular for adjectives, infinitive for verbs).\n\
          2. For Nouns, Adjectives, and Determiners: specify Gender (masculine/feminine) and Number (singular/plural).\n\
          3. For Verbs: specify Tense, Mood, Person, and Number. For past participles (Participio Passato), also include Gender and Number if they agree with the subject or object.\n\

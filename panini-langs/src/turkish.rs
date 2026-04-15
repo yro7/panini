@@ -78,7 +78,7 @@ pub enum TurkishCopula {
 
 // ─── GrammaticalFunction wrapper enum ────────────────────────────────────────
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema, panini_macro::AggregableFields)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, panini_macro::AggregableFields)]
 #[serde(tag = "category", rename_all = "snake_case")]
 pub enum TurkishGrammaticalFunction {
     Case { value: TurkishCase },
@@ -228,7 +228,7 @@ impl Agglutinative for Turkish {
         let inventory_lines: String = TURKISH_MORPHEMES
             .iter()
             .map(|m| {
-                let funcs: Vec<String> = m.functions.iter().map(|f| f.directive_label()).collect();
+                let funcs: Vec<String> = m.functions.iter().map(TurkishGrammaticalFunction::directive_label).collect();
                 format!("  {} → {}", m.base_form, funcs.join(" / "))
             })
             .collect::<Vec<_>>()
@@ -283,7 +283,7 @@ impl LinguisticDefinition for Turkish {
         &[TypologicalFeature::Conjugation, TypologicalFeature::Agglutination]
     }
 
-    fn extraction_directives(&self) -> &str {
+    fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: All extracted words must be in their dictionary form (e.g., nouns in nominative singular, verbs in infinitive form).\n\
          2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive) and number (singular, plural) as used in the sentence.\n\
          3. For verbs: provide the tense, mood, voice, person, number, and polarity.\n\

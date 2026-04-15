@@ -133,7 +133,7 @@ where
 
         for seg in segs.iter_mut() {
             let word = &seg.word;
-            for morpheme in seg.morphemes.iter_mut() {
+            for morpheme in &mut seg.morphemes {
                 let definition = inventory.iter().find(|d| d.base_form == morpheme.base_form);
 
                 let Some(def) = definition else {

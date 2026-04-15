@@ -46,7 +46,7 @@ impl<T: ClosedValues> AggregableFields for T {
     }
 }
 
-/// Implement AggregableFields for () (used by non-agglutinative languages).
+/// Implement `AggregableFields` for () (used by non-agglutinative languages).
 impl AggregableFields for () {
     fn descriptors() -> Vec<FieldDescriptor> {
         vec![]
@@ -57,7 +57,7 @@ impl AggregableFields for () {
     }
 }
 
-/// Implemented by a top-level aggregation target (Morphology enum, WordSegmentation).
+/// Implemented by a top-level aggregation target (Morphology enum, `WordSegmentation`).
 ///
 /// - `group_key()` — the bucket name (e.g. "Noun", "Verb", "morpheme").
 /// - `instance_descriptors()` — field schema for the group (may vary per-variant for enums).
@@ -88,7 +88,7 @@ pub struct Pivoted<'a, A: Aggregable, F: Fn(&A) -> String> {
     pub key_extractor: F,
 }
 
-impl<'a, A: Aggregable, F: Fn(&A) -> String> Aggregable for Pivoted<'a, A, F> {
+impl<A: Aggregable, F: Fn(&A) -> String> Aggregable for Pivoted<'_, A, F> {
     fn group_key(&self) -> String {
         (self.key_extractor)(self.inner)
     }

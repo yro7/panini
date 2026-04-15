@@ -7,7 +7,7 @@ use anyhow::{anyhow, Result};
 use rig::completion::CompletionModel;
 
 use panini_core::component::{AnalysisComponent, ExtractionResult};
-use panini_core::components::*;
+use panini_core::components::{PedagogicalExplanation, MorphologyAnalysis, MultiwordExpressions, MorphemeSegmentation, LeipzigAlignment};
 use panini_engine::{extract_with_components, ExtractionOptions, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
 
@@ -84,7 +84,7 @@ where
 }
 
 /// Macro to generate the registry functions for all languages.
-/// Each language must be a unit struct implementing LinguisticDefinition.
+/// Each language must be a unit struct implementing `LinguisticDefinition`.
 macro_rules! generate_registry {
     ($($lang:ident),* $(,)?) => {
         /// Extracts features using composable components for any supported language.
@@ -120,7 +120,7 @@ macro_rules! generate_registry {
         }
 
         /// Returns all supported ISO 639-3 language codes.
-        pub fn supported_languages() -> &'static [&'static str] {
+        pub const fn supported_languages() -> &'static [&'static str] {
             &[$(<$lang as panini_core::LinguisticDefinition>::ISO_CODE),*]
         }
     };

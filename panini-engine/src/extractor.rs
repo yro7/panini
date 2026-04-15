@@ -90,6 +90,7 @@ pub struct ExtractionOptions<'a> {
 }
 
 impl<'a> ExtractionOptions<'a> {
+    #[must_use] 
     pub fn new(extractor_prompts: &'a ExtractorPrompts) -> Self {
         Self {
             temperature: 0.2,
@@ -140,8 +141,8 @@ where
             Ok(res) => return Ok(res),
             Err(e) => {
                 // Only retry on parsing/validation errors
-                if let ExtractionError::Parse(pe) = &e {
-                    if let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff) {
+                if let ExtractionError::Parse(pe) = &e
+                    && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff) {
                         tracing::warn!(
                             ?wait,
                             error = %pe.error_message,
@@ -154,7 +155,6 @@ where
                         tokio::time::sleep(wait).await;
                         continue;
                     }
-                }
                 return Err(e);
             }
         }
@@ -199,8 +199,8 @@ where
     let mut builder: CompletionRequestBuilder<M> = model
         .completion_request(user_message.as_str())
         .preamble(system_prompt)
-        .temperature(options.temperature as f64)
-        .max_tokens(options.max_tokens as u64)
+        .temperature(f64::from(options.temperature))
+        .max_tokens(u64::from(options.max_tokens))
         .output_schema(rig_schema);
 
     if let Some(prev) = previous_attempt {
@@ -238,7 +238,7 @@ where
     let mut json_value: serde_json::Value = match serde_json::from_str(&processed) {
         Ok(v) => v,
         Err(e) => {
-            let err_msg = format!("Invalid JSON syntax: {}", e);
+            let err_msg = format!("Invalid JSON syntax: {e}");
             tracing::warn!(error = %err_msg, "Failed to parse JSON syntax");
             return Err(ExtractionParseError {
                 raw_response: processed,
@@ -277,7 +277,7 @@ where
             comp.validate(language, section).map_err(|e| {
                 ExtractionParseError {
                     raw_response: processed.clone(),
-                    error_message: format!("Validation failed for component '{}': {}", key, e),
+                    error_message: format!("Validation failed for component '{key}': {e}"),
                 }
             })?;
         }
@@ -289,7 +289,7 @@ where
             comp.post_process(language, section).map_err(|e| {
                 ExtractionParseError {
                     raw_response: processed.clone(),
-                    error_message: format!("Post-processing failed for component '{}': {}", key, e),
+                    error_message: format!("Post-processing failed for component '{key}': {e}"),
                 }
             })?;
         }

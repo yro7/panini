@@ -5,6 +5,7 @@ use crate::{Aggregable, FieldKind};
 // ─── Dimension types ──────────────────────────────────────────────────────────
 
 /// A closed-set dimension: all possible values are known upfront.
+///
 /// `possible` is populated at initialization from `FieldKind::Closed`.
 /// `counts` may not contain all possible values (zero counts are omitted).
 #[derive(Debug, Clone, Default)]
@@ -14,29 +15,34 @@ pub struct Distribution {
 }
 
 impl Distribution {
+    #[must_use] 
     pub fn new(possible: &[&'static str]) -> Self {
         Self {
-            possible: possible.iter().map(|s| s.to_string()).collect(),
+            possible: possible.iter().map(std::string::ToString::to_string).collect(),
             counts: HashMap::new(),
         }
     }
 
     /// Number of distinct possible values actually observed.
+    #[must_use] 
     pub fn seen_count(&self) -> usize {
         self.counts.len()
     }
 
     /// Total number of possible values.
-    pub fn total_count(&self) -> usize {
+    #[must_use] 
+    pub const fn total_count(&self) -> usize {
         self.possible.len()
     }
 
     /// Coverage: (seen, total)
+    #[must_use] 
     pub fn coverage(&self) -> (usize, usize) {
         (self.seen_count(), self.total_count())
     }
 
     /// Coverage percentage (0.0 to 1.0)
+    #[must_use] 
     pub fn coverage_percent(&self) -> f64 {
         if self.possible.is_empty() {
             0.0
@@ -62,8 +68,8 @@ pub enum Dimension {
 impl Dimension {
     fn record(&mut self, value: String) {
         match self {
-            Dimension::Dist(d) => *d.counts.entry(value).or_insert(0) += 1,
-            Dimension::Inv(i) => *i.counts.entry(value).or_insert(0) += 1,
+            Self::Dist(d) => *d.counts.entry(value).or_insert(0) += 1,
+            Self::Inv(i) => *i.counts.entry(value).or_insert(0) += 1,
         }
     }
 }
@@ -148,11 +154,13 @@ impl AggregationResult {
     }
 
     /// Total number of items aggregated across all groups.
+    #[must_use] 
     pub fn total_count(&self) -> usize {
         self.by_group.values().map(|g| g.total).sum()
     }
 
     /// Number of distinct groups.
+    #[must_use] 
     pub fn group_count(&self) -> usize {
         self.by_group.len()
     }
@@ -175,7 +183,7 @@ impl AggregationResult {
                     Dimension::Dist(d) => {
                         let seen = d.seen_count();
                         let total = d.total_count();
-                        print!("  |- {} [{}/{}]: ", dim_name, seen, total);
+                        print!("  |- {dim_name} [{seen}/{total}]: ");
                         let mut variants: Vec<_> = d.counts.iter().collect();
                         variants.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
                         let summary: Vec<_> =
@@ -184,7 +192,7 @@ impl AggregationResult {
                     }
                     Dimension::Inv(i) => {
                         let unique = i.counts.len();
-                        print!("  |- {} [{}unique]: ", dim_name, unique);
+                        print!("  |- {dim_name} [{unique}unique]: ");
                         let mut entries: Vec<_> = i.counts.iter().collect();
                         entries.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
                         let summary: Vec<_> = entries
@@ -274,12 +282,14 @@ pub struct BasicAggregator {
 }
 
 impl BasicAggregator {
+    #[must_use] 
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Borrow of the result (for inspection without consuming).
-    pub fn result(&self) -> &AggregationResult {
+    #[must_use] 
+    pub const fn result(&self) -> &AggregationResult {
         &self.result
     }
 }
