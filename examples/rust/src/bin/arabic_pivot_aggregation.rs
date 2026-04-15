@@ -82,9 +82,9 @@ async fn main() -> Result<()> {
 
             // Aggregate by Root
             let root = match &feat.morphology {
-                ArabicMorphology::Noun { root, .. } => root.clone(),
-                ArabicMorphology::Verb { root, .. } => root.clone(),
-                ArabicMorphology::Adjective { root, .. } => root.clone(),
+                ArabicMorphology::Noun { root, .. }
+                | ArabicMorphology::Verb { root, .. }
+                | ArabicMorphology::Adjective { root, .. } => root.clone(),
                 _ => "no-root".to_string(),
             };
             root_agg.record(&feat.morphology.pivoted(|_| root.clone()));
