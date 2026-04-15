@@ -104,6 +104,10 @@ impl ExtractionResult {
     }
 
     /// Deserialize a component's section into a concrete type.
+    /// 
+    /// # Errors
+    /// Returns `ExtractionResultError::KeyNotFound` if the key is not in the result.
+    /// Returns `ExtractionResultError::DeserializeError` if the section fails to deserialize into `T`.
     pub fn get<T: DeserializeOwned>(&self, key: &str) -> Result<T, ExtractionResultError> {
         let section = self
             .raw

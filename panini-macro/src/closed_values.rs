@@ -35,7 +35,8 @@ pub fn derive(input: TokenStream) -> TokenStream {
         .iter()
         .map(|v| {
             get_serde_value(&v.attrs, "rename")
-                .unwrap_or_else(|| variant_serialized_name(&v.ident.to_string(), &rename_all))
+                .unwrap_or_else(|| variant_serialized_name(&v.ident.to_string(), rename_all.as_ref()))
+
         })
         .collect();
 
