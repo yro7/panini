@@ -120,6 +120,10 @@ where
     fn morpheme_directives(&self) -> String;
 
     /// Parse and validate morpheme segmentation from the LLM response.
+    ///
+    /// # Errors
+    /// Returns a string containing all validation errors if any morphemes
+    /// have an unknown `base_form` or an invalid `function` according to the inventory.
     fn validate_and_enrich(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<Self::GrammaticalFunction>>>,

@@ -52,6 +52,9 @@ pub fn compose_schema<L: LinguisticDefinition>(
 /// parts (`system_role`, `target_language`, `learner_profile`, `skill_context`,
 /// `user_context`), then appends each component's `prompt_fragment()` in an
 /// XML-tagged section, and finally the composed output instruction.
+///
+/// # Errors
+/// Returns an error if prompt interpolation fails (e.g. missing context variables).
 pub fn compose_prompt<L: LinguisticDefinition>(
     lang: &L,
     request: &ExtractionRequest,
@@ -196,19 +199,19 @@ mod tests {
         type PosTag = TestPosTag;
         fn lemma(&self) -> &str {
             match self {
-                TestMorphology::Noun { lemma } | TestMorphology::Verb { lemma } => lemma,
+                Self::Noun { lemma } | Self::Verb { lemma } => lemma,
             }
         }
         fn pos_tag(&self) -> TestPosTag {
             match self {
-                TestMorphology::Noun { .. } => TestPosTag::Noun,
-                TestMorphology::Verb { .. } => TestPosTag::Verb,
+                Self::Noun { .. } => TestPosTag::Noun,
+                Self::Verb { .. } => TestPosTag::Verb,
             }
         }
         fn pos_label(&self) -> &'static str {
             match self {
-                TestMorphology::Noun { .. } => "Noun",
-                TestMorphology::Verb { .. } => "Verb",
+                Self::Noun { .. } => "Noun",
+                Self::Verb { .. } => "Verb",
             }
         }
     }
@@ -233,7 +236,7 @@ mod tests {
         fn default_script(&self) -> Script {
             Script::LATN
         }
-        fn extraction_directives(&self) -> &str {
+        fn extraction_directives(&self) -> &'static str {
             "Test directives"
         }
         fn typological_features(&self) -> &[TypologicalFeature] {
@@ -338,7 +341,7 @@ mod tests {
 
         let validator = jsonschema::validator_for(&schema).unwrap();
         let errors: Vec<_> = validator.iter_errors(&sample).collect();
-        assert!(errors.is_empty(), "Schema validation errors: {:?}", errors);
+        assert!(errors.is_empty(), "Schema validation errors: {errors:?}");
     }
 
     // ── Compatibility filtering (tested via compose_schema) ────────────────
