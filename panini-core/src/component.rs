@@ -95,7 +95,8 @@ pub struct ExtractionResult {
 impl ExtractionResult {
     /// Create a new `ExtractionResult` from a raw JSON object and the list
     /// of component keys that were requested.
-    pub fn new(raw: serde_json::Value, requested_keys: Vec<&'static str>) -> Self {
+    #[must_use] 
+    pub const fn new(raw: serde_json::Value, requested_keys: Vec<&'static str>) -> Self {
         Self {
             raw,
             requested_keys,
@@ -119,6 +120,7 @@ impl ExtractionResult {
     }
 
     /// Get the raw JSON value for a component's key.
+    #[must_use] 
     pub fn get_raw(&self, key: &str) -> Option<&serde_json::Value> {
         self.raw.get(key)
     }
@@ -132,11 +134,13 @@ impl ExtractionResult {
     }
 
     /// The keys that were requested (i.e., the compatible components).
+    #[must_use] 
     pub fn requested_keys(&self) -> &[&'static str] {
         &self.requested_keys
     }
 
     /// Consume and return the raw JSON value.
+    #[must_use] 
     pub fn into_raw(self) -> serde_json::Value {
         self.raw
     }

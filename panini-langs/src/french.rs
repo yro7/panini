@@ -178,7 +178,7 @@ impl LinguisticDefinition for French {
         &[TypologicalFeature::Conjugation]
     }
 
-    fn extraction_directives(&self) -> &str {
+    fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: Provide the dictionary form (masculine singular for adjectives/nouns, infinitive for verbs).\n\
          2. Gender and Number: Always specify for Nouns, Adjectives, and Determiners.\n\
          3. Verbs: Distinguish between simple tenses (Present, Imperfect, etc.). For compound tenses (e.g., Passé Composé), treat the auxiliary and the past participle as separate tokens.\n\

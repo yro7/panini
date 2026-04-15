@@ -1,6 +1,7 @@
 /// Normalizes `"pos"` field values in a JSON string before deserialization:
 /// 1. Lowercases all `"pos": "..."` values
 /// 2. Maps common UD abbreviations AND long-form aliases to canonical enum names
+#[must_use] 
 pub fn normalize_pos_tags(json: &str) -> String {
     // UD abbreviation / long-form alias → canonical lowercase enum variant
     let ud_map: &[(&str, &str)] = &[
@@ -46,9 +47,9 @@ pub fn normalize_pos_tags(json: &str) -> String {
             .map(|(_, canonical)| *canonical)
             .unwrap_or_else(|| {
                 // Not in the map — use the lowercased value as-is
-                return &raw_val;
+                &raw_val
             });
-        format!(r#""pos": "{}""#, normalized)
+        format!(r#""pos": "{normalized}""#)
     })
     .to_string()
 }

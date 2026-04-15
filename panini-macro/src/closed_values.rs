@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::*;
+use crate::helpers::{get_crate_path, get_serde_value, variant_serialized_name};
 
 // ─── ClosedValues derive ──────────────────────────────────────────────────────
 
@@ -25,12 +25,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
     };
 
     for variant in variants {
-        if !matches!(variant.fields, Fields::Unit) {
-            panic!(
-                "ClosedValues: variant `{}` must be a unit variant (no fields)",
-                variant.ident
-            );
-        }
+        assert!(matches!(variant.fields, Fields::Unit), 
+            "ClosedValues: variant `{}` must be a unit variant (no fields)",
+            variant.ident
+        );
     }
 
     let serialized_names: Vec<String> = variants

@@ -45,9 +45,9 @@ pub struct SkillContextPrompts {
 impl ExtractorPrompts {
     pub fn load(path: &str) -> Result<Self, PromptBuilderError> {
         let content = std::fs::read_to_string(path)
-            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to read {}: {}", path, e)))?;
+            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to read {path}: {e}")))?;
         serde_yml::from_str(&content)
-            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to parse {}: {}", path, e)))
+            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to parse {path}: {e}")))
     }
 }
 
@@ -80,8 +80,9 @@ pub struct ExtractionRequest {
 // ----- Helper Functions -----
 
 /// Wraps content in XML tags
+#[must_use] 
 pub fn wrap_tag(tag: &str, content: &str) -> String {
-    format!("<{}>\n{}\n</{}>", tag, content, tag)
+    format!("<{tag}>\n{content}\n</{tag}>")
 }
 
 /// Interpolates placeholders in a template string
@@ -96,7 +97,7 @@ pub fn interpolate<V: AsRef<str>>(template: &str, context: &HashMap<&str, V>) ->
                 placeholder: placeholder.to_string(),
             })?
             .as_ref();
-        result = result.replace(&format!("{{{}}}", placeholder), value);
+        result = result.replace(&format!("{{{placeholder}}}"), value);
     }
 
     Ok(result)
@@ -113,9 +114,7 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
-        .map(|lang| lang.to_639_3().to_string())
-        .unwrap_or_else(|| "eng".to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -126,7 +125,7 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", language.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code.clone());
+    global_ctx.insert("iso", ui_lang_iso_code);
     global_ctx.insert("name", ui_lang_name.clone());
     global_ctx.insert("context_description", context_description.to_string());
 

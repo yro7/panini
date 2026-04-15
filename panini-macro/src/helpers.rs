@@ -3,7 +3,7 @@ use syn::{Attribute, Type};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/// PascalCase → snake_case (e.g. "MasculinePersonal" → "masculine_personal").
+/// `PascalCase` → `snake_case` (e.g. "`MasculinePersonal`" → "`masculine_personal`").
 pub fn pascal_to_snake_case(s: &str) -> String {
     let mut result = String::new();
     for (i, c) in s.chars().enumerate() {
@@ -39,7 +39,7 @@ pub fn get_serde_value(attrs: &[Attribute], key: &str) -> Option<String> {
     None
 }
 
-/// Compute the serialized string for a variant name given enum-level rename_all.
+/// Compute the serialized string for a variant name given enum-level `rename_all`.
 pub fn variant_serialized_name(variant_name: &str, rename_all: &Option<String>) -> String {
     match rename_all.as_deref() {
         Some("snake_case") => pascal_to_snake_case(variant_name),

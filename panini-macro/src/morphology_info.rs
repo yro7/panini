@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::*;
+use crate::helpers::{FieldClass, is_option_type, classify};
 
 // ─── MorphologyInfo derive ────────────────────────────────────────────────────
 
@@ -35,12 +35,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
             let has_lemma = fields
                 .iter()
                 .any(|f| f.ident.as_ref().is_some_and(|id| id == "lemma"));
-            if !has_lemma {
-                panic!(
-                    "MorphologyInfo: variant `{}` must have a named `lemma` field",
-                    v.ident
-                );
-            }
+            assert!(has_lemma, 
+                "MorphologyInfo: variant `{}` must have a named `lemma` field",
+                v.ident
+            );
 
             let aggregable: Vec<(&syn::Field, FieldClass)> = fields
                 .iter()
@@ -194,25 +192,22 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     .iter()
                     .find(|(f, _)| f.ident.as_ref().unwrap() == &field_name);
 
-                match field {
-                    Some((f, class)) => {
-                        let field_ident = f.ident.as_ref().unwrap();
-                        match class {
-                            FieldClass::String => quote! {
-                                Self::#variant_ident { #field_ident, .. } => Some(#field_ident.clone()),
-                            },
-                            FieldClass::Bool => quote! {
-                                Self::#variant_ident { #field_ident, .. } => Some(#field_ident.to_string()),
-                            },
-                            FieldClass::Closed => quote! {
-                                Self::#variant_ident { #field_ident, .. } => Some(panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string()),
-                            },
-                        }
+                if let Some((f, class)) = field {
+                    let field_ident = f.ident.as_ref().unwrap();
+                    match class {
+                        FieldClass::String => quote! {
+                            Self::#variant_ident { #field_ident, .. } => Some(#field_ident.clone()),
+                        },
+                        FieldClass::Bool => quote! {
+                            Self::#variant_ident { #field_ident, .. } => Some(#field_ident.to_string()),
+                        },
+                        FieldClass::Closed => quote! {
+                            Self::#variant_ident { #field_ident, .. } => Some(panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string()),
+                        },
                     }
-                    None => quote! {
-                        Self::#variant_ident { .. } => None,
-                    },
-                }
+                } else { quote! {
+                    Self::#variant_ident { .. } => None,
+                } }
             });
 
             quote! {

@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
         ).await?;
 
         println!("API Response:");
-        println!("{:#?}", result);
+        println!("{result:#?}");
 
         let segments: Vec<WordSegmentation<TurkishGrammaticalFunction>> = 
             result.get("morpheme_segmentation")?;

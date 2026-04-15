@@ -1,11 +1,11 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::*;
+use crate::helpers::{get_crate_path, get_serde_value, variant_serialized_name, classify, FieldClass};
 
 // ─── AggregableFields derive ──────────────────────────────────────────────────
 
-/// Derive `AggregableFields` for internally-tagged enums (GrammaticalFunction style).
+/// Derive `AggregableFields` for internally-tagged enums (`GrammaticalFunction` style).
 ///
 /// Requires `#[serde(tag = "...")]` on the enum. Generates two aggregate dimensions:
 /// - `function_category` (Closed) — the serialized variant name
@@ -22,9 +22,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let krate = get_crate_path(&input.attrs, "aggregable_fields");
 
     // Validate that a serde tag is present (required for the internally-tagged pattern).
-    if get_serde_value(&input.attrs, "tag").is_none() {
-        panic!("AggregableFields: #[serde(tag = \"...\")] is required on {}", name);
-    }
+    assert!(get_serde_value(&input.attrs, "tag").is_some(), "AggregableFields: #[serde(tag = \"...\")] is required on {name}");
 
     let rename_all = get_serde_value(&input.attrs, "rename_all");
 

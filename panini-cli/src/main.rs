@@ -51,7 +51,7 @@ enum Command {
         #[arg(long, default_value = "English")]
         ui_language: String,
 
-        /// Comma-separated list of components to extract (e.g. "pedagogical_explanation,morphology").
+        /// Comma-separated list of components to extract (e.g. "`pedagogical_explanation,morphology`").
         /// When omitted, all compatible components are extracted.
         #[arg(long)]
         components: Option<String>,
@@ -62,7 +62,7 @@ enum Command {
 
     /// Generate a new language implementation using an LLM.
     AddLanguage {
-        /// Path to the TOML configuration file (for provider/model/api_key).
+        /// Path to the TOML configuration file (for `provider/model/api_key`).
         #[arg(long, default_value = "panini.toml")]
         config: String,
 
@@ -157,7 +157,7 @@ async fn main() -> Result<()> {
 
             let keys: Option<Vec<&str>> = components
                 .as_ref()
-                .map(|s| s.split(',').map(|k| k.trim()).collect());
+                .map(|s| s.split(',').map(str::trim).collect());
             let result = run_component_extraction(
                 &config,
                 &prompts,
@@ -244,7 +244,7 @@ async fn run_component_extraction(
 // Prompts loading
 // ---------------------------------------------------------------------------
 
-/// Load ExtractorPrompts — from a custom file in config, or panic with a
+/// Load `ExtractorPrompts` — from a custom file in config, or panic with a
 /// clear message if none is provided (the default prompts file is user-supplied).
 fn load_prompts(config: &Config) -> Result<ExtractorPrompts> {
     let path = config.prompts_file.as_deref().ok_or_else(|| {

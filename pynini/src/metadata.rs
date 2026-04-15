@@ -72,6 +72,6 @@ pub fn supported_languages() -> Vec<&'static str> {
 
 /// Returns the current package version.
 #[pyfunction]
-pub fn version() -> &'static str {
+pub const fn version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }

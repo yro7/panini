@@ -24,11 +24,11 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
     };
     if let Ok(path_str) = input.extract::<String>() {
         ExtractorPrompts::load(&path_str).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Failed to load prompts from path: {}", e))
+            pyo3::exceptions::PyValueError::new_err(format!("Failed to load prompts from path: {e}"))
         })
     } else if input.is_instance_of::<PyDict>() {
         depythonize(input.as_any()).map_err(|e| {
-            pyo3::exceptions::PyValueError::new_err(format!("Invalid prompts dictionary: {}", e))
+            pyo3::exceptions::PyValueError::new_err(format!("Invalid prompts dictionary: {e}"))
         })
     } else {
         Err(pyo3::exceptions::PyTypeError::new_err(
@@ -38,7 +38,7 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
 }
 
 /// Helper to create an extraction request.
-fn create_request(text: String, targets: Vec<String>, ui_language: String) -> ExtractionRequest {
+const fn create_request(text: String, targets: Vec<String>, ui_language: String) -> ExtractionRequest {
     ExtractionRequest {
         content: text,
         targets,
@@ -66,7 +66,7 @@ async fn do_extract(
     let request = create_request(text, targets, ui_language);
 
     let component_refs: Option<Vec<&str>> =
-        components.as_ref().map(|c| c.iter().map(|s| s.as_str()).collect());
+        components.as_ref().map(|c| c.iter().map(std::string::String::as_str).collect());
 
     match provider.as_str() {
         "openai" => {
@@ -145,7 +145,7 @@ pub fn extract(
         .enable_all()
         .build()
         .map_err(|e| {
-            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to start Tokio runtime: {}", e))
+            pyo3::exceptions::PyRuntimeError::new_err(format!("Failed to start Tokio runtime: {e}"))
         })?;
 
     let result = rt
@@ -165,7 +165,7 @@ pub fn extract(
             )
             .await
         })
-        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(format!("Extraction error: {}", e)))?;
+        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(format!("Extraction error: {e}")))?;
 
     Ok(pythonize(py, &result)?.into())
 }
@@ -205,7 +205,7 @@ pub fn async_extract<'py>(
             components,
         )
         .await
-        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(format!("Extraction error: {}", e)))?;
+        .map_err(|e| pyo3::exceptions::PyRuntimeError::new_err(format!("Extraction error: {e}")))?;
 
         Python::with_gil(|py| -> PyResult<PyObject> { Ok(pythonize(py, &result)?.into()) })
     })
