@@ -52,11 +52,17 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
     }
 
     /// Validate this component's section of the parsed JSON.
+    ///
+    /// # Errors
+    /// Returns a validation error string if the section does not conform to expected constraints.
     fn validate(&self, _lang: &L, _section: &serde_json::Value) -> Result<(), String> {
         Ok(())
     }
 
     /// Post-process this component's section of the parsed JSON (in place).
+    ///
+    /// # Errors
+    /// Returns an error string if post-processing logic fails.
     fn post_process(&self, _lang: &L, _section: &mut serde_json::Value) -> Result<(), String> {
         Ok(())
     }
@@ -104,6 +110,10 @@ impl ExtractionResult {
     }
 
     /// Deserialize a component's section into a concrete type.
+    /// 
+    /// # Errors
+    /// Returns `ExtractionResultError::KeyNotFound` if the key is not in the result.
+    /// Returns `ExtractionResultError::DeserializeError` if the section fails to deserialize into `T`.
     pub fn get<T: DeserializeOwned>(&self, key: &str) -> Result<T, ExtractionResultError> {
         let section = self
             .raw

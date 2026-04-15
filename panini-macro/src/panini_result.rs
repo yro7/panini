@@ -5,6 +5,10 @@ use crate::helpers::is_option_type;
 
 // ─── PaniniResult derive macro ────────────────────────────────────────────────
 
+/// Generates the `extract` orchestration method for a target struct.
+/// 1. Validates that the struct has exactly one generic lifetime/type (the language type L).
+/// 2. Parses `#[component(...)]` macros to instantiate the required linguistic components.
+/// 3. Generates the runtime `extract()` async function which pipelines LLM results into the struct.
 pub fn derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
@@ -23,12 +27,21 @@ pub fn derive(input: TokenStream) -> TokenStream {
         _ => panic!("PaniniResult: can only be derived for structs"),
     };
 
-    // Parse #[component(ComponentName)] attributes on each field.
-    struct ComponentField {
-        ident: syn::Ident,
-        path: syn::Path,
-        is_option: bool,
-    }
+    let component_fields = parse_component_fields(fields);
+    let impl_block = generate_extract_impl(name, generics, lang_ident, &component_fields);
+
+    TokenStream::from(impl_block)
+}
+
+struct ComponentField {
+    ident: syn::Ident,
+    path: syn::Path,
+    is_option: bool,
+}
+
+/// Parses the `#[component(...)]` attributes to map each struct field to its Panini `AnalysisComponent`.
+fn parse_component_fields(fields: &syn::punctuated::Punctuated<syn::Field, syn::token::Comma>) -> Vec<ComponentField> {
+
 
     let mut component_fields = Vec::new();
 
@@ -58,7 +71,17 @@ pub fn derive(input: TokenStream) -> TokenStream {
         });
     }
 
-    // Aliases to reduce quote! block verbosity
+    component_fields
+}
+
+/// Generates the `extract()` async function and the wrapping `impl` block
+/// handling component instantiation, trait bounds, and the LLM response mapping.
+fn generate_extract_impl(
+    name: &syn::Ident,
+    generics: &syn::Generics,
+    lang_ident: &syn::Ident,
+    component_fields: &[ComponentField],
+) -> proc_macro2::TokenStream {
     let ac = quote! { ::panini::__macro_support::panini_core::component::AnalysisComponent::<#lang_ident> };
     let ex_err = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionError };
     let res_err = quote! { ::panini::__macro_support::panini_core::component::ExtractionResultError };
@@ -68,7 +91,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let opts = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionOptions };
     let extract_fn = quote! { ::panini::__macro_support::panini_engine::extractor::extract_with_components };
 
-    // Generate component instantiation: one let binding per component
     let component_lets: Vec<_> = component_fields
         .iter()
         .enumerate()
@@ -79,7 +101,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
         })
         .collect();
 
-    // Generate component references and field deserializations in parallel
     let component_refs: Vec<_> = (0..component_fields.len())
         .map(|i| {
             let var = quote::format_ident!("__comp_{}", i);
@@ -108,7 +129,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
         })
         .collect();
 
-    // Generate ComponentRequires<L> bounds only for required (non-Option) fields.
     let requires_bounds: Vec<_> = component_fields
         .iter()
         .filter(|comp| !comp.is_option)
@@ -129,7 +149,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     let (impl_generics, ty_generics, _) = generics.split_for_impl();
 
-    let expanded = quote! {
+    quote! {
         impl #impl_generics #name #ty_generics
         where
             #existing_where
@@ -149,7 +169,5 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 Ok(Self { #(#field_deserializations,)* })
             }
         }
-    };
-
-    TokenStream::from(expanded)
+    }
 }

@@ -12,6 +12,7 @@ pub struct Config {
     /// API key — can be a plain string or "${`ENV_VAR`}" to read from the environment.
     pub api_key: String,
     /// Optional custom base URL for the provider's API endpoint.
+    #[allow(dead_code)] // For future implementation
     pub base_url: Option<String>,
     /// Optional path to a custom prompts YAML file.
     pub prompts_file: Option<String>,
@@ -43,16 +44,17 @@ impl Config {
 /// If `value` matches `${VAR_NAME}`, return the environment variable.
 /// Otherwise return the value unchanged.
 fn resolve_env_var(value: &str) -> anyhow::Result<String> {
-    if let Some(var_name) = value
+    value
         .strip_prefix("${")
         .and_then(|s| s.strip_suffix('}'))
-    {
-        std::env::var(var_name).map_err(|_| {
-            anyhow::anyhow!(
-                "Environment variable '{var_name}' referenced in config is not set"
-            )
-        })
-    } else {
-        Ok(value.to_owned())
-    }
+        .map_or_else(
+            || Ok(value.to_owned()),
+            |var_name| {
+                std::env::var(var_name).map_err(|_| {
+                    anyhow::anyhow!(
+                        "Environment variable '{var_name}' referenced in config is not set"
+                    )
+                })
+            },
+        )
 }
