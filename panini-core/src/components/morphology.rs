@@ -42,10 +42,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
             // Remove $defs from the nested copies
             if let Some(props) = fragment.get_mut("properties") {
                 for key in ["target_features", "context_features"] {
-                    if let Some(prop) = props.get_mut(key) {
-                        if let Some(obj) = prop.as_object_mut() {
-                            obj.remove("$defs");
-                        }
+                    if let Some(obj) = props.get_mut(key).and_then(|p| p.as_object_mut()) {
+                        obj.remove("$defs");
                     }
                 }
             }

@@ -35,7 +35,7 @@ impl PyDistribution {
         self.inner.seen_count()
     }
 
-    fn total_count(&self) -> usize {
+    const fn total_count(&self) -> usize {
         self.inner.total_count()
     }
 }
@@ -62,7 +62,7 @@ pub struct PyGroupResult {
 #[pymethods]
 impl PyGroupResult {
     #[getter]
-    fn total(&self) -> usize {
+    const fn total(&self) -> usize {
         self.inner.total
     }
 
@@ -72,10 +72,10 @@ impl PyGroupResult {
         for (name, dim) in &self.inner.dimensions {
             match dim {
                 Dimension::Dist(d) => {
-                    dict.set_item(name, PyDistribution { inner: d.clone() }.into_py(py))?
+                    dict.set_item(name, PyDistribution { inner: d.clone() }.into_py(py))?;
                 }
                 Dimension::Inv(i) => {
-                    dict.set_item(name, PyInventory { inner: i.clone() }.into_py(py))?
+                    dict.set_item(name, PyInventory { inner: i.clone() }.into_py(py))?;
                 }
             }
         }

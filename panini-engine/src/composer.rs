@@ -21,13 +21,12 @@ pub fn compose_schema<L: LinguisticDefinition>(
         let mut fragment = comp.schema_fragment(lang);
 
         // Hoist $defs from the fragment to root level
-        if let Some(defs) = fragment.as_object_mut().and_then(|o| o.remove("$defs")) {
-            if let Some(defs_obj) = defs.as_object() {
+        if let Some(defs) = fragment.as_object_mut().and_then(|o| o.remove("$defs"))
+            && let Some(defs_obj) = defs.as_object() {
                 for (def_key, def_value) in defs_obj {
                     all_defs.insert(def_key.clone(), def_value.clone());
                 }
             }
-        }
 
         properties.insert(key.to_string(), fragment);
         required.push(serde_json::Value::String(key.to_string()));
@@ -50,8 +49,8 @@ pub fn compose_schema<L: LinguisticDefinition>(
 /// Compose the system prompt from base blocks + component prompt fragments.
 ///
 /// Uses the same block structure as `build_extraction_prompt` for the base
-/// parts (system_role, target_language, learner_profile, skill_context,
-/// user_context), then appends each component's `prompt_fragment()` in an
+/// parts (`system_role`, `target_language`, `learner_profile`, `skill_context`,
+/// `user_context`), then appends each component's `prompt_fragment()` in an
 /// XML-tagged section, and finally the composed output instruction.
 pub fn compose_prompt<L: LinguisticDefinition>(
     lang: &L,
@@ -66,9 +65,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
-        .map(|lang| lang.to_639_3().to_string())
-        .unwrap_or_else(|| "eng".to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -79,7 +76,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", lang.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code.clone());
+    global_ctx.insert("iso", ui_lang_iso_code);
     global_ctx.insert("name", ui_lang_name.clone());
     global_ctx.insert("context_description", context_description.to_string());
 
