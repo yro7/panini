@@ -12,5 +12,8 @@ pub use french::*;
 pub mod italian;
 pub use italian::*;
 
+pub mod danish;
+pub use danish::*;
+
 #[cfg(feature = "registry")]
 pub mod registry;
