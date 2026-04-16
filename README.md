@@ -2,7 +2,7 @@
   <h1>Pāṇini</h1>
   <p><b>A LLM-powered linguistic feature extraction framework</b></p>
   <p>
-    <a href="https://crates.io/crates/panini-engine"><img src="https://img.shields.io/crates/v/panini-engine.svg" alt="Crates.io" /></a>
+    <a href="https://crates.io/crates/panini-lang"><img src="https://img.shields.io/crates/v/panini-lang.svg" alt="Crates.io" /></a>
     <a href="https://pypi.org/project/panini-lang/"><img src="https://img.shields.io/pypi/v/panini-lang.svg" alt="PyPI" /></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License" />
   </p>
@@ -20,14 +20,25 @@
 Pāṇini is a linguistic feature extraction framework: describe your language's morphology as Rust types, write extraction directives, and the pipeline handles the rest — prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation. No universal schema imposed; you define exactly the features your language needs.
 
 ## Table of Contents
+- [Table of Contents](#table-of-contents)
 - [Extraction Capabilities](#extraction-capabilities)
   - [Available components](#available-components)
-  - [Examples](#output-examples)
+  - [Output examples](#output-examples)
+    - [`morphology`](#morphology)
+    - [`pedagogical_explanation`](#pedagogical_explanation)
+    - [`morpheme_segmentation`](#morpheme_segmentation)
+    - [`multiword_expressions`](#multiword_expressions)
+    - [`leipzig_alignment`](#leipzig_alignment)
 - [Usage](#usage)
   - [As a library (Rust API)](#as-a-library-rust-api)
   - [As a standalone CLI](#as-a-standalone-cli)
   - [Python](#python)
+- [What you define, what the framework does](#what-you-define-what-the-framework-does)
+- [Design principles](#design-principles)
+- [Workspace structure](#workspace-structure)
 - [Adding a language](#adding-a-language)
+  - [Automatically (LLM-assisted)](#automatically-llm-assisted)
+  - [Manually (step by step)](#manually-step-by-step)
 - [Adding an analysis component](#adding-an-analysis-component)
 - [Building](#building)
 - [License](#license)
