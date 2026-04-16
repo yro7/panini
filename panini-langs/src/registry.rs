@@ -11,7 +11,7 @@ use panini_core::components::{PedagogicalExplanation, MorphologyAnalysis, Multiw
 use panini_engine::{extract_with_components, ExtractionOptions, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
 
-use crate::{Arabic, French, Italian, Polish, Turkish};
+use crate::{Arabic, French, Italian, Polish, Turkish, Danish};
 
 /// Helper: build the component list for a concrete language and dispatch.
 async fn extract_for_language<L, M>(
@@ -132,13 +132,13 @@ macro_rules! generate_registry {
 }
 
 // Generate the registry for all supported languages
-generate_registry!(Polish, Turkish, Arabic, French, Italian);
+generate_registry!(Polish, Turkish, Arabic, French, Italian, Danish);
 
 #[cfg(test)]
 mod tests {
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
-    use crate::{Polish, Turkish, Arabic};
+    use crate::{Polish, Turkish, Arabic, Danish};
 
     #[test]
     fn morpheme_segmentation_compatible_with_turkish() {
@@ -156,6 +156,12 @@ mod tests {
     fn morpheme_segmentation_incompatible_with_arabic() {
         let comp = MorphemeSegmentation;
         assert!(!comp.is_compatible(&Arabic));
+    }
+
+    #[test]
+    fn morpheme_segmentation_incompatible_with_danish() {
+        let comp = MorphemeSegmentation;
+        assert!(!comp.is_compatible(&Danish));
     }
 
     #[test]
