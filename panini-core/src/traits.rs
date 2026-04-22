@@ -35,6 +35,25 @@ pub trait MorphologyCatalog {
     fn group_descriptors() -> Vec<MorphologyGroupSchema>;
 }
 
+/// Static schema for one grammatical-function variant such as `case` or `agreement`.
+#[derive(Debug, Clone)]
+pub struct FunctionVariantSchema {
+    pub key: String,
+    pub label: String,
+    pub dimensions: Vec<FieldDescriptor>,
+}
+
+/// Exposes compile-time grammatical-function descriptors
+pub trait GrammaticalFunctionCatalog {
+    fn function_descriptors() -> Vec<FunctionVariantSchema>;
+}
+
+impl GrammaticalFunctionCatalog for () {
+    fn function_descriptors() -> Vec<FunctionVariantSchema> {
+        vec![]
+    }
+}
+
 /// Re-export `isolang::Language` as `IsoLang` so downstream crates don't need `isolang` directly.
 pub use isolang::Language as IsoLang;
 

@@ -164,6 +164,7 @@ pub enum TurkishCopula {
     Deserialize,
     schemars::JsonSchema,
     panini_macro::AggregableFields,
+    panini_macro::GrammaticalFunctionCatalog,
 )]
 #[serde(tag = "category", rename_all = "snake_case")]
 pub enum TurkishGrammaticalFunction {
