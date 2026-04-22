@@ -4,7 +4,6 @@ pub mod llm_utils;
 pub mod prompts;
 
 pub use extractor::{
-    extract_with_components, ExtractionError, ExtractionOptions,
-    ExtractionParseError,
+    ExtractionError, ExtractionOptions, ExtractionParseError, extract_with_components,
 };
 pub use prompts::ExtractionRequest;

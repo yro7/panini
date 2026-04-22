@@ -1,8 +1,21 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{BinaryGender, BinaryVoice, LinguisticDefinition, Person, Script, TernaryNumber};
+use panini_core::traits::{
+    BinaryGender, BinaryVoice, LinguisticDefinition, Person, Script, TernaryNumber,
+};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicCase {
     Nominative,
@@ -10,7 +23,18 @@ pub enum ArabicCase {
     Genitive,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicTense {
     Past,
@@ -18,7 +42,18 @@ pub enum ArabicTense {
     Future,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicMood {
     Indicative,
@@ -26,28 +61,72 @@ pub enum ArabicMood {
     Jussive,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicState {
     Construct,
     Absolute,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicDefiniteness {
     Definite,
     Indefinite,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicPronounType {
     Independent,
     Attached,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicParticleFunction {
     Negation,
@@ -60,7 +139,18 @@ pub enum ArabicParticleFunction {
     Attention,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicAttachmentType {
     Possessive,
@@ -68,13 +158,48 @@ pub enum ArabicAttachmentType {
     Prepositional,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 pub enum ArabicVerbForm {
-    I, II, III, IV, V, VI, VII, VIII, IX, X, XI, XII, XIII, XIV, XV,
+    I,
+    II,
+    III,
+    IV,
+    V,
+    VI,
+    VII,
+    VIII,
+    IX,
+    X,
+    XI,
+    XII,
+    XIII,
+    XIV,
+    XV,
 }
 
 /// A morphological feature representing a Part of Speech (`PoS`) in Modern Standard Arabic.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::MorphologyInfo)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::MorphologyInfo,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicMorphology {
     Adjective {
@@ -87,12 +212,24 @@ pub enum ArabicMorphology {
         case: ArabicCase,
         definiteness: ArabicDefiniteness,
     },
-    Adposition { lemma: String },
-    Adverb { lemma: String },
-    Auxiliary { lemma: String },
-    CoordinatingConjunction { lemma: String },
-    Determiner { lemma: String },
-    Interjection { lemma: String },
+    Adposition {
+        lemma: String,
+    },
+    Adverb {
+        lemma: String,
+    },
+    Auxiliary {
+        lemma: String,
+    },
+    CoordinatingConjunction {
+        lemma: String,
+    },
+    Determiner {
+        lemma: String,
+    },
+    Interjection {
+        lemma: String,
+    },
     Noun {
         lemma: String,
         root: String,
@@ -122,10 +259,18 @@ pub enum ArabicMorphology {
         number: TernaryNumber,
         gender: BinaryGender,
     },
-    ProperNoun { lemma: String },
-    Punctuation { lemma: String },
-    SubordinatingConjunction { lemma: String },
-    Symbol { lemma: String },
+    ProperNoun {
+        lemma: String,
+    },
+    Punctuation {
+        lemma: String,
+    },
+    SubordinatingConjunction {
+        lemma: String,
+    },
+    Symbol {
+        lemma: String,
+    },
     Verb {
         lemma: String,
         root: String,
@@ -137,7 +282,9 @@ pub enum ArabicMorphology {
         mood: ArabicMood,
         voice: BinaryVoice,
     },
-    Other { lemma: String },
+    Other {
+        lemma: String,
+    },
 }
 
 pub struct Arabic;

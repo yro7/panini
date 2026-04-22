@@ -1,12 +1,12 @@
-use std::time::Duration;
 use panini_core::component::{AnalysisComponent, ExtractionResult};
 use panini_core::traits::LinguisticDefinition;
 use rig::completion::{CompletionModel, CompletionRequestBuilder};
 use rig::message::Message;
+use std::time::Duration;
 
-use crate::composer::{compose_schema, compose_prompt};
+use crate::composer::{compose_prompt, compose_schema};
 use crate::llm_utils::clean_llm_json;
-use crate::prompts::{ExtractorPrompts, ExtractionRequest};
+use crate::prompts::{ExtractionRequest, ExtractorPrompts};
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ pub struct ExtractionOptions<'a> {
 }
 
 impl<'a> ExtractionOptions<'a> {
-    #[must_use] 
+    #[must_use]
     pub fn new(extractor_prompts: &'a ExtractorPrompts) -> Self {
         Self {
             temperature: 0.2,
@@ -146,19 +146,20 @@ where
             Err(e) => {
                 // Only retry on parsing/validation errors
                 if let ExtractionError::Parse(pe) = &e
-                    && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff) {
-                        tracing::warn!(
-                            ?wait,
-                            error = %pe.error_message,
-                            "Extraction validation failed, retrying with self-correction..."
-                        );
-                        prev_attempt = Some(PreviousAttempt {
-                            raw_response: pe.raw_response.clone(),
-                            error: pe.error_message.clone(),
-                        });
-                        tokio::time::sleep(wait).await;
-                        continue;
-                    }
+                    && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff)
+                {
+                    tracing::warn!(
+                        ?wait,
+                        error = %pe.error_message,
+                        "Extraction validation failed, retrying with self-correction..."
+                    );
+                    prev_attempt = Some(PreviousAttempt {
+                        raw_response: pe.raw_response.clone(),
+                        error: pe.error_message.clone(),
+                    });
+                    tokio::time::sleep(wait).await;
+                    continue;
+                }
                 return Err(e);
             }
         }
@@ -278,24 +279,22 @@ where
     for comp in &compatible {
         let key = comp.schema_key();
         if let Some(section) = json_value.get(key) {
-            comp.validate(language, section).map_err(|e| {
-                ExtractionParseError {
+            comp.validate(language, section)
+                .map_err(|e| ExtractionParseError {
                     raw_response: processed.clone(),
                     error_message: format!("Validation failed for component '{key}': {e}"),
-                }
-            })?;
+                })?;
         }
     }
 
     for comp in &compatible {
         let key = comp.schema_key();
         if let Some(section) = json_value.get_mut(key) {
-            comp.post_process(language, section).map_err(|e| {
-                ExtractionParseError {
+            comp.post_process(language, section)
+                .map_err(|e| ExtractionParseError {
                     raw_response: processed.clone(),
                     error_message: format!("Post-processing failed for component '{key}': {e}"),
-                }
-            })?;
+                })?;
         }
     }
 

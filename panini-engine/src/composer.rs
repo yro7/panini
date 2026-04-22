@@ -1,7 +1,7 @@
 use panini_core::component::{AnalysisComponent, ComponentContext};
 use panini_core::traits::LinguisticDefinition;
 
-use crate::prompts::{wrap_tag, ExtractionRequest, ExtractorPrompts};
+use crate::prompts::{ExtractionRequest, ExtractorPrompts, wrap_tag};
 
 /// Compose a JSON Schema from multiple components.
 ///
@@ -22,11 +22,12 @@ pub fn compose_schema<L: LinguisticDefinition>(
 
         // Hoist $defs from the fragment to root level
         if let Some(defs) = fragment.as_object_mut().and_then(|o| o.remove("$defs"))
-            && let Some(defs_obj) = defs.as_object() {
-                for (def_key, def_value) in defs_obj {
-                    all_defs.insert(def_key.clone(), def_value.clone());
-                }
+            && let Some(defs_obj) = defs.as_object()
+        {
+            for (def_key, def_value) in defs_obj {
+                all_defs.insert(def_key.clone(), def_value.clone());
             }
+        }
 
         properties.insert(key.to_string(), fragment);
         required.push(serde_json::Value::String(key.to_string()));
@@ -68,7 +69,8 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
+        .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -294,10 +296,12 @@ mod tests {
             &[&FakeComponentA as &dyn AnalysisComponent<TestLang>],
         );
         assert_eq!(schema["properties"]["alpha"]["type"], "string");
-        assert!(schema["required"]
-            .as_array()
-            .unwrap()
-            .contains(&serde_json::json!("alpha")));
+        assert!(
+            schema["required"]
+                .as_array()
+                .unwrap()
+                .contains(&serde_json::json!("alpha"))
+        );
     }
 
     #[test]

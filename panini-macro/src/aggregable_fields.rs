@@ -1,7 +1,9 @@
+use crate::helpers::{
+    classify, get_crate_path, get_serde_value, variant_serialized_name, FieldClass,
+};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::{get_crate_path, get_serde_value, variant_serialized_name, classify, FieldClass};
 
 // ─── AggregableFields derive ──────────────────────────────────────────────────
 
@@ -22,7 +24,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let krate = get_crate_path(&input.attrs, "aggregable_fields");
 
     // Validate that a serde tag is present (required for the internally-tagged pattern).
-    assert!(get_serde_value(&input.attrs, "tag").is_some(), "AggregableFields: #[serde(tag = \"...\")] is required on {name}");
+    assert!(
+        get_serde_value(&input.attrs, "tag").is_some(),
+        "AggregableFields: #[serde(tag = \"...\")] is required on {name}"
+    );
 
     let rename_all = get_serde_value(&input.attrs, "rename_all");
 
@@ -34,51 +39,58 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let serialized_names: Vec<String> = variants
         .iter()
         .map(|v| {
-            get_serde_value(&v.attrs, "rename")
-                .unwrap_or_else(|| variant_serialized_name(&v.ident.to_string(), rename_all.as_ref()))
+            get_serde_value(&v.attrs, "rename").unwrap_or_else(|| {
+                variant_serialized_name(&v.ident.to_string(), rename_all.as_ref())
+            })
         })
         .collect();
 
-    let field_value_arms = variants.iter().zip(serialized_names.iter()).map(|(v, cat_str)| {
-        let ident = &v.ident;
-        let fields = match &v.fields {
-            Fields::Named(f) => &f.named,
-            Fields::Unit => {
-                return quote! {
-                    Self::#ident => (#cat_str.to_string(), #cat_str.to_string()),
-                };
-            }
-            Fields::Unnamed(_) => panic!("AggregableFields: tuple variants are not supported"),
-        };
-
-
-        let field_idents: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();
-
-        let value_parts: Vec<_> = fields
-            .iter()
-            .map(|f| {
-                let fi = f.ident.as_ref().unwrap();
-                match classify(&f.ty) {
-                    FieldClass::String => quote! { #fi.clone() },
-                    FieldClass::Bool => quote! { #fi.to_string() },
-                    FieldClass::Closed => quote! {
-                        #krate::aggregable::ClosedValues::variant_str(#fi).to_string()
-                    },
+    let field_value_arms = variants
+        .iter()
+        .zip(serialized_names.iter())
+        .map(|(v, cat_str)| {
+            let ident = &v.ident;
+            let fields = match &v.fields {
+                Fields::Named(f) => &f.named,
+                Fields::Unit => {
+                    return quote! {
+                        Self::#ident => (#cat_str.to_string(), #cat_str.to_string()),
+                    };
                 }
-            })
-            .collect();
+                Fields::Unnamed(_) => panic!("AggregableFields: tuple variants are not supported"),
+            };
 
-        let value_expr = if value_parts.len() == 1 {
-            quote! { #(#value_parts)* }
-        } else {
-            let fmt_str = value_parts.iter().map(|_| "{}").collect::<Vec<_>>().join("_");
-            quote! { format!(#fmt_str, #(#value_parts),*) }
-        };
+            let field_idents: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();
 
-        quote! {
-            Self::#ident { #(#field_idents,)* } => (#cat_str.to_string(), #value_expr),
-        }
-    });
+            let value_parts: Vec<_> = fields
+                .iter()
+                .map(|f| {
+                    let fi = f.ident.as_ref().unwrap();
+                    match classify(&f.ty) {
+                        FieldClass::String => quote! { #fi.clone() },
+                        FieldClass::Bool => quote! { #fi.to_string() },
+                        FieldClass::Closed => quote! {
+                            #krate::aggregable::ClosedValues::variant_str(#fi).to_string()
+                        },
+                    }
+                })
+                .collect();
+
+            let value_expr = if value_parts.len() == 1 {
+                quote! { #(#value_parts)* }
+            } else {
+                let fmt_str = value_parts
+                    .iter()
+                    .map(|_| "{}")
+                    .collect::<Vec<_>>()
+                    .join("_");
+                quote! { format!(#fmt_str, #(#value_parts),*) }
+            };
+
+            quote! {
+                Self::#ident { #(#field_idents,)* } => (#cat_str.to_string(), #value_expr),
+            }
+        });
 
     let expanded = quote! {
         impl #krate::aggregable::AggregableFields for #name {

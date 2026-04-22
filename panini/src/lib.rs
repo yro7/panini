@@ -2,14 +2,16 @@ pub use panini_core;
 pub use panini_engine;
 
 // Re-export key types at top level for ergonomics
-pub use panini_core::{LinguisticDefinition, MorphologyInfo};
 pub use panini_core::component::ComponentRequires;
-pub use panini_core::component::{AnalysisComponent, ComponentContext, ExtractionResult, ExtractionResultError};
+pub use panini_core::component::{
+    AnalysisComponent, ComponentContext, ExtractionResult, ExtractionResultError,
+};
 pub use panini_core::components::{
     MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions, PedagogicalExplanation,
 };
-pub use panini_engine::{extract_with_components, ExtractionRequest};
+pub use panini_core::{LinguisticDefinition, MorphologyInfo};
 pub use panini_engine::extractor::{ExtractionError, ExtractionOptions};
+pub use panini_engine::{ExtractionRequest, extract_with_components};
 pub use panini_macro::PaniniResult;
 
 /// Internal re-exports used by `#[derive(PaniniResult)]` generated code.

@@ -1,5 +1,5 @@
 /// Strips markdown code fences that LLMs sometimes wrap around JSON responses.
-#[must_use] 
+#[must_use]
 pub fn clean_llm_json(raw: &str) -> &str {
     raw.trim()
         .trim_start_matches("```json")
