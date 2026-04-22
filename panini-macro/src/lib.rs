@@ -1,5 +1,6 @@
 mod aggregable_fields;
 mod closed_values;
+mod grammatical_function_catalog;
 mod helpers;
 mod morphology_info;
 mod panini_result;
@@ -24,4 +25,9 @@ pub fn panini_result_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(AggregableFields, attributes(aggregable_fields))]
 pub fn aggregable_fields_derive(input: TokenStream) -> TokenStream {
     aggregable_fields::derive(input)
+}
+
+#[proc_macro_derive(GrammaticalFunctionCatalog, attributes(serde))]
+pub fn grammatical_function_catalog_derive(input: TokenStream) -> TokenStream {
+    grammatical_function_catalog::derive(input)
 }
