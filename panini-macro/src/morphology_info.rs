@@ -1,7 +1,8 @@
+use crate::helpers::{classify, is_option_type, FieldClass};
+use heck::ToSnakeCase;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::{FieldClass, is_option_type, classify};
 
 // ─── MorphologyInfo derive ────────────────────────────────────────────────────
 
@@ -26,11 +27,20 @@ pub fn derive(input: TokenStream) -> TokenStream {
         .map(|v| {
             let fields = match &v.fields {
                 Fields::Named(f) => &f.named,
-                _ => panic!("MorphologyInfo: variant `{}` must have named fields", v.ident),
+                _ => panic!(
+                    "MorphologyInfo: variant `{}` must have named fields",
+                    v.ident
+                ),
             };
 
-            let has_lemma = fields.iter().any(|f| f.ident.as_ref().is_some_and(|id| id == "lemma"));
-            assert!(has_lemma, "MorphologyInfo: variant `{}` must have a named `lemma` field", v.ident);
+            let has_lemma = fields
+                .iter()
+                .any(|f| f.ident.as_ref().is_some_and(|id| id == "lemma"));
+            assert!(
+                has_lemma,
+                "MorphologyInfo: variant `{}` must have a named `lemma` field",
+                v.ident
+            );
 
             let aggregable: Vec<(&syn::Field, FieldClass)> = fields
                 .iter()
@@ -38,7 +48,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 .map(|f| (f, classify(&f.ty)))
                 .collect();
 
-            VariantInfo { ident: &v.ident, aggregable }
+            VariantInfo {
+                ident: &v.ident,
+                aggregable,
+            }
         })
         .collect();
 
@@ -47,14 +60,97 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let ts_traits = generate_pos_tag_and_traits(name, &pos_tag_name, variants);
     let ts_getters = generate_field_getters(name, &variant_infos);
     let ts_aggregable = generate_aggregable_impl(name, &variant_infos);
+    let ts_catalog = generate_catalog_impl(name, &variant_infos);
 
     let expanded = quote! {
         #ts_traits
         #ts_getters
         #ts_aggregable
+        #ts_catalog
     };
 
     TokenStream::from(expanded)
+}
+
+/// Generates a static schema catalog describing the morphology groups and their dimensions.
+fn generate_catalog_impl(
+    name: &syn::Ident,
+    variant_infos: &[VariantInfo],
+) -> proc_macro2::TokenStream {
+    let schema_entries: Vec<proc_macro2::TokenStream> = variant_infos
+        .iter()
+        .map(|info| {
+            let ident = info.ident;
+            let label = ident.to_string();
+            let key = label.to_snake_case();
+
+            let descriptor_entries = info.aggregable.iter().map(|(f, class)| {
+                let field_name = f.ident.as_ref().unwrap().to_string();
+                let ty = &f.ty;
+                match class {
+                    FieldClass::String => quote! {
+                        panini_core::aggregable::FieldDescriptor {
+                            name: #field_name.into(),
+                            kind: panini_core::aggregable::FieldKind::Open,
+                        }
+                    },
+                    FieldClass::Bool => quote! {
+                        panini_core::aggregable::FieldDescriptor {
+                            name: #field_name.into(),
+                            kind: panini_core::aggregable::FieldKind::Closed(&["true", "false"]),
+                        }
+                    },
+                    FieldClass::Closed => quote! {
+                        panini_core::aggregable::FieldDescriptor {
+                            name: #field_name.into(),
+                            kind: panini_core::aggregable::FieldKind::Closed(
+                                <#ty as panini_core::aggregable::ClosedValues>::all_variants()
+                            ),
+                        }
+                    },
+                }
+            });
+
+            quote! {
+                panini_core::traits::MorphologyGroupSchema {
+                    key: #key.to_string(),
+                    label: #label.to_string(),
+                    dimensions: vec![#(#descriptor_entries,)*],
+                }
+            }
+        })
+        .collect();
+
+    let mut closed_field_types: Vec<proc_macro2::TokenStream> = Vec::new();
+    for info in variant_infos {
+        for (f, class) in &info.aggregable {
+            if matches!(class, FieldClass::Closed) {
+                let ty = &f.ty;
+                closed_field_types.push(quote! { #ty });
+            }
+        }
+    }
+
+    let mut seen = std::collections::HashSet::new();
+    let unique_closed_types: Vec<_> = closed_field_types
+        .into_iter()
+        .filter(|t| seen.insert(t.to_string()))
+        .collect();
+
+    let closed_where_bounds = unique_closed_types.iter().map(|ty| {
+        quote! { #ty: panini_core::aggregable::ClosedValues }
+    });
+
+    quote! {
+        impl panini_core::traits::MorphologyCatalog for #name
+        where
+            #(#closed_where_bounds,)*
+        {
+            fn group_descriptors() -> Vec<panini_core::traits::MorphologyGroupSchema> {
+                vec![#(#schema_entries),*]
+            }
+        }
+    }
 }
 
 struct VariantInfo<'a> {
@@ -119,7 +215,10 @@ fn generate_pos_tag_and_traits(
 }
 
 /// Generates getter functions for every aggregable field found in the enum variants.
-fn generate_field_getters(name: &syn::Ident, variant_infos: &[VariantInfo]) -> proc_macro2::TokenStream {
+fn generate_field_getters(
+    name: &syn::Ident,
+    variant_infos: &[VariantInfo],
+) -> proc_macro2::TokenStream {
     let mut all_fields = std::collections::HashSet::new();
     for info in variant_infos {
         for (f, _) in &info.aggregable {
@@ -174,7 +273,10 @@ fn generate_field_getters(name: &syn::Ident, variant_infos: &[VariantInfo]) -> p
 }
 
 /// Generates the `Aggregable` trait implementation so this morphology can be grouped and analyzed.
-fn generate_aggregable_impl(name: &syn::Ident, variant_infos: &[VariantInfo]) -> proc_macro2::TokenStream {
+fn generate_aggregable_impl(
+    name: &syn::Ident,
+    variant_infos: &[VariantInfo],
+) -> proc_macro2::TokenStream {
     let descriptor_arms: Vec<proc_macro2::TokenStream> = variant_infos
         .iter()
         .map(|info| {

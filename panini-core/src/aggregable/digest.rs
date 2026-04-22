@@ -15,34 +15,37 @@ pub struct Distribution {
 }
 
 impl Distribution {
-    #[must_use] 
+    #[must_use]
     pub fn new(possible: &[&'static str]) -> Self {
         Self {
-            possible: possible.iter().map(std::string::ToString::to_string).collect(),
+            possible: possible
+                .iter()
+                .map(std::string::ToString::to_string)
+                .collect(),
             counts: HashMap::new(),
         }
     }
 
     /// Number of distinct possible values actually observed.
-    #[must_use] 
+    #[must_use]
     pub fn seen_count(&self) -> usize {
         self.counts.len()
     }
 
     /// Total number of possible values.
-    #[must_use] 
+    #[must_use]
     pub const fn total_count(&self) -> usize {
         self.possible.len()
     }
 
     /// Coverage: (seen, total)
-    #[must_use] 
+    #[must_use]
     pub fn coverage(&self) -> (usize, usize) {
         (self.seen_count(), self.total_count())
     }
 
     /// Coverage percentage (0.0 to 1.0)
-    #[must_use] 
+    #[must_use]
     #[allow(clippy::cast_precision_loss)]
     pub fn coverage_percent(&self) -> f64 {
         if self.possible.is_empty() {
@@ -155,13 +158,13 @@ impl AggregationResult {
     }
 
     /// Total number of items aggregated across all groups.
-    #[must_use] 
+    #[must_use]
     pub fn total_count(&self) -> usize {
         self.by_group.values().map(|g| g.total).sum()
     }
 
     /// Number of distinct groups.
-    #[must_use] 
+    #[must_use]
     pub fn group_count(&self) -> usize {
         self.by_group.len()
     }
@@ -283,13 +286,13 @@ pub struct BasicAggregator {
 }
 
 impl BasicAggregator {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Borrow of the result (for inspection without consuming).
-    #[must_use] 
+    #[must_use]
     pub const fn result(&self) -> &AggregationResult {
         &self.result
     }
@@ -529,10 +532,14 @@ mod tests {
             kind: FieldKind::Closed(&["Nominative", "Accusative"]),
         }];
 
-        let items1 = vec![MockAggregable::new("Noun", descriptors.clone())
-            .with_observation(vec![("case".to_string(), "Nominative".to_string())])];
-        let items2 = vec![MockAggregable::new("Noun", descriptors)
-            .with_observation(vec![("case".to_string(), "Accusative".to_string())])];
+        let items1 = vec![
+            MockAggregable::new("Noun", descriptors.clone())
+                .with_observation(vec![("case".to_string(), "Nominative".to_string())]),
+        ];
+        let items2 = vec![
+            MockAggregable::new("Noun", descriptors)
+                .with_observation(vec![("case".to_string(), "Accusative".to_string())]),
+        ];
 
         let mut result = AggregationResult::default();
         result.extend(items1);

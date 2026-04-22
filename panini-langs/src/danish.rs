@@ -1,24 +1,55 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{
-    BinaryNumber, LinguisticDefinition, Person, Script, TypologicalFeature,
-};
+use panini_core::traits::{BinaryNumber, LinguisticDefinition, Person, Script, TypologicalFeature};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishGender {
     Common, // Fælleskøn (n-ord)
     Neuter, // Intetkøn (t-ord)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishDefiniteness {
     Indefinite, // Ubestemt
     Definite,   // Bestemt
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishCase {
     Nominative, // Nominativ
@@ -26,14 +57,36 @@ pub enum DanishCase {
     Objective,  // Akkusativ/Dativ (mostly for pronouns)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishTense {
     Present, // Nutid (præsens)
     Past,    // Datid (præteritum)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishMood {
     Indicative, // Fremsættende måde
@@ -42,14 +95,36 @@ pub enum DanishMood {
     Participle, // Tillægsform
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishVoice {
     Active,  // Aktiv
     Passive, // Passiv (s-passiv or auxiliary)
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum DanishDegree {
     Positive,    // Positiv
@@ -57,7 +132,17 @@ pub enum DanishDegree {
     Superlative, // Superlativ
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::MorphologyInfo)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::MorphologyInfo,
+)]
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum DanishMorphology {

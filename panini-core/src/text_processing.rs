@@ -4,39 +4,39 @@
 ///
 /// # Panics
 /// Panics if the internal regex fails to compile (should never happen).
-#[must_use] 
+#[must_use]
 pub fn normalize_pos_tags(json: &str) -> String {
     // UD abbreviation / long-form alias → canonical lowercase enum variant
     let ud_map: &[(&str, &str)] = &[
         // UD tag abbreviations
-        ("adj",   "adjective"),
-        ("adp",   "adposition"),
-        ("adv",   "adverb"),
-        ("aux",   "auxiliary"),
+        ("adj", "adjective"),
+        ("adp", "adposition"),
+        ("adv", "adverb"),
+        ("aux", "auxiliary"),
         ("cconj", "coordinating_conjunction"),
-        ("det",   "determiner"),
-        ("intj",  "interjection"),
-        ("n",     "noun"),
-        ("num",   "numeral"),
-        ("part",  "particle"),
-        ("prep",  "adposition"),
-        ("pron",  "pronoun"),
+        ("det", "determiner"),
+        ("intj", "interjection"),
+        ("n", "noun"),
+        ("num", "numeral"),
+        ("part", "particle"),
+        ("prep", "adposition"),
+        ("pron", "pronoun"),
         ("propn", "proper_noun"),
         ("sconj", "subordinating_conjunction"),
-        ("v",     "verb"),
-        ("conj",  "coordinating_conjunction"),
-        ("interj","interjection"),
-        ("sym",   "symbol"),
-        ("punc",  "punctuation"),
+        ("v", "verb"),
+        ("conj", "coordinating_conjunction"),
+        ("interj", "interjection"),
+        ("sym", "symbol"),
+        ("punc", "punctuation"),
         ("punct", "punctuation"),
-        ("x",     "other"),
+        ("x", "other"),
         // Long-form aliases that some LLMs emit
-        ("preposition",              "adposition"),
-        ("conjunction",              "coordinating_conjunction"),
+        ("preposition", "adposition"),
+        ("conjunction", "coordinating_conjunction"),
         ("coordinating conjunction", "coordinating_conjunction"),
-        ("subordinating conjunction","subordinating_conjunction"),
-        ("proper noun",              "proper_noun"),
-        ("propernoun",               "proper_noun"),
+        ("subordinating conjunction", "subordinating_conjunction"),
+        ("proper noun", "proper_noun"),
+        ("propernoun", "proper_noun"),
     ];
 
     // Regex: match `"pos"` (with optional whitespace) `:` string value
@@ -44,14 +44,11 @@ pub fn normalize_pos_tags(json: &str) -> String {
 
     re.replace_all(json, |caps: &regex::Captures| {
         let raw_val = caps[1].to_lowercase();
-        let normalized = ud_map
-            .iter()
-            .find(|(abbr, _)| *abbr == raw_val)
-            .map_or(
-                // Not in the map — use the lowercased value as-is
-                raw_val.as_str(),
-                |(_, canonical)| *canonical,
-            );
+        let normalized = ud_map.iter().find(|(abbr, _)| *abbr == raw_val).map_or(
+            // Not in the map — use the lowercased value as-is
+            raw_val.as_str(),
+            |(_, canonical)| *canonical,
+        );
         format!(r#""pos": "{normalized}""#)
     })
     .to_string()

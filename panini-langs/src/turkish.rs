@@ -7,56 +7,122 @@ use panini_core::traits::{
 
 // ─── Existing Turkish grammatical enums ──────────────────────────────────────
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishCase {
-    Nominative,  // Yalın hâl
-    Accusative,  // Belirtme hâli
-    Dative,      // Yönelme hâli
-    Locative,    // Bulunma hâli
-    Ablative,    // Ayrılma hâli
-    Genitive,    // Tamlayan hâli
+    Nominative, // Yalın hâl
+    Accusative, // Belirtme hâli
+    Dative,     // Yönelme hâli
+    Locative,   // Bulunma hâli
+    Ablative,   // Ayrılma hâli
+    Genitive,   // Tamlayan hâli
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishTense {
-    Past,     // Geçmiş zaman
-    Present,  // Şimdiki zaman
-    Future,   // Gelecek zaman
-    Aorist,   // Geniş zaman
+    Past,    // Geçmiş zaman
+    Present, // Şimdiki zaman
+    Future,  // Gelecek zaman
+    Aorist,  // Geniş zaman
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishMood {
-    Indicative,     // Bildirme kipi
-    Imperative,     // Emir kipi
-    Necessitative,  // Gereklilik kipi
-    Optative,       // İstek kipi
-    Conditional,    // Şart kipi
+    Indicative,    // Bildirme kipi
+    Imperative,    // Emir kipi
+    Necessitative, // Gereklilik kipi
+    Optative,      // İstek kipi
+    Conditional,   // Şart kipi
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishVoice {
-    Active,      // Etken çatı
-    Passive,     // Edilgen çatı
-    Reflexive,   // Dönüşlü çatı
-    Reciprocal,  // İşteş çatı
-    Causative,   // Ettirgen çatı
+    Active,     // Etken çatı
+    Passive,    // Edilgen çatı
+    Reflexive,  // Dönüşlü çatı
+    Reciprocal, // İşteş çatı
+    Causative,  // Ettirgen çatı
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishPolarity {
-    Positive,  // Olumlu
-    Negative,  // Olumsuz
+    Positive, // Olumlu
+    Negative, // Olumsuz
 }
 
 // ─── New enums for morpheme-level functions ───────────────────────────────────
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishDerivation {
     Nominalization,
@@ -70,7 +136,18 @@ pub enum TurkishDerivation {
     Adverbial,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishCopula {
     Epistemic,
@@ -78,19 +155,50 @@ pub enum TurkishCopula {
 
 // ─── GrammaticalFunction wrapper enum ────────────────────────────────────────
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, panini_macro::AggregableFields)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::AggregableFields,
+)]
 #[serde(tag = "category", rename_all = "snake_case")]
 pub enum TurkishGrammaticalFunction {
-    Case { value: TurkishCase },
-    Tense { value: TurkishTense },
-    Mood { value: TurkishMood },
-    Voice { value: TurkishVoice },
-    Polarity { value: TurkishPolarity },
-    Number { value: BinaryNumber },
-    Agreement { person: Person, number: BinaryNumber },
-    Possessive { person: Person, number: BinaryNumber },
-    Derivation { value: TurkishDerivation },
-    Copula { value: TurkishCopula },
+    Case {
+        value: TurkishCase,
+    },
+    Tense {
+        value: TurkishTense,
+    },
+    Mood {
+        value: TurkishMood,
+    },
+    Voice {
+        value: TurkishVoice,
+    },
+    Polarity {
+        value: TurkishPolarity,
+    },
+    Number {
+        value: BinaryNumber,
+    },
+    Agreement {
+        person: Person,
+        number: BinaryNumber,
+    },
+    Possessive {
+        person: Person,
+        number: BinaryNumber,
+    },
+    Derivation {
+        value: TurkishDerivation,
+    },
+    Copula {
+        value: TurkishCopula,
+    },
 }
 
 impl TurkishGrammaticalFunction {
@@ -113,24 +221,52 @@ impl TurkishGrammaticalFunction {
 
 // ─── TurkishMorphology ────────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::MorphologyInfo)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::MorphologyInfo,
+)]
 #[serde(tag = "pos")]
 #[serde(rename_all = "lowercase")]
 pub enum TurkishMorphology {
-    Adjective { lemma: String },
-    Adposition { lemma: String },
-    Adverb { lemma: String },
-    Auxiliary { lemma: String },
-    CoordinatingConjunction { lemma: String },
-    Determiner { lemma: String },
-    Interjection { lemma: String },
+    Adjective {
+        lemma: String,
+    },
+    Adposition {
+        lemma: String,
+    },
+    Adverb {
+        lemma: String,
+    },
+    Auxiliary {
+        lemma: String,
+    },
+    CoordinatingConjunction {
+        lemma: String,
+    },
+    Determiner {
+        lemma: String,
+    },
+    Interjection {
+        lemma: String,
+    },
     Noun {
         lemma: String,
         case: TurkishCase,
         number: BinaryNumber,
     },
-    Numeral { lemma: String },
-    Particle { lemma: String },
+    Numeral {
+        lemma: String,
+    },
+    Particle {
+        lemma: String,
+    },
     Pronoun {
         lemma: String,
         case: TurkishCase,
@@ -142,9 +278,15 @@ pub enum TurkishMorphology {
         case: TurkishCase,
         number: BinaryNumber,
     },
-    Punctuation { lemma: String },
-    SubordinatingConjunction { lemma: String },
-    Symbol { lemma: String },
+    Punctuation {
+        lemma: String,
+    },
+    SubordinatingConjunction {
+        lemma: String,
+    },
+    Symbol {
+        lemma: String,
+    },
     Verb {
         lemma: String,
         tense: TurkishTense,
@@ -154,7 +296,9 @@ pub enum TurkishMorphology {
         number: BinaryNumber,
         polarity: TurkishPolarity,
     },
-    Other { lemma: String },
+    Other {
+        lemma: String,
+    },
 }
 
 // ─── Static morpheme inventory ────────────────────────────────────────────────
@@ -164,54 +308,313 @@ type F = TurkishGrammaticalFunction;
 
 static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     // === Cases (nominal) ===
-    MorphemeDefinition { base_form: "(y)I", functions: &[F::Case { value: TurkishCase::Accusative }], applies_to: &[P::Noun, P::Pronoun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "DA", functions: &[F::Case { value: TurkishCase::Locative }], applies_to: &[P::Noun, P::Pronoun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "DAn", functions: &[F::Case { value: TurkishCase::Ablative }], applies_to: &[P::Noun, P::Pronoun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(y)A", functions: &[F::Case { value: TurkishCase::Dative }], applies_to: &[P::Noun, P::Pronoun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(n)In", functions: &[F::Case { value: TurkishCase::Genitive }], applies_to: &[P::Noun, P::Pronoun, P::ProperNoun] },
+    MorphemeDefinition {
+        base_form: "(y)I",
+        functions: &[F::Case {
+            value: TurkishCase::Accusative,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "DA",
+        functions: &[F::Case {
+            value: TurkishCase::Locative,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "DAn",
+        functions: &[F::Case {
+            value: TurkishCase::Ablative,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(y)A",
+        functions: &[F::Case {
+            value: TurkishCase::Dative,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(n)In",
+        functions: &[F::Case {
+            value: TurkishCase::Genitive,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
     // === Plural ===
-    MorphemeDefinition { base_form: "lAr", functions: &[F::Number { value: BinaryNumber::Plural }, F::Agreement { person: Person::Third, number: BinaryNumber::Plural }], applies_to: &[P::Noun, P::Pronoun, P::Verb, P::ProperNoun] },
+    MorphemeDefinition {
+        base_form: "lAr",
+        functions: &[
+            F::Number {
+                value: BinaryNumber::Plural,
+            },
+            F::Agreement {
+                person: Person::Third,
+                number: BinaryNumber::Plural,
+            },
+        ],
+        applies_to: &[P::Noun, P::Pronoun, P::Verb, P::ProperNoun],
+    },
     // === Possessive ===
-    MorphemeDefinition { base_form: "(I)m", functions: &[F::Possessive { person: Person::First, number: BinaryNumber::Singular }], applies_to: &[P::Noun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(I)n", functions: &[F::Possessive { person: Person::Second, number: BinaryNumber::Singular }], applies_to: &[P::Noun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(s)I", functions: &[F::Possessive { person: Person::Third, number: BinaryNumber::Singular }], applies_to: &[P::Noun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(I)mIz", functions: &[F::Possessive { person: Person::First, number: BinaryNumber::Plural }], applies_to: &[P::Noun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "(I)nIz", functions: &[F::Possessive { person: Person::Second, number: BinaryNumber::Plural }], applies_to: &[P::Noun, P::ProperNoun] },
-    MorphemeDefinition { base_form: "lArI", functions: &[F::Possessive { person: Person::Third, number: BinaryNumber::Plural }], applies_to: &[P::Noun, P::ProperNoun] },
+    MorphemeDefinition {
+        base_form: "(I)m",
+        functions: &[F::Possessive {
+            person: Person::First,
+            number: BinaryNumber::Singular,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(I)n",
+        functions: &[F::Possessive {
+            person: Person::Second,
+            number: BinaryNumber::Singular,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(s)I",
+        functions: &[F::Possessive {
+            person: Person::Third,
+            number: BinaryNumber::Singular,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(I)mIz",
+        functions: &[F::Possessive {
+            person: Person::First,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(I)nIz",
+        functions: &[F::Possessive {
+            person: Person::Second,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "lArI",
+        functions: &[F::Possessive {
+            person: Person::Third,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Noun, P::ProperNoun],
+    },
     // === Polarity (negation) ===
-    MorphemeDefinition { base_form: "mA", functions: &[F::Polarity { value: TurkishPolarity::Negative }, F::Derivation { value: TurkishDerivation::Nominalization }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "mA",
+        functions: &[
+            F::Polarity {
+                value: TurkishPolarity::Negative,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Nominalization,
+            },
+        ],
+        applies_to: &[P::Verb],
+    },
     // === Voice ===
-    MorphemeDefinition { base_form: "(I)l", functions: &[F::Voice { value: TurkishVoice::Passive }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(I)n", functions: &[F::Voice { value: TurkishVoice::Reflexive }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(I)ş", functions: &[F::Voice { value: TurkishVoice::Reciprocal }, F::Derivation { value: TurkishDerivation::ActionNominalization }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "DIr", functions: &[F::Voice { value: TurkishVoice::Causative }, F::Copula { value: TurkishCopula::Epistemic }], applies_to: &[P::Verb, P::Noun, P::Adjective] },
+    MorphemeDefinition {
+        base_form: "(I)l",
+        functions: &[F::Voice {
+            value: TurkishVoice::Passive,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(I)n",
+        functions: &[F::Voice {
+            value: TurkishVoice::Reflexive,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(I)ş",
+        functions: &[
+            F::Voice {
+                value: TurkishVoice::Reciprocal,
+            },
+            F::Derivation {
+                value: TurkishDerivation::ActionNominalization,
+            },
+        ],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "DIr",
+        functions: &[
+            F::Voice {
+                value: TurkishVoice::Causative,
+            },
+            F::Copula {
+                value: TurkishCopula::Epistemic,
+            },
+        ],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
+    },
     // === Tense / Aspect ===
-    MorphemeDefinition { base_form: "DI", functions: &[F::Tense { value: TurkishTense::Past }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "mIş", functions: &[F::Tense { value: TurkishTense::Past }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(I)yor", functions: &[F::Tense { value: TurkishTense::Present }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(y)AcAk", functions: &[F::Tense { value: TurkishTense::Future }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(A/I)r", functions: &[F::Tense { value: TurkishTense::Aorist }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "DI",
+        functions: &[F::Tense {
+            value: TurkishTense::Past,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "mIş",
+        functions: &[F::Tense {
+            value: TurkishTense::Past,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(I)yor",
+        functions: &[F::Tense {
+            value: TurkishTense::Present,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(y)AcAk",
+        functions: &[F::Tense {
+            value: TurkishTense::Future,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(A/I)r",
+        functions: &[F::Tense {
+            value: TurkishTense::Aorist,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Mood ===
-    MorphemeDefinition { base_form: "(y)sA", functions: &[F::Mood { value: TurkishMood::Conditional }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "mAlI", functions: &[F::Mood { value: TurkishMood::Necessitative }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(y)A", functions: &[F::Mood { value: TurkishMood::Optative }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "(y)sA",
+        functions: &[F::Mood {
+            value: TurkishMood::Conditional,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "mAlI",
+        functions: &[F::Mood {
+            value: TurkishMood::Necessitative,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(y)A",
+        functions: &[F::Mood {
+            value: TurkishMood::Optative,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Agreement ===
-    MorphemeDefinition { base_form: "(y)Im", functions: &[F::Agreement { person: Person::First, number: BinaryNumber::Singular }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "sIn", functions: &[F::Agreement { person: Person::Second, number: BinaryNumber::Singular }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "(y)Iz", functions: &[F::Agreement { person: Person::First, number: BinaryNumber::Plural }], applies_to: &[P::Verb] },
-    MorphemeDefinition { base_form: "sInIz", functions: &[F::Agreement { person: Person::Second, number: BinaryNumber::Plural }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "(y)Im",
+        functions: &[F::Agreement {
+            person: Person::First,
+            number: BinaryNumber::Singular,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "sIn",
+        functions: &[F::Agreement {
+            person: Person::Second,
+            number: BinaryNumber::Singular,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(y)Iz",
+        functions: &[F::Agreement {
+            person: Person::First,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "sInIz",
+        functions: &[F::Agreement {
+            person: Person::Second,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Derivation ===
-    MorphemeDefinition { base_form: "CI", functions: &[F::Derivation { value: TurkishDerivation::AgentSuffix }], applies_to: &[P::Noun, P::Verb] },
-    MorphemeDefinition { base_form: "lIk", functions: &[F::Derivation { value: TurkishDerivation::AbstractSuffix }], applies_to: &[P::Noun, P::Adjective, P::Verb] },
-    MorphemeDefinition { base_form: "sIz", functions: &[F::Derivation { value: TurkishDerivation::Privative }], applies_to: &[P::Noun] },
-    MorphemeDefinition { base_form: "lI", functions: &[F::Derivation { value: TurkishDerivation::Possessional }], applies_to: &[P::Noun] },
-    MorphemeDefinition { base_form: "DIk", functions: &[F::Derivation { value: TurkishDerivation::FactNominalization }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "CI",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::AgentSuffix,
+        }],
+        applies_to: &[P::Noun, P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "lIk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::AbstractSuffix,
+        }],
+        applies_to: &[P::Noun, P::Adjective, P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "sIz",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Privative,
+        }],
+        applies_to: &[P::Noun],
+    },
+    MorphemeDefinition {
+        base_form: "lI",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Possessional,
+        }],
+        applies_to: &[P::Noun],
+    },
+    MorphemeDefinition {
+        base_form: "DIk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::FactNominalization,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Ability ===
-    MorphemeDefinition { base_form: "(y)Abil", functions: &[F::Mood { value: TurkishMood::Optative }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "(y)Abil",
+        functions: &[F::Mood {
+            value: TurkishMood::Optative,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === New Additions ===
-    MorphemeDefinition { base_form: "(y)ken", functions: &[F::Derivation { value: TurkishDerivation::Adverbial }], applies_to: &[P::Verb, P::Noun, P::Adjective] },
-    MorphemeDefinition { base_form: "lAş", functions: &[F::Derivation { value: TurkishDerivation::Verbalization }], applies_to: &[P::Noun, P::Adjective] },
-    MorphemeDefinition { base_form: "mAk", functions: &[F::Derivation { value: TurkishDerivation::Nominalization }], applies_to: &[P::Verb] },
+    MorphemeDefinition {
+        base_form: "(y)ken",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
+    },
+    MorphemeDefinition {
+        base_form: "lAş",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Verbalization,
+        }],
+        applies_to: &[P::Noun, P::Adjective],
+    },
+    MorphemeDefinition {
+        base_form: "mAk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Nominalization,
+        }],
+        applies_to: &[P::Verb],
+    },
 ];
 
 // ─── Agglutinative implementation ────────────────────────────────────────────
@@ -228,7 +631,11 @@ impl Agglutinative for Turkish {
         let inventory_lines: String = TURKISH_MORPHEMES
             .iter()
             .map(|m| {
-                let funcs: Vec<String> = m.functions.iter().map(TurkishGrammaticalFunction::directive_label).collect();
+                let funcs: Vec<String> = m
+                    .functions
+                    .iter()
+                    .map(TurkishGrammaticalFunction::directive_label)
+                    .collect();
                 format!("  {} → {}", m.base_form, funcs.join(" / "))
             })
             .collect::<Vec<_>>()
@@ -256,8 +663,6 @@ impl Agglutinative for Turkish {
              Only segment words that have at least one suffix worth annotating."
         )
     }
-
-
 }
 
 // ─── LinguisticDefinition implementation ─────────────────────────────────────
@@ -270,7 +675,6 @@ impl LinguisticDefinition for Turkish {
 
     const ISO_CODE: &'static str = "tur";
 
-
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]
     }
@@ -280,7 +684,10 @@ impl LinguisticDefinition for Turkish {
     }
 
     fn typological_features(&self) -> &[TypologicalFeature] {
-        &[TypologicalFeature::Conjugation, TypologicalFeature::Agglutination]
+        &[
+            TypologicalFeature::Conjugation,
+            TypologicalFeature::Agglutination,
+        ]
     }
 
     fn extraction_directives(&self) -> &'static str {
