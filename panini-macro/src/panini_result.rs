@@ -1,7 +1,7 @@
+use crate::helpers::is_option_type;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use crate::helpers::is_option_type;
 
 // ─── PaniniResult derive macro ────────────────────────────────────────────────
 
@@ -40,9 +40,9 @@ struct ComponentField {
 }
 
 /// Parses the `#[component(...)]` attributes to map each struct field to its Panini `AnalysisComponent`.
-fn parse_component_fields(fields: &syn::punctuated::Punctuated<syn::Field, syn::token::Comma>) -> Vec<ComponentField> {
-
-
+fn parse_component_fields(
+    fields: &syn::punctuated::Punctuated<syn::Field, syn::token::Comma>,
+) -> Vec<ComponentField> {
     let mut component_fields = Vec::new();
 
     for field in fields {
@@ -51,17 +51,15 @@ fn parse_component_fields(fields: &syn::punctuated::Punctuated<syn::Field, syn::
 
         for attr in &field.attrs {
             if attr.meta.path().is_ident("component") {
-                let path: syn::Path = attr.parse_args().expect(
-                    "PaniniResult: #[component(Name)] expects a component type path",
-                );
+                let path: syn::Path = attr
+                    .parse_args()
+                    .expect("PaniniResult: #[component(Name)] expects a component type path");
                 component_path = Some(path);
             }
         }
 
         let Some(path) = component_path else {
-            panic!(
-                "PaniniResult: field `{field_ident}` must have a #[component(Name)] attribute"
-            );
+            panic!("PaniniResult: field `{field_ident}` must have a #[component(Name)] attribute");
         };
 
         component_fields.push(ComponentField {
@@ -84,12 +82,14 @@ fn generate_extract_impl(
 ) -> proc_macro2::TokenStream {
     let ac = quote! { ::panini::__macro_support::panini_core::component::AnalysisComponent::<#lang_ident> };
     let ex_err = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionError };
-    let res_err = quote! { ::panini::__macro_support::panini_core::component::ExtractionResultError };
+    let res_err =
+        quote! { ::panini::__macro_support::panini_core::component::ExtractionResultError };
     let ling = quote! { ::panini::__macro_support::panini_core::traits::LinguisticDefinition };
     let model = quote! { ::panini::__macro_support::rig::completion::CompletionModel };
     let req = quote! { ::panini::__macro_support::panini_engine::prompts::ExtractionRequest };
     let opts = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionOptions };
-    let extract_fn = quote! { ::panini::__macro_support::panini_engine::extractor::extract_with_components };
+    let extract_fn =
+        quote! { ::panini::__macro_support::panini_engine::extractor::extract_with_components };
 
     let component_lets: Vec<_> = component_fields
         .iter()

@@ -12,4 +12,4 @@ pub use component::{
     AnalysisComponent, ComponentContext, ComponentRequires, ExtractionResult,
     ExtractionResultError, LanguageLevel,
 };
-pub use traits::{LinguisticDefinition, MorphologyInfo};
+pub use traits::{LinguisticDefinition, MorphologyCatalog, MorphologyGroupSchema, MorphologyInfo};

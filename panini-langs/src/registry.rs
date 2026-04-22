@@ -3,15 +3,18 @@
 //! Provides the type-erased extraction entry-point `extract_erased_with_components()`
 //! which dispatches on an ISO code and runs the composable component pipeline.
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use rig::completion::CompletionModel;
 
 use panini_core::component::{AnalysisComponent, ExtractionResult};
-use panini_core::components::{PedagogicalExplanation, MorphologyAnalysis, MultiwordExpressions, MorphemeSegmentation, LeipzigAlignment};
-use panini_engine::{extract_with_components, ExtractionOptions, ExtractionRequest};
+use panini_core::components::{
+    LeipzigAlignment, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
+    PedagogicalExplanation,
+};
 use panini_engine::prompts::ExtractorPrompts;
+use panini_engine::{ExtractionOptions, ExtractionRequest, extract_with_components};
 
-use crate::{Arabic, French, Italian, Polish, Turkish, Danish};
+use crate::{Arabic, Danish, French, Italian, Polish, Turkish};
 
 /// Helper: build the component list for a concrete language and dispatch.
 async fn extract_for_language<L, M>(
@@ -75,14 +78,7 @@ where
     options.temperature = temperature;
     options.max_tokens = max_tokens;
 
-    Ok(extract_with_components(
-        lang,
-        model,
-        request,
-        &selected,
-        options,
-    )
-    .await?)
+    Ok(extract_with_components(lang, model, request, &selected, options).await?)
 }
 
 /// Macro to generate the registry functions for all languages.
@@ -136,9 +132,9 @@ generate_registry!(Polish, Turkish, Arabic, French, Italian, Danish);
 
 #[cfg(test)]
 mod tests {
+    use crate::{Arabic, Danish, Polish, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
-    use crate::{Polish, Turkish, Arabic, Danish};
 
     #[test]
     fn morpheme_segmentation_compatible_with_turkish() {

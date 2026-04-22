@@ -1,8 +1,8 @@
-mod helpers;
+mod aggregable_fields;
 mod closed_values;
+mod helpers;
 mod morphology_info;
 mod panini_result;
-mod aggregable_fields;
 
 use proc_macro::TokenStream;
 

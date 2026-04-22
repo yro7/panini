@@ -1,8 +1,8 @@
+use isolang::Language as IsoLang;
 use panini_core::traits::LinguisticDefinition;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use regex::Regex;
-use isolang::Language as IsoLang;
 
 // ----- Prompt Builder Errors -----
 
@@ -48,10 +48,12 @@ impl ExtractorPrompts {
     /// # Errors
     /// Returns an error if the file cannot be read or parsed.
     pub fn load(path: &str) -> Result<Self, PromptBuilderError> {
-        let content = std::fs::read_to_string(path)
-            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to read {path}: {e}")))?;
-        serde_yml::from_str(&content)
-            .map_err(|e| PromptBuilderError::ConfigLoadError(format!("Failed to parse {path}: {e}")))
+        let content = std::fs::read_to_string(path).map_err(|e| {
+            PromptBuilderError::ConfigLoadError(format!("Failed to read {path}: {e}"))
+        })?;
+        serde_yml::from_str(&content).map_err(|e| {
+            PromptBuilderError::ConfigLoadError(format!("Failed to parse {path}: {e}"))
+        })
     }
 }
 
@@ -84,7 +86,7 @@ pub struct ExtractionRequest {
 // ----- Helper Functions -----
 
 /// Wraps content in XML tags
-#[must_use] 
+#[must_use]
 pub fn wrap_tag(tag: &str, content: &str) -> String {
     format!("<{tag}>\n{content}\n</{tag}>")
 }
@@ -96,13 +98,17 @@ pub fn wrap_tag(tag: &str, content: &str) -> String {
 ///
 /// # Errors
 /// Returns an error if a placeholder requires a value not present in the context.
-pub fn interpolate<V: AsRef<str>, S: std::hash::BuildHasher>(template: &str, context: &HashMap<&str, V, S>) -> Result<String, PromptBuilderError> {
+pub fn interpolate<V: AsRef<str>, S: std::hash::BuildHasher>(
+    template: &str,
+    context: &HashMap<&str, V, S>,
+) -> Result<String, PromptBuilderError> {
     let placeholder_re = Regex::new(r"\{(\w+)\}").unwrap();
     let mut result = template.to_string();
 
     for cap in placeholder_re.captures_iter(template) {
         let placeholder = &cap[1];
-        let value = context.get(placeholder)
+        let value = context
+            .get(placeholder)
             .ok_or_else(|| PromptBuilderError::PlaceholderNotAvailable {
                 placeholder: placeholder.to_string(),
             })?
@@ -127,7 +133,8 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
+        .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");

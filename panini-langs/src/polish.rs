@@ -2,7 +2,18 @@ use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{LinguisticDefinition, Script, SlavicAspect, TypologicalFeature};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum PolishCase {
     Nominative,
@@ -14,7 +25,18 @@ pub enum PolishCase {
     Vocative,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum PolishGender {
     MasculinePersonal,
@@ -25,7 +47,7 @@ pub enum PolishGender {
 }
 
 impl PolishGender {
-    #[must_use] 
+    #[must_use]
     pub const fn is_masculine(&self) -> bool {
         matches!(
             self,
@@ -34,7 +56,18 @@ impl PolishGender {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum PolishTense {
     Past,
@@ -42,7 +75,17 @@ pub enum PolishTense {
     Future,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::MorphologyInfo)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::MorphologyInfo,
+)]
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum PolishMorphology {

@@ -2,6 +2,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::str::FromStr;
 
+use crate::aggregable::FieldDescriptor;
 use serde::{Deserialize, Serialize};
 
 pub use crate::morphology_enums::*;
@@ -19,6 +20,19 @@ pub trait MorphologyInfo {
     fn pos_tag(&self) -> Self::PosTag;
     /// The part-of-speech label (e.g. "Noun", "Verb").
     fn pos_label(&self) -> &'static str;
+}
+
+/// Static schema for one morphology group such as `noun` or `verb`.
+#[derive(Debug, Clone)]
+pub struct MorphologyGroupSchema {
+    pub key: String,
+    pub label: String,
+    pub dimensions: Vec<FieldDescriptor>,
+}
+
+/// Exposes compile-time morphology descriptors without requiring runtime samples.
+pub trait MorphologyCatalog {
+    fn group_descriptors() -> Vec<MorphologyGroupSchema>;
 }
 
 /// Re-export `isolang::Language` as `IsoLang` so downstream crates don't need `isolang` directly.
@@ -39,14 +53,14 @@ impl Script {
     pub const HANG: Self = Self("Hang");
 
     /// Returns the 4-character ISO 15924 code.
-    #[must_use] 
+    #[must_use]
     pub const fn code(&self) -> &'static str {
         self.0
     }
 
     /// Constructs a `Script` from any valid ISO 15924 code string.
     /// Returns `None` if the code is not in the standard.
-    #[must_use] 
+    #[must_use]
     pub fn new(code: &str) -> Option<Self> {
         let entry = iso15924::ScriptCode::by_code(code)?;
         Some(Self(entry.code.as_ref()))
@@ -56,7 +70,7 @@ impl Script {
     ///
     /// # Panics
     /// Panics if the internal script code is invalid (should never happen if constructed safely).
-    #[must_use] 
+    #[must_use]
     pub fn resolve(&self) -> &'static iso15924::ScriptCode<'static> {
         iso15924::ScriptCode::by_code(self.0)
             .unwrap_or_else(|| panic!("Invalid ISO 15924 script code: {}", self.0))
