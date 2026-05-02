@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature};
+use panini_core::traits::{
+    IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature,
+};
 
 #[derive(
     Debug,
