@@ -103,7 +103,7 @@ macro_rules! generate_registry {
         ) -> Result<ExtractionResult> {
             match lang_code {
                 $(
-                    <$lang as panini_core::LinguisticDefinition>::ISO_CODE => {
+                    s if s == <$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                         extract_for_language(
                             &$lang,
                             model,
@@ -121,8 +121,8 @@ macro_rules! generate_registry {
         }
 
         /// Returns all supported ISO 639-3 language codes.
-        pub const fn supported_languages() -> &'static [&'static str] {
-            &[$(<$lang as panini_core::LinguisticDefinition>::ISO_CODE),*]
+        pub fn supported_languages() -> Vec<&'static str> {
+            vec![$(<$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3()),*]
         }
     };
 }

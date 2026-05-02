@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{LinguisticDefinition, Script, SlavicAspect, TypologicalFeature};
+use panini_core::traits::{IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature};
 
 #[derive(
     Debug,
@@ -147,7 +147,7 @@ impl LinguisticDefinition for Polish {
     type Morphology = PolishMorphology;
     type GrammaticalFunction = ();
 
-    const ISO_CODE: &'static str = "pol";
+    const ISO_LANG: IsoLang = IsoLang::Pol;
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

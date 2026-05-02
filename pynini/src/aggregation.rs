@@ -177,7 +177,7 @@ impl PyBasicAggregator {
             ($($lang:ident),*) => {
                 match lang_code {
                     $(
-                        <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_CODE => {
+                        s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                             use panini_langs::$lang;
                             use panini_core::traits::LinguisticDefinition;
                             use panini_core::domain::ExtractedFeature;

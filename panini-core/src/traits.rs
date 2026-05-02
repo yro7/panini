@@ -1,6 +1,5 @@
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::str::FromStr;
 
 use crate::aggregable::FieldDescriptor;
 use serde::{Deserialize, Serialize};
@@ -174,18 +173,17 @@ pub trait LinguisticDefinition {
         + Send
         + Sync;
 
-    /// The ISO 639-3 language code as a const (e.g., "pol", "tur", "fra").
-    const ISO_CODE: &'static str;
+    /// The ISO 639-3 language as a typed enum variant — invalid codes are impossible to express.
+    const ISO_LANG: IsoLang;
 
-    /// Returns the `IsoLang` variant (derived from `ISO_CODE`).
-    fn iso_code(&self) -> IsoLang {
-        IsoLang::from_str(Self::ISO_CODE)
-            .unwrap_or_else(|_| panic!("Invalid ISO code: {}", Self::ISO_CODE))
+    /// Returns the ISO 639-3 three-letter code string (e.g. `"pol"`, `"tur"`, `"fra"`).
+    fn iso_code(&self) -> &'static str {
+        Self::ISO_LANG.to_639_3()
     }
 
-    /// The English name of the language, auto-derived from `iso_code()`.
+    /// The English name of the language, auto-derived from `ISO_LANG`.
     fn name(&self) -> &str {
-        self.iso_code().to_name()
+        Self::ISO_LANG.to_name()
     }
 
     /// The scripts supported by this language.

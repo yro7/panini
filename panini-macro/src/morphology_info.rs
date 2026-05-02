@@ -17,7 +17,11 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     let variants = match &input.data {
         Data::Enum(data_enum) => &data_enum.variants,
-        _ => panic!("MorphologyInfo can only be derived for enums"),
+        _ => {
+            return syn::Error::new_spanned(name, "MorphologyInfo can only be derived for enums")
+                .to_compile_error()
+                .into();
+        }
     };
 
     let has_serde_tag_pos = input.attrs.iter().any(|attr| {
@@ -45,46 +49,60 @@ pub fn derive(input: TokenStream) -> TokenStream {
         })
         .unwrap_or(false)
     });
-    assert!(
-        has_serde_tag_pos,
-        "MorphologyInfo: enum `{}` must have `#[serde(tag = \"pos\")]` for correct LLM deserialization",
-        name
-    );
+    if !has_serde_tag_pos {
+        return syn::Error::new_spanned(
+            name,
+            "MorphologyInfo: enum must have `#[serde(tag = \"pos\")]` for correct LLM deserialization",
+        )
+        .to_compile_error()
+        .into();
+    }
 
     // Single pass: validate each variant (named fields + a `lemma` field) and
     // collect its aggregable fields (non-lemma, non-Option) with their class.
-    let variant_infos: Vec<VariantInfo> = variants
-        .iter()
-        .map(|v| {
-            let fields = match &v.fields {
-                Fields::Named(f) => &f.named,
-                _ => panic!(
-                    "MorphologyInfo: variant `{}` must have named fields",
+    let mut variant_infos: Vec<VariantInfo> = Vec::new();
+    for v in variants {
+        let fields = match &v.fields {
+            Fields::Named(f) => &f.named,
+            _ => {
+                return syn::Error::new_spanned(
+                    &v.ident,
+                    format!(
+                        "MorphologyInfo: variant `{}` must have named fields",
+                        v.ident
+                    ),
+                )
+                .to_compile_error()
+                .into();
+            }
+        };
+
+        let has_lemma = fields
+            .iter()
+            .any(|f| f.ident.as_ref().is_some_and(|id| id == "lemma"));
+        if !has_lemma {
+            return syn::Error::new_spanned(
+                &v.ident,
+                format!(
+                    "MorphologyInfo: variant `{}` must have a named `lemma` field",
                     v.ident
                 ),
-            };
+            )
+            .to_compile_error()
+            .into();
+        }
 
-            let has_lemma = fields
-                .iter()
-                .any(|f| f.ident.as_ref().is_some_and(|id| id == "lemma"));
-            assert!(
-                has_lemma,
-                "MorphologyInfo: variant `{}` must have a named `lemma` field",
-                v.ident
-            );
+        let aggregable: Vec<(&syn::Field, FieldClass)> = fields
+            .iter()
+            .filter(|f| !is_option_type(&f.ty))
+            .map(|f| (f, classify(&f.ty)))
+            .collect();
 
-            let aggregable: Vec<(&syn::Field, FieldClass)> = fields
-                .iter()
-                .filter(|f| !is_option_type(&f.ty))
-                .map(|f| (f, classify(&f.ty)))
-                .collect();
-
-            VariantInfo {
-                ident: &v.ident,
-                aggregable,
-            }
-        })
-        .collect();
+        variant_infos.push(VariantInfo {
+            ident: &v.ident,
+            aggregable,
+        });
+    }
 
     let pos_tag_name = quote::format_ident!("{}PosTag", name);
 
