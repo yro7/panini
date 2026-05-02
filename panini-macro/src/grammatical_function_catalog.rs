@@ -13,8 +13,44 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let rename_all = get_serde_value(&input.attrs, "rename_all");
     let variants = match &input.data {
         Data::Enum(data_enum) => &data_enum.variants,
-        _ => panic!("GrammaticalFunctionCatalog can only be derived for enums"),
+        _ => {
+            return syn::Error::new_spanned(
+                name,
+                "GrammaticalFunctionCatalog can only be derived for enums",
+            )
+            .to_compile_error()
+            .into();
+        }
     };
+
+    // Pre-validate: all variants must have named fields.
+    for v in variants.iter() {
+        match &v.fields {
+            Fields::Named(_) => {}
+            Fields::Unit => {
+                return syn::Error::new_spanned(
+                    &v.ident,
+                    format!(
+                        "GrammaticalFunctionCatalog: variant `{}` must have named fields (not unit)",
+                        v.ident
+                    ),
+                )
+                .to_compile_error()
+                .into();
+            }
+            Fields::Unnamed(_) => {
+                return syn::Error::new_spanned(
+                    &v.ident,
+                    format!(
+                        "GrammaticalFunctionCatalog: variant `{}` must not be a tuple variant",
+                        v.ident
+                    ),
+                )
+                .to_compile_error()
+                .into();
+            }
+        }
+    }
 
     let schema_entries = variants.iter().map(|variant| {
         let ident = &variant.ident;
@@ -30,10 +66,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         let fields = match &variant.fields {
             Fields::Named(fields) => &fields.named,
-            Fields::Unit => panic!("GrammaticalFunctionCatalog requires named fields"),
-            Fields::Unnamed(_) => {
-                panic!("GrammaticalFunctionCatalog does not support tuple variants")
-            }
+            _ => unreachable!("non-named variants rejected in pre-validation"),
         };
 
         let dimensions = fields.iter().map(|field| {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    BinaryGender, BinaryVoice, LinguisticDefinition, Person, Script, TernaryNumber,
+    BinaryGender, BinaryVoice, IsoLang, LinguisticDefinition, Person, Script, TernaryNumber,
 };
 
 #[derive(
@@ -294,7 +294,7 @@ impl LinguisticDefinition for Arabic {
     type Morphology = ArabicMorphology;
     type GrammaticalFunction = ();
 
-    const ISO_CODE: &'static str = "ara";
+    const ISO_LANG: IsoLang = IsoLang::Ara;
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::ARAB]
