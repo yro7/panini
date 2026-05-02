@@ -200,6 +200,7 @@ pub enum ArabicVerbForm {
     schemars::JsonSchema,
     panini_macro::MorphologyInfo,
 )]
+#[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum ArabicMorphology {
     Adjective {
