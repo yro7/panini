@@ -20,6 +20,37 @@ pub fn derive(input: TokenStream) -> TokenStream {
         _ => panic!("MorphologyInfo can only be derived for enums"),
     };
 
+    let has_serde_tag_pos = input.attrs.iter().any(|attr| {
+        if !attr.path().is_ident("serde") {
+            return false;
+        }
+        attr.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+        )
+        .map(|list| {
+            list.iter().any(|meta| {
+                if let syn::Meta::NameValue(nv) = meta {
+                    if nv.path.is_ident("tag") {
+                        if let syn::Expr::Lit(syn::ExprLit {
+                            lit: syn::Lit::Str(s),
+                            ..
+                        }) = &nv.value
+                        {
+                            return s.value() == "pos";
+                        }
+                    }
+                }
+                false
+            })
+        })
+        .unwrap_or(false)
+    });
+    assert!(
+        has_serde_tag_pos,
+        "MorphologyInfo: enum `{}` must have `#[serde(tag = \"pos\")]` for correct LLM deserialization",
+        name
+    );
+
     // Single pass: validate each variant (named fields + a `lemma` field) and
     // collect its aggregable fields (non-lemma, non-Option) with their class.
     let variant_infos: Vec<VariantInfo> = variants
