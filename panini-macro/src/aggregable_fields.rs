@@ -38,12 +38,9 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let variants = match &input.data {
         Data::Enum(data_enum) => &data_enum.variants,
         _ => {
-            return syn::Error::new_spanned(
-                name,
-                "AggregableFields can only be derived for enums",
-            )
-            .to_compile_error()
-            .into();
+            return syn::Error::new_spanned(name, "AggregableFields can only be derived for enums")
+                .to_compile_error()
+                .into();
         }
     };
 
