@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{BinaryNumber, LinguisticDefinition, Person, Script, TypologicalFeature};
+use panini_core::traits::{BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature};
 
 #[derive(
     Debug,
@@ -235,7 +235,7 @@ impl LinguisticDefinition for Danish {
     type Morphology = DanishMorphology;
     type GrammaticalFunction = ();
 
-    const ISO_CODE: &'static str = "dan";
+    const ISO_LANG: IsoLang = IsoLang::Dan;
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

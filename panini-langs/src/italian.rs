@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    BinaryGender, BinaryNumber, LinguisticDefinition, Person, Script, TypologicalFeature,
+    BinaryGender, BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature,
 };
 
 #[derive(
@@ -163,7 +163,7 @@ impl LinguisticDefinition for Italian {
     type Morphology = ItalianMorphology;
     type GrammaticalFunction = ();
 
-    const ISO_CODE: &'static str = "ita";
+    const ISO_LANG: IsoLang = IsoLang::Ita;
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

@@ -185,7 +185,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use panini_core::traits::{MorphologyInfo, Script, TypologicalFeature};
+    use panini_core::traits::{IsoLang, MorphologyInfo, Script, TypologicalFeature};
     use serde::{Deserialize, Serialize};
 
     // ── Minimal test language ──────────────────────────────────────────────
@@ -230,7 +230,7 @@ mod tests {
         type Morphology = TestMorphology;
         type GrammaticalFunction = ();
 
-        const ISO_CODE: &'static str = "eng";
+        const ISO_LANG: IsoLang = IsoLang::Eng;
 
         fn supported_scripts(&self) -> &[Script] {
             &[Script::LATN]

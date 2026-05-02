@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    BinaryGender, BinaryNumber, BinaryVoice, LinguisticDefinition, Person, Script,
+    BinaryGender, BinaryNumber, BinaryVoice, IsoLang, LinguisticDefinition, Person, Script,
     TypologicalFeature,
 };
 
@@ -219,7 +219,7 @@ impl LinguisticDefinition for French {
     type Morphology = FrenchMorphology;
     type GrammaticalFunction = ();
 
-    const ISO_CODE: &'static str = "fra";
+    const ISO_LANG: IsoLang = IsoLang::Fra;
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

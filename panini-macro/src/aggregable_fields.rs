@@ -24,17 +24,43 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let krate = get_crate_path(&input.attrs, "aggregable_fields");
 
     // Validate that a serde tag is present (required for the internally-tagged pattern).
-    assert!(
-        get_serde_value(&input.attrs, "tag").is_some(),
-        "AggregableFields: #[serde(tag = \"...\")] is required on {name}"
-    );
+    if get_serde_value(&input.attrs, "tag").is_none() {
+        return syn::Error::new_spanned(
+            name,
+            "AggregableFields: #[serde(tag = \"...\")] is required on this enum",
+        )
+        .to_compile_error()
+        .into();
+    }
 
     let rename_all = get_serde_value(&input.attrs, "rename_all");
 
     let variants = match &input.data {
         Data::Enum(data_enum) => &data_enum.variants,
-        _ => panic!("AggregableFields can only be derived for enums"),
+        _ => {
+            return syn::Error::new_spanned(
+                name,
+                "AggregableFields can only be derived for enums",
+            )
+            .to_compile_error()
+            .into();
+        }
     };
+
+    // Pre-validate: no tuple variants allowed.
+    for v in variants.iter() {
+        if matches!(v.fields, Fields::Unnamed(_)) {
+            return syn::Error::new_spanned(
+                &v.ident,
+                format!(
+                    "AggregableFields: variant `{}` must not be a tuple variant",
+                    v.ident
+                ),
+            )
+            .to_compile_error()
+            .into();
+        }
+    }
 
     let serialized_names: Vec<String> = variants
         .iter()
@@ -57,7 +83,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                         Self::#ident => (#cat_str.to_string(), #cat_str.to_string()),
                     };
                 }
-                Fields::Unnamed(_) => panic!("AggregableFields: tuple variants are not supported"),
+                Fields::Unnamed(_) => unreachable!("tuple variants rejected in pre-validation"),
             };
 
             let field_idents: Vec<_> = fields.iter().map(|f| f.ident.as_ref().unwrap()).collect();

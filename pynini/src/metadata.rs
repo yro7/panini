@@ -23,7 +23,7 @@ pub fn get_language_info(lang_code: &str) -> PyResult<LanguageInfo> {
         ($($lang:ident),*) => {
             match lang_code {
                 $(
-                    <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_CODE => {
+                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                         use panini_core::traits::LinguisticDefinition;
                         let lang = panini_langs::$lang;
                         Ok(LanguageInfo {
@@ -48,7 +48,7 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
         ($($lang:ident),*) => {
             match lang_code {
                 $(
-                    <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_CODE => {
+                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                         use panini_core::component::AnalysisComponent;
                         use panini_core::components::MorphologyAnalysis;
                         let lang = panini_langs::$lang;
@@ -69,7 +69,7 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
 /// Returns the list of supported ISO 639-3 language codes.
 #[pyfunction]
 pub fn supported_languages() -> Vec<&'static str> {
-    registry::supported_languages().to_vec()
+    registry::supported_languages()
 }
 
 /// Returns the current package version.

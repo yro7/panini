@@ -273,7 +273,7 @@ fn build_system_prompt(agglutinative: bool) -> String {
             and `#[serde(rename_all = \"snake_case\")]`.\n\
          5. Reuse shared enums from `panini_core::traits` (Person, BinaryNumber, TernaryNumber, BinaryGender, TernaryGender, SlavicAspect, BinaryVoice) where semantically appropriate.\n\
          6. The unit struct must be `pub struct <Name>;` with no fields.\n\
-         7. Define `const ISO_CODE: &'static str = \"<iso639-3 code>\";` — the code must be a valid ISO 639-3 three-letter code.\n\
+         7. Define `const ISO_LANG: panini_core::traits::IsoLang = panini_core::traits::IsoLang::<Variant>;` — use the typed enum (e.g. `IsoLang::Fra` for French). Invalid codes are impossible.\n\
          8. Import only from: `use serde::{Deserialize, Serialize};` and `use panini_core::traits::{...};`\n\
          9. Use UPOS tag set for morphology variants (Adjective, Adposition, Adverb, Auxiliary, CoordinatingConjunction, Determiner, Interjection, Noun, Numeral, Particle, Pronoun, ProperNoun, Punctuation, SubordinatingConjunction, Symbol, Verb, Other).\n"
     );

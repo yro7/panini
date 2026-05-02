@@ -21,15 +21,25 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     let variants = match &input.data {
         Data::Enum(data_enum) => &data_enum.variants,
-        _ => panic!("ClosedValues can only be derived for enums"),
+        _ => {
+            return syn::Error::new_spanned(name, "ClosedValues can only be derived for enums")
+                .to_compile_error()
+                .into();
+        }
     };
 
     for variant in variants {
-        assert!(
-            matches!(variant.fields, Fields::Unit),
-            "ClosedValues: variant `{}` must be a unit variant (no fields)",
-            variant.ident
-        );
+        if !matches!(variant.fields, Fields::Unit) {
+            return syn::Error::new_spanned(
+                &variant.ident,
+                format!(
+                    "ClosedValues: variant `{}` must be a unit variant (no fields)",
+                    variant.ident
+                ),
+            )
+            .to_compile_error()
+            .into();
+        }
     }
 
     let serialized_names: Vec<String> = variants

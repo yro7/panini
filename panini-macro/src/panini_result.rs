@@ -14,20 +14,41 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let name = &input.ident;
     let generics = &input.generics;
 
-    // We expect EXACTLY one generic parameter L (the language type) for now.
     let type_params: Vec<_> = generics.type_params().collect();
-    assert!(type_params.len() == 1, "PaniniResult: struct must have exactly one type parameter (the language type L). Support for multiple generics requires implementing a #[panini(lang = \"L\")] attribute.");
+    if type_params.len() != 1 {
+        return syn::Error::new_spanned(
+            &input.generics,
+            "PaniniResult: struct must have exactly one type parameter (the language type L). \
+             Support for multiple generics requires implementing a #[panini(lang = \"L\")] attribute.",
+        )
+        .to_compile_error()
+        .into();
+    }
     let lang_ident = &type_params[0].ident;
 
     let fields = match &input.data {
         Data::Struct(data) => match &data.fields {
             Fields::Named(f) => &f.named,
-            _ => panic!("PaniniResult: only named fields are supported"),
+            _ => {
+                return syn::Error::new_spanned(
+                    name,
+                    "PaniniResult: only named fields are supported",
+                )
+                .to_compile_error()
+                .into();
+            }
         },
-        _ => panic!("PaniniResult: can only be derived for structs"),
+        _ => {
+            return syn::Error::new_spanned(name, "PaniniResult: can only be derived for structs")
+                .to_compile_error()
+                .into();
+        }
     };
 
-    let component_fields = parse_component_fields(fields);
+    let component_fields = match parse_component_fields(fields) {
+        Ok(cf) => cf,
+        Err(e) => return e.to_compile_error().into(),
+    };
     let impl_block = generate_extract_impl(name, generics, lang_ident, &component_fields);
 
     TokenStream::from(impl_block)
@@ -42,7 +63,7 @@ struct ComponentField {
 /// Parses the `#[component(...)]` attributes to map each struct field to its Panini `AnalysisComponent`.
 fn parse_component_fields(
     fields: &syn::punctuated::Punctuated<syn::Field, syn::token::Comma>,
-) -> Vec<ComponentField> {
+) -> Result<Vec<ComponentField>, syn::Error> {
     let mut component_fields = Vec::new();
 
     for field in fields {
@@ -51,16 +72,24 @@ fn parse_component_fields(
 
         for attr in &field.attrs {
             if attr.meta.path().is_ident("component") {
-                let path: syn::Path = attr
-                    .parse_args()
-                    .expect("PaniniResult: #[component(Name)] expects a component type path");
+                let path: syn::Path = attr.parse_args().map_err(|_| {
+                    syn::Error::new_spanned(
+                        attr,
+                        "PaniniResult: #[component(Name)] expects a component type path",
+                    )
+                })?;
                 component_path = Some(path);
             }
         }
 
-        let Some(path) = component_path else {
-            panic!("PaniniResult: field `{field_ident}` must have a #[component(Name)] attribute");
-        };
+        let path = component_path.ok_or_else(|| {
+            syn::Error::new_spanned(
+                field_ident,
+                format!(
+                    "PaniniResult: field `{field_ident}` must have a #[component(Name)] attribute"
+                ),
+            )
+        })?;
 
         component_fields.push(ComponentField {
             ident: field_ident.clone(),
@@ -69,7 +98,7 @@ fn parse_component_fields(
         });
     }
 
-    component_fields
+    Ok(component_fields)
 }
 
 /// Generates the `extract()` async function and the wrapping `impl` block
