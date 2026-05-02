@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use panini_core::traits::{BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature};
+use panini_core::traits::{
+    BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature,
+};
 
 #[derive(
     Debug,
