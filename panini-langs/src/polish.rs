@@ -101,7 +101,7 @@ pub enum PolishMorphology {
     Adposition {
         lemma: String,
         /// The grammatical case this adposition governs.
-        governed_case: PolishCase,
+        case: PolishCase,
     },
     /// Adverb (ADV)
     Adverb { lemma: String },
