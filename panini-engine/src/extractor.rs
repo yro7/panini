@@ -10,20 +10,39 @@ use crate::prompts::{ExtractionRequest, ExtractorPrompts};
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
-/// Error returned when feature extraction parsing fails, carrying the raw LLM output.
-#[derive(Debug)]
+/// Detailed reason for an extraction failure.
+#[derive(Debug, thiserror::Error)]
+pub enum ExtractionFailureReason {
+    /// LLM output could not be parsed as JSON.
+    #[error("Invalid JSON syntax: {0}")]
+    JsonSyntax(String),
+
+    /// JSON output did not match the required schema.
+    #[error("Schema validation failed: {0}")]
+    Schema(String),
+
+    /// A specific component failed its internal validation.
+    #[error("Validation failed for component '{key}': {message}")]
+    ComponentValidation {
+        key: &'static str,
+        message: String,
+    },
+
+    /// A specific component failed its internal post-processing.
+    #[error("Post-processing failed for component '{key}': {message}")]
+    ComponentPostProcess {
+        key: &'static str,
+        message: String,
+    },
+}
+
+/// Error returned when feature extraction parsing fails, carrying the raw LLM output and structured reason.
+#[derive(Debug, thiserror::Error)]
+#[error("{reason}")]
 pub struct ExtractionParseError {
     pub raw_response: String,
-    pub error_message: String,
+    pub reason: ExtractionFailureReason,
 }
-
-impl std::fmt::Display for ExtractionParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.error_message)
-    }
-}
-
-impl std::error::Error for ExtractionParseError {}
 
 /// Typed error enum for the extraction pipeline.
 #[derive(Debug, thiserror::Error)]
@@ -148,14 +167,15 @@ where
                 if let ExtractionError::Parse(pe) = &e
                     && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff)
                 {
+                    let err_msg = pe.reason.to_string();
                     tracing::warn!(
                         ?wait,
-                        error = %pe.error_message,
+                        error = %err_msg,
                         "Extraction validation failed, retrying with self-correction..."
                     );
                     prev_attempt = Some(PreviousAttempt {
                         raw_response: pe.raw_response.clone(),
-                        error: pe.error_message.clone(),
+                        error: err_msg,
                     });
                     tokio::time::sleep(wait).await;
                     continue;
@@ -243,11 +263,11 @@ where
     let mut json_value: serde_json::Value = match serde_json::from_str(&processed) {
         Ok(v) => v,
         Err(e) => {
-            let err_msg = format!("Invalid JSON syntax: {e}");
+            let err_msg = format!("{e}");
             tracing::warn!(error = %err_msg, "Failed to parse JSON syntax");
             return Err(ExtractionParseError {
                 raw_response: processed,
-                error_message: err_msg,
+                reason: ExtractionFailureReason::JsonSyntax(err_msg),
             }
             .into());
         }
@@ -261,15 +281,11 @@ where
             for err in schema_errors {
                 err_msgs.push(format!("- Path: {}: {}", err.instance_path(), err));
             }
-            let err_msg = format!(
-                "Schema validation failed with {} errors:\n{}",
-                err_msgs.len(),
-                err_msgs.join("\n")
-            );
+            let err_msg = err_msgs.join("\n");
             tracing::warn!(error = %err_msg, "Schema validation failed — retrying");
             return Err(ExtractionParseError {
                 raw_response: processed,
-                error_message: err_msg,
+                reason: ExtractionFailureReason::Schema(err_msg),
             }
             .into());
         }
@@ -282,7 +298,7 @@ where
             comp.validate(language, section)
                 .map_err(|e| ExtractionParseError {
                     raw_response: processed.clone(),
-                    error_message: format!("Validation failed for component '{key}': {e}"),
+                    reason: ExtractionFailureReason::ComponentValidation { key, message: e },
                 })?;
         }
     }
@@ -293,7 +309,7 @@ where
             comp.post_process(language, section)
                 .map_err(|e| ExtractionParseError {
                     raw_response: processed.clone(),
-                    error_message: format!("Post-processing failed for component '{key}': {e}"),
+                    reason: ExtractionFailureReason::ComponentPostProcess { key, message: e },
                 })?;
         }
     }
