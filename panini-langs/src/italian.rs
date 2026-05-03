@@ -83,17 +83,17 @@ pub enum ItalianPronounType {
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum ItalianMorphology {
-    /// An adjective (ADJ).
+    /// Adjective (ADJ)
     Adjective {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// An adposition (ADP).
+    /// Adposition (ADP)
     Adposition { lemma: String },
-    /// An adverb (ADV).
+    /// Adverb (ADV)
     Adverb { lemma: String },
-    /// An auxiliary (AUX).
+    /// Auxiliary (AUX)
     Auxiliary {
         lemma: String,
         tense: ItalianTense,
@@ -101,27 +101,27 @@ pub enum ItalianMorphology {
         person: Person,
         number: BinaryNumber,
     },
-    /// A coordinating conjunction (CCONJ).
+    /// Coordinating conjunction (CCONJ)
     CoordinatingConjunction { lemma: String },
-    /// A determiner (DET).
+    /// Determiner (DET)
     Determiner {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// An interjection (INTJ).
+    /// Interjection (INTJ)
     Interjection { lemma: String },
-    /// A noun (NOUN).
+    /// Noun (NOUN)
     Noun {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// A numeral (NUM).
+    /// Numeral (NUM)
     Numeral { lemma: String },
-    /// A particle (PART).
+    /// Particle (PART)
     Particle { lemma: String },
-    /// A pronoun (PRON).
+    /// Pronoun (PRON)
     Pronoun {
         lemma: String,
         pronoun_type: ItalianPronounType,
@@ -133,15 +133,15 @@ pub enum ItalianMorphology {
         number: Option<BinaryNumber>,
         clitic: bool,
     },
-    /// A proper noun (PROPN).
+    /// Proper noun (PROPN)
     ProperNoun { lemma: String },
-    /// Punctuation (PUNCT).
+    /// Punctuation (PUNCT)
     Punctuation { lemma: String },
-    /// A subordinating conjunction (SCONJ).
+    /// Subordinating conjunction (SCONJ)
     SubordinatingConjunction { lemma: String },
-    /// A symbol (SYM).
+    /// Symbol (SYM)
     Symbol { lemma: String },
-    /// A verb (VERB).
+    /// Verb (VERB)
     Verb {
         lemma: String,
         tense: ItalianTense,
@@ -153,7 +153,7 @@ pub enum ItalianMorphology {
         #[serde(skip_serializing_if = "Option::is_none")]
         gender: Option<BinaryGender>,
     },
-    /// Other (X) for unanalyzable tokens.
+    /// Other (X) for unanalyzable tokens
     Other { lemma: String },
 }
 
