@@ -91,55 +91,55 @@ pub enum PolishTense {
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum PolishMorphology {
-    /// An adjective (ADJ).
+    /// Adjective (ADJ)
     Adjective {
         lemma: String,
         gender: PolishGender,
         case: PolishCase,
     },
-    /// An adposition (ADP) - replaces Preposition.
+    /// Adposition (ADP)
     Adposition {
         lemma: String,
         /// The grammatical case this adposition governs.
         governed_case: PolishCase,
     },
-    /// An adverb (ADV).
+    /// Adverb (ADV)
     Adverb { lemma: String },
-    /// An auxiliary (AUX).
+    /// Auxiliary (AUX)
     Auxiliary { lemma: String },
-    /// A coordinating conjunction (CCONJ).
+    /// Coordinating conjunction (CCONJ)
     CoordinatingConjunction { lemma: String },
-    /// A determiner (DET).
+    /// Determiner (DET)
     Determiner { lemma: String },
-    /// An interjection (INTJ).
+    /// Interjection (INTJ)
     Interjection { lemma: String },
-    /// A noun (NOUN).
+    /// Noun (NOUN)
     Noun {
         lemma: String,
         gender: PolishGender,
         case: PolishCase,
     },
-    /// A numeral (NUM).
+    /// Numeral (NUM)
     Numeral { lemma: String },
-    /// A particle (PART).
+    /// Particle (PART)
     Particle { lemma: String },
-    /// A pronoun (PRON).
+    /// Pronoun (PRON)
     Pronoun { lemma: String, case: PolishCase },
-    /// A proper noun (PROPN).
+    /// Proper noun (PROPN)
     ProperNoun { lemma: String },
-    /// Punctuation (PUNCT).
+    /// Punctuation (PUNCT)
     Punctuation { lemma: String },
-    /// A subordinating conjunction (SCONJ).
+    /// Subordinating conjunction (SCONJ)
     SubordinatingConjunction { lemma: String },
-    /// A symbol (SYM).
+    /// Symbol (SYM)
     Symbol { lemma: String },
-    /// A verb (VERB).
+    /// Verb (VERB)
     Verb {
         lemma: String,
         tense: PolishTense,
         aspect: SlavicAspect,
     },
-    /// Other (X) for unanalyzable tokens.
+    /// Other (X) for unanalyzable tokens
     Other { lemma: String },
 }
 

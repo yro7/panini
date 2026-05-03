@@ -44,7 +44,26 @@ pub fn compose_schema<L: LinguisticDefinition>(
         schema["$defs"] = serde_json::Value::Object(all_defs);
     }
 
+    strip_schema_metadata(&mut schema);
     schema
+}
+
+fn strip_schema_metadata(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(obj) => {
+            obj.remove("$schema");
+            obj.remove("title");
+            for v in obj.values_mut() {
+                strip_schema_metadata(v);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for v in arr.iter_mut() {
+                strip_schema_metadata(v);
+            }
+        }
+        _ => {}
+    }
 }
 
 /// Compose the system prompt from base blocks + component prompt fragments.
