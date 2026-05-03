@@ -141,6 +141,8 @@ impl<'de> Deserialize<'de> for Script {
 pub enum TypologicalFeature {
     /// The language features verb conjugation (e.g. Polish, French, Spanish).
     Conjugation,
+    /// The language features declension (e.g. Polish, Arabic, Turkish...).
+    Declension,
     /// The language is agglutinative (e.g. Turkish, Finnish, Korean).
     Agglutination,
 }
