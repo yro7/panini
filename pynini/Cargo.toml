@@ -13,9 +13,9 @@ name = "panini"
 crate-type = ["cdylib"]
 
 [dependencies]
-panini-engine = { version = "0.3.0", path = "../panini-engine" }
-panini-langs = { version = "0.3.0", path = "../panini-langs", features = ["registry"] }
-panini-core = { version = "0.3.0", path = "../panini-core" }
+panini-engine = { version = "0.3.0", path = "../panini-engine", package = "panini-lang-engine" }
+panini-langs = { version = "0.3.0", path = "../panini-langs", features = ["registry"], package = "panini-lang-langs" }
+panini-core = { version = "0.3.0", path = "../panini-core", package = "panini-lang-core" }
 rig-core = "0.33"
 tokio = { version = "1.0", features = ["full"] }
 pyo3 = { version = "0.22.0", features = ["extension-module", "abi3-py38"] }

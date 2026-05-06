@@ -1,5 +1,5 @@
 [package]
-name = "panini-macro"
+name = "panini-lang-macro"
 version = "0.3.0"
 edition = "2021"
 description = "Procedural macros for the Panini linguistic feature extraction framework"
