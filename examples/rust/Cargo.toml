@@ -10,7 +10,7 @@ categories = ["science", "text-processing"]
 readme = "../../README.md"
 
 [dependencies]
-panini = { version = "0.3.0", path = "../../panini" }
+panini-lang = { version = "0.3.0", path = "../../panini" }
 panini-core = { version = "0.3.0", path = "../../panini-core" }
 panini-langs = { version = "0.3.0", path = "../../panini-langs", features = ["registry"] }
 panini-engine = { version = "0.3.0", path = "../../panini-engine" }
