@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
-use crate::component::{AnalysisComponent, ComponentContext};
+use crate::aggregable::digest::{record_aggregable, AggregationSink};
+use crate::aggregable::AggregableFields;
+use crate::component::{AggregationError, Aggregating, AnalysisComponent, ComponentContext};
 use crate::morpheme::WordSegmentation;
 use crate::traits::{LinguisticDefinition, TypologicalFeature};
 
@@ -52,7 +54,6 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     }
 
     fn post_process(&self, lang: &L, section: &mut serde_json::Value) -> Result<(), String> {
-        // Deserialize into typed form, run language post-processing, then re-serialize
         let mut segmentation: Option<Vec<WordSegmentation<L::GrammaticalFunction>>> =
             serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
 
@@ -65,5 +66,38 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     fn is_compatible(&self, lang: &L) -> bool {
         lang.typological_features()
             .contains(&TypologicalFeature::Agglutination)
+    }
+
+    fn as_aggregating(&self) -> Option<&dyn Aggregating<L>> {
+        Some(self)
+    }
+}
+
+impl<L: LinguisticDefinition> Aggregating<L> for MorphemeSegmentation
+where
+    L::GrammaticalFunction: AggregableFields + for<'de> serde::Deserialize<'de>,
+{
+    fn aggregate_section(
+        &self,
+        _lang: &L,
+        section: &serde_json::Value,
+        sink: &mut dyn AggregationSink,
+    ) -> Result<(), AggregationError> {
+        let segmentations: Option<Vec<WordSegmentation<L::GrammaticalFunction>>> =
+            serde_json::from_value(section.clone()).map_err(|e| {
+                AggregationError::Deserialize {
+                    key: "morpheme_segmentation",
+                    source: e,
+                }
+            })?;
+
+        if let Some(segs) = segmentations {
+            for seg in &segs {
+                for morpheme in &seg.morphemes {
+                    record_aggregable(sink, morpheme);
+                }
+            }
+        }
+        Ok(())
     }
 }

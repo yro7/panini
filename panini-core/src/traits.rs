@@ -154,24 +154,33 @@ pub enum TypologicalFeature {
 pub trait LinguisticDefinition {
     /// The language-specific morphology enum. Each variant represents a `PoS` category
     /// with its morphological fields (lemma, case, gender, aspect, etc.).
+    ///
+    /// Requires `Aggregable + DeserializeOwned` so `MorphologyAnalysis` can implement
+    /// `Aggregating<L>` for all `L: LinguisticDefinition` without conditional impls.
+    /// All current language morphology enums satisfy this via `#[derive(MorphologyInfo)]`.
     type Morphology: Debug
         + Clone
         + Serialize
         + for<'de> Deserialize<'de>
         + schemars::JsonSchema
         + MorphologyInfo
+        + crate::aggregable::Aggregable
         + Send
         + Sync;
 
     /// The grammatical function type for morpheme segmentation.
     /// Non-agglutinative languages set this to `()`.
     /// Agglutinative languages set this to their wrapper enum (e.g., `TurkishGrammaticalFunction`).
+    ///
+    /// Requires `AggregableFields + DeserializeOwned` so `MorphemeSegmentation` can implement
+    /// `Aggregating<L>` for all `L: LinguisticDefinition` without conditional impls.
     type GrammaticalFunction: Debug
         + Clone
         + PartialEq
         + Serialize
         + for<'de> Deserialize<'de>
         + schemars::JsonSchema
+        + crate::aggregable::AggregableFields
         + Send
         + Sync;
 

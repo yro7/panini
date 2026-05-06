@@ -8,9 +8,13 @@ pub mod text_processing;
 pub mod traits;
 
 pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor, FieldKind};
+pub use aggregable::digest::{
+    record_aggregable, AggregationContribution, AggregationSink, Aggregator, BasicAggregator,
+    PivotingSink,
+};
 pub use component::{
-    AnalysisComponent, ComponentContext, ComponentRequires, ExtractionResult,
-    ExtractionResultError, LanguageLevel,
+    AggregationError, Aggregating, AnalysisComponent, ComponentContext, ComponentRequires,
+    ExtractionResult, ExtractionResultError, LanguageLevel,
 };
 pub use traits::{
     FunctionVariantSchema, GrammaticalFunctionCatalog, LinguisticDefinition, MorphologyCatalog,

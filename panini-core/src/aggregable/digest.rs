@@ -81,9 +81,14 @@ impl Dimension {
 // ─── GroupResult ──────────────────────────────────────────────────────────────
 
 /// Aggregated data for a single group (e.g. "Noun", "Verb", "morpheme").
+///
+/// `total` is the sum of all `AggregationContribution::total_increment` values
+/// recorded for this group. For POS groups (`"Noun"`, `"Verb"`, …) it equals
+/// the number of word tokens. For the `"morpheme"` group it equals the
+/// **morpheme count** — one contribution per `ExtractedMorpheme`,
+/// `total_increment = 1` — not the segmented-word count.
 #[derive(Debug, Clone, Default)]
 pub struct GroupResult {
-    /// Total number of instances (not unique).
     pub total: usize,
     pub dimensions: HashMap<String, Dimension>,
 }
@@ -105,15 +110,129 @@ impl GroupResult {
     }
 }
 
+// ─── AggregationContribution ─────────────────────────────────────────────────
+
+/// One unit of aggregation — emitted by a component (or by the typed
+/// `Aggregable` shim) and consumed by an `AggregationSink`.
+///
+/// `total_increment` controls how much is added to `GroupResult::total`.
+/// For most contributions this is `1`. Components may use other values when
+/// a single logical unit spans multiple observations (e.g. weighted counts).
+#[derive(Debug, Clone)]
+pub struct AggregationContribution {
+    pub group: String,
+    pub descriptors: Vec<super::FieldDescriptor>,
+    pub observations: Vec<Vec<(String, String)>>,
+    pub total_increment: usize,
+}
+
+// ─── AggregationSink ─────────────────────────────────────────────────────────
+
+/// Object-safe consumer of [`AggregationContribution`]s.
+///
+/// Implemented by [`BasicAggregator`], [`LearnerProfileAggregator`],
+/// [`PivotingSink`], and any custom aggregation strategy.
+///
+/// The blanket `record<A: Aggregable>` shim is a default method — it converts
+/// any `Aggregable` item into an `AggregationContribution` with
+/// `total_increment = 1`. Concrete impls only need to provide
+/// `record_contribution`.
+pub trait AggregationSink {
+    /// Low-level ingest of a pre-projected contribution.
+    fn record_contribution(&mut self, c: AggregationContribution);
+
+    /// Typed shim: converts any [`Aggregable`] to a contribution and records it.
+    /// `total_increment` is always `1` via this path.
+    ///
+    /// Bounded `where Self: Sized` so `dyn AggregationSink` stays object-safe;
+    /// call `record_contribution` directly on trait objects.
+    fn record<A: Aggregable + ?Sized>(&mut self, item: &A)
+    where
+        Self: Sized,
+    {
+        self.record_contribution(AggregationContribution {
+            group: item.group_key(),
+            descriptors: item.instance_descriptors(),
+            observations: item.observations(),
+            total_increment: 1,
+        });
+    }
+}
+
+/// Records an [`Aggregable`] item into a `dyn AggregationSink`.
+///
+/// Equivalent to `sink.record(item)` for concrete sinks. Use this when `sink` is
+/// a trait object — the generic `record<A>` method is not available on `dyn AggregationSink`.
+pub fn record_aggregable<A: Aggregable + ?Sized>(sink: &mut dyn AggregationSink, item: &A) {
+    sink.record_contribution(AggregationContribution {
+        group: item.group_key(),
+        descriptors: item.instance_descriptors(),
+        observations: item.observations(),
+        total_increment: 1,
+    });
+}
+
+// ─── PivotingSink ────────────────────────────────────────────────────────────
+
+/// Wraps any [`AggregationSink`] and overrides the `group` of every
+/// contribution before forwarding it.
+///
+/// Used when the caller wants to re-key contributions (e.g. pivot morphology
+/// stats by Arabic root or by skill node).
+pub struct PivotingSink<'a, S: AggregationSink + ?Sized> {
+    pub inner: &'a mut S,
+    pub pivot: &'a dyn Fn(&AggregationContribution) -> String,
+}
+
+impl<S: AggregationSink + ?Sized> AggregationSink for PivotingSink<'_, S> {
+    fn record_contribution(&mut self, mut c: AggregationContribution) {
+        c.group = (self.pivot)(&c);
+        self.inner.record_contribution(c);
+    }
+}
+
+// ─── Aggregator trait ─────────────────────────────────────────────────────────
+
+/// Extension of [`AggregationSink`] for aggregators that produce a typed output.
+///
+/// Enables generic code over "finishable sinks" — e.g. a mean aggregator, a
+/// histogram builder, or a custom strategy can all satisfy `Aggregator<Output = T>`.
+/// The `record_contribution` / `record<A>` methods are inherited from `AggregationSink`.
+pub trait Aggregator: AggregationSink {
+    /// The final result type produced by this aggregator.
+    type Output;
+
+    /// Consume the aggregator and return the final result.
+    fn finish(self) -> Self::Output;
+}
+
 // ─── AggregationResult ────────────────────────────────────────────────────────
 
-/// Aggregated statistics across all Aggregable items.
+/// Aggregated statistics across all recorded contributions.
 ///
-/// Built via [`AggregationResult::from_iter`] from any iterator of [`Aggregable`] items,
-/// or via [`BasicAggregator`](crate::aggregable::digest::BasicAggregator) for more control.
+/// Can be built by collecting an iterator of [`Aggregable`] items, by driving
+/// a [`BasicAggregator`], or by recording [`AggregationContribution`]s directly
+/// (since `AggregationResult` itself implements [`AggregationSink`]).
 #[derive(Debug, Clone, Default)]
 pub struct AggregationResult {
     pub by_group: HashMap<String, GroupResult>,
+}
+
+impl AggregationSink for AggregationResult {
+    fn record_contribution(&mut self, c: AggregationContribution) {
+        let group_result = self
+            .by_group
+            .entry(c.group)
+            .or_insert_with(|| GroupResult::from_descriptors(&c.descriptors));
+        group_result.total += c.total_increment;
+        for observation in c.observations {
+            for (field, value) in observation {
+                if let Some(dim) = group_result.dimensions.get_mut(&field) {
+                    dim.record(value);
+                }
+            }
+        }
+    }
 }
 
 impl AggregationResult {
@@ -217,20 +336,7 @@ impl<A: Aggregable> FromIterator<A> for AggregationResult {
     fn from_iter<I: IntoIterator<Item = A>>(iter: I) -> Self {
         let mut result = Self::default();
         for item in iter {
-            let group = item.group_key();
-            let descriptors = item.instance_descriptors();
-            let group_result = result
-                .by_group
-                .entry(group)
-                .or_insert_with(|| GroupResult::from_descriptors(&descriptors));
-            group_result.total += 1;
-            for observation in item.observations() {
-                for (field, value) in observation {
-                    if let Some(dim) = group_result.dimensions.get_mut(&field) {
-                        dim.record(value);
-                    }
-                }
-            }
+            result.record(&item);
         }
         result
     }
@@ -239,47 +345,15 @@ impl<A: Aggregable> FromIterator<A> for AggregationResult {
 impl<A: Aggregable> Extend<A> for AggregationResult {
     fn extend<I: IntoIterator<Item = A>>(&mut self, iter: I) {
         for item in iter {
-            let group = item.group_key();
-            let descriptors = item.instance_descriptors();
-            let group_result = self
-                .by_group
-                .entry(group)
-                .or_insert_with(|| GroupResult::from_descriptors(&descriptors));
-            group_result.total += 1;
-            for observation in item.observations() {
-                for (field, value) in observation {
-                    if let Some(dim) = group_result.dimensions.get_mut(&field) {
-                        dim.record(value);
-                    }
-                }
-            }
+            self.record(&item);
         }
     }
 }
 
-// ─── Aggregator trait ─────────────────────────────────────────────────────────
-
-/// Consumer of Aggregable items that produces an aggregated result.
-///
-/// IMPORTANT: the type parameter `<A>` is at the METHOD level (not trait level).
-/// This allows a single aggregator to ingest heterogeneous Aggregable types
-/// (e.g. `ExtractedFeature<M>` AND `WordSegmentation<F>`), which is essential
-/// for stateful aggregators like `LearnerProfileAggregator`.
-pub trait Aggregator {
-    /// Output type produced by this aggregator.
-    type Output;
-
-    /// Record an item (polymorphic over any Aggregable type).
-    fn record<A: Aggregable>(&mut self, item: &A);
-
-    /// Consume the aggregator and return the result.
-    fn finish(self) -> Self::Output;
-}
-
 // ─── BasicAggregator ──────────────────────────────────────────────────────────
 
-/// Generic aggregator — default implementation.
-/// NON-generic: can ingest any `A: Aggregable` via record.
+/// Default aggregator — can ingest any [`AggregationContribution`] or any
+/// [`Aggregable`] item via the typed shim.
 #[derive(Debug, Clone, Default)]
 pub struct BasicAggregator {
     result: AggregationResult,
@@ -291,33 +365,21 @@ impl BasicAggregator {
         Self::default()
     }
 
-    /// Borrow of the result (for inspection without consuming).
+    /// Borrow of the in-progress result (without consuming).
     #[must_use]
     pub const fn result(&self) -> &AggregationResult {
         &self.result
     }
 }
 
+impl AggregationSink for BasicAggregator {
+    fn record_contribution(&mut self, c: AggregationContribution) {
+        self.result.record_contribution(c);
+    }
+}
+
 impl Aggregator for BasicAggregator {
     type Output = AggregationResult;
-
-    fn record<A: Aggregable>(&mut self, item: &A) {
-        let group = item.group_key();
-        let descriptors = item.instance_descriptors();
-        let group_result = self
-            .result
-            .by_group
-            .entry(group)
-            .or_insert_with(|| GroupResult::from_descriptors(&descriptors));
-        group_result.total += 1;
-        for observation in item.observations() {
-            for (field, value) in observation {
-                if let Some(dim) = group_result.dimensions.get_mut(&field) {
-                    dim.record(value);
-                }
-            }
-        }
-    }
 
     fn finish(self) -> AggregationResult {
         self.result
@@ -406,7 +468,6 @@ mod tests {
 
     #[test]
     fn basic_aggregator_heterogeneous_input() {
-        // Test that BasicAggregator can handle items from different groups
         let descriptors1 = vec![FieldDescriptor {
             name: "case".to_string(),
             kind: FieldKind::Closed(&["Nominative", "Accusative"]),
@@ -434,7 +495,6 @@ mod tests {
 
     #[test]
     fn coverage_calculation_closed_vs_open() {
-        // Both items have the same descriptors (realistic scenario)
         let descriptors = vec![
             FieldDescriptor {
                 name: "case".to_string(),
@@ -462,15 +522,13 @@ mod tests {
         let result = agg.finish();
         let noun = &result.by_group["Noun"];
 
-        // Closed: should have coverage
         if let Dimension::Dist(case) = &noun.dimensions["case"] {
-            assert_eq!(case.coverage(), (2, 3)); // seen 2 of 3
+            assert_eq!(case.coverage(), (2, 3));
             assert!((case.coverage_percent() - 0.666).abs() < 0.01);
         } else {
             panic!("Expected Distribution for case");
         }
 
-        // Open: no coverage concept
         if let Dimension::Inv(lemma) = &noun.dimensions["lemma"] {
             assert_eq!(lemma.counts["pies"], 1);
             assert_eq!(lemma.counts["kot"], 1);
@@ -532,14 +590,10 @@ mod tests {
             kind: FieldKind::Closed(&["Nominative", "Accusative"]),
         }];
 
-        let items1 = vec![
-            MockAggregable::new("Noun", descriptors.clone())
-                .with_observation(vec![("case".to_string(), "Nominative".to_string())]),
-        ];
-        let items2 = vec![
-            MockAggregable::new("Noun", descriptors)
-                .with_observation(vec![("case".to_string(), "Accusative".to_string())]),
-        ];
+        let items1 = vec![MockAggregable::new("Noun", descriptors.clone())
+            .with_observation(vec![("case".to_string(), "Nominative".to_string())])];
+        let items2 = vec![MockAggregable::new("Noun", descriptors)
+            .with_observation(vec![("case".to_string(), "Accusative".to_string())])];
 
         let mut result = AggregationResult::default();
         result.extend(items1);
@@ -547,5 +601,80 @@ mod tests {
 
         assert_eq!(result.total_count(), 2);
         assert_eq!(result.group_count(), 1);
+    }
+
+    #[test]
+    fn record_contribution_direct() {
+        let descriptors = vec![FieldDescriptor {
+            name: "case".to_string(),
+            kind: FieldKind::Closed(&["Nominative", "Accusative"]),
+        }];
+
+        let mut agg = BasicAggregator::new();
+        agg.record_contribution(AggregationContribution {
+            group: "Noun".to_string(),
+            descriptors: descriptors.clone(),
+            observations: vec![vec![("case".to_string(), "Nominative".to_string())]],
+            total_increment: 1,
+        });
+        agg.record_contribution(AggregationContribution {
+            group: "Noun".to_string(),
+            descriptors,
+            observations: vec![vec![("case".to_string(), "Accusative".to_string())]],
+            total_increment: 1,
+        });
+
+        let result = agg.finish();
+        assert_eq!(result.total_count(), 2);
+        let noun = &result.by_group["Noun"];
+        assert_eq!(noun.total, 2);
+    }
+
+    #[test]
+    fn pivoting_sink_overrides_group() {
+        let descriptors = vec![FieldDescriptor {
+            name: "case".to_string(),
+            kind: FieldKind::Closed(&["Nominative", "Accusative"]),
+        }];
+
+        let item = MockAggregable::new("Noun", descriptors)
+            .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
+
+        let mut inner = BasicAggregator::new();
+        {
+            let pivot = |_: &AggregationContribution| "PivotedGroup".to_string();
+            let mut sink = PivotingSink {
+                inner: &mut inner,
+                pivot: &pivot,
+            };
+            sink.record(&item);
+        }
+
+        let result = inner.finish();
+        assert!(result.by_group.contains_key("PivotedGroup"));
+        assert!(!result.by_group.contains_key("Noun"));
+    }
+
+    #[test]
+    fn total_increment_respected() {
+        let descriptors = vec![FieldDescriptor {
+            name: "base_form".to_string(),
+            kind: FieldKind::Open,
+        }];
+
+        let mut agg = BasicAggregator::new();
+        // Emit 3 contributions each with total_increment = 1 (Option A: per morpheme)
+        for base in &["DA", "(y)I", "lAr"] {
+            agg.record_contribution(AggregationContribution {
+                group: "morpheme".to_string(),
+                descriptors: descriptors.clone(),
+                observations: vec![vec![("base_form".to_string(), (*base).to_string())]],
+                total_increment: 1,
+            });
+        }
+
+        let result = agg.finish();
+        let morpheme = &result.by_group["morpheme"];
+        assert_eq!(morpheme.total, 3); // counts morphemes, not words
     }
 }

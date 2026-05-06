@@ -46,9 +46,13 @@ pub struct WordSegmentation<F> {
 
 // ─── Aggregable impls ─────────────────────────────────────────────────────────
 
-/// Each morpheme in a `WordSegmentation` is one observation.
+/// Each `ExtractedMorpheme` is one aggregable unit — group `"morpheme"`,
+/// `total_increment = 1` (via the typed shim on `AggregationSink`).
+///
 /// Fields: `base_form` (open) + whatever `F: AggregableFields` contributes.
-impl<F: AggregableFields> Aggregable for WordSegmentation<F> {
+/// This ensures `GroupResult.total` for the `"morpheme"` group counts individual
+/// morphemes, not segmented words (Option A semantics).
+impl<F: AggregableFields> Aggregable for ExtractedMorpheme<F> {
     fn group_key(&self) -> String {
         "morpheme".to_string()
     }
@@ -63,14 +67,9 @@ impl<F: AggregableFields> Aggregable for WordSegmentation<F> {
     }
 
     fn observations(&self) -> Vec<Vec<(String, String)>> {
-        self.morphemes
-            .iter()
-            .map(|m| {
-                let mut obs = vec![("base_form".to_string(), m.base_form.clone())];
-                obs.extend(m.function.field_values());
-                obs
-            })
-            .collect()
+        let mut obs = vec![("base_form".to_string(), self.base_form.clone())];
+        obs.extend(self.function.field_values());
+        vec![obs]
     }
 }
 
