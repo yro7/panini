@@ -6,7 +6,7 @@ description = "Procedural macros for the Panini linguistic feature extraction fr
 repository = "https://github.com/yro7/panini.git"
 license = "MIT"
 keywords = ["linguistics", "nlp", "llm", "extraction", "macros"]
-categories = ["development-tools::procedural-macros", "science", "text-processing"]
+categories = ["development-tools", "science", "text-processing"]
 readme = "../README.md"
 
 
