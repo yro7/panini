@@ -1,8 +1,29 @@
 use std::fmt::Debug;
 
-use crate::component::{AnalysisComponent, ComponentContext};
+use serde::de::DeserializeOwned;
+
+use crate::aggregable::digest::{record_aggregable, AggregationSink};
+use crate::aggregable::Aggregable;
+use crate::component::{AggregationError, Aggregating, AnalysisComponent, ComponentContext};
 use crate::domain::ExtractedFeature;
 use crate::traits::LinguisticDefinition;
+
+// ─── MorphSection ─────────────────────────────────────────────────────────────
+
+/// Deserializable shape of the `"morphology"` section produced by `MorphologyAnalysis`.
+///
+/// The composable pipeline nests `target_features` and `context_features` under
+/// the `"morphology"` key.
+#[derive(serde::Deserialize, Default)]
+#[serde(bound(deserialize = "M: serde::de::DeserializeOwned"))]
+pub struct MorphSection<M> {
+    #[serde(default = "Vec::new")]
+    pub target_features: Vec<ExtractedFeature<M>>,
+    #[serde(default = "Vec::new")]
+    pub context_features: Vec<ExtractedFeature<M>>,
+}
+
+// ─── MorphologyAnalysis ───────────────────────────────────────────────────────
 
 /// Produces morphological feature extraction for target and context words.
 #[derive(Debug, Clone, Default)]
@@ -20,13 +41,10 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
     }
 
     fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
-        // Generate the schema for ExtractedFeature<L::Morphology> and build the
-        // morphology object with target_features and context_features.
         let r#gen = schemars::SchemaGenerator::default();
         let feature_schema = r#gen.into_root_schema_for::<Vec<ExtractedFeature<L::Morphology>>>();
         let feature_value = serde_json::to_value(&feature_schema).unwrap();
 
-        // Extract $defs if present — they'll be hoisted by the composer
         let mut fragment = serde_json::json!({
             "type": "object",
             "properties": {
@@ -36,10 +54,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
             "required": ["target_features", "context_features"]
         });
 
-        // Hoist $defs from the inner schema to our fragment level for the composer
         if let Some(defs) = feature_value.get("$defs") {
             fragment["$defs"] = defs.clone();
-            // Remove $defs from the nested copies
             if let Some(props) = fragment.get_mut("properties") {
                 for key in ["target_features", "context_features"] {
                     if let Some(obj) = props.get_mut(key).and_then(|p| p.as_object_mut()) {
@@ -82,5 +98,34 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
 
     fn pre_process(&self, raw: &str) -> String {
         crate::text_processing::normalize_pos_tags(raw)
+    }
+
+    fn as_aggregating(&self) -> Option<&dyn Aggregating<L>> {
+        Some(self)
+    }
+}
+
+impl<L: LinguisticDefinition> Aggregating<L> for MorphologyAnalysis
+where
+    L::Morphology: Aggregable + DeserializeOwned,
+{
+    fn aggregate_section(
+        &self,
+        _lang: &L,
+        section: &serde_json::Value,
+        sink: &mut dyn AggregationSink,
+    ) -> Result<(), AggregationError> {
+        let morph: MorphSection<L::Morphology> =
+            serde_json::from_value(section.clone()).map_err(|e| AggregationError::Deserialize {
+                key: "morphology",
+                source: e,
+            })?;
+        for feature in &morph.target_features {
+            record_aggregable(sink, &feature.morphology);
+        }
+        for feature in &morph.context_features {
+            record_aggregable(sink, &feature.morphology);
+        }
+        Ok(())
     }
 }

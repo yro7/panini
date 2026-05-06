@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use serde::de::DeserializeOwned;
 
+use crate::aggregable::digest::AggregationSink;
 use crate::traits::LinguisticDefinition;
 
 /// A language the learner already speaks, with proficiency level.
@@ -71,6 +72,14 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
     /// Incompatible components are silently skipped.
     fn is_compatible(&self, _lang: &L) -> bool {
         true
+    }
+
+    /// Returns `Some(self)` for components that produce aggregable data.
+    ///
+    /// Override to return `Some(self)` in components that implement [`Aggregating<L>`].
+    /// Default returns `None` — non-aggregable components carry no aggregation logic.
+    fn as_aggregating(&self) -> Option<&dyn Aggregating<L>> {
+        None
     }
 }
 
@@ -155,6 +164,45 @@ impl ExtractionResult {
         self.raw
     }
 }
+
+// ─── AggregationError ────────────────────────────────────────────────────────
+
+/// Typed error for [`Aggregating::aggregate_section`].
+#[derive(Debug, thiserror::Error)]
+pub enum AggregationError {
+    #[error("failed to deserialize section '{key}': {source}")]
+    Deserialize {
+        key: &'static str,
+        #[source]
+        source: serde_json::Error,
+    },
+    #[error("aggregation hook for '{key}' failed: {message}")]
+    Hook { key: &'static str, message: String },
+}
+
+// ─── Aggregating sub-trait ────────────────────────────────────────────────────
+
+/// Extension of [`AnalysisComponent`] for components that produce aggregable data.
+///
+/// Components opt in by overriding `as_aggregating` on `AnalysisComponent` to
+/// return `Some(self)`. Non-aggregable components (`PedagogicalExplanation`,
+/// `LeipzigAlignment`, etc.) do nothing.
+pub trait Aggregating<L: LinguisticDefinition>: AnalysisComponent<L> {
+    /// Project this component's JSON section into aggregation contributions.
+    ///
+    /// Called per-card with the deserialized (and post-processed) section value.
+    /// Implementations deserialize the section and push contributions to `sink`
+    /// via [`AggregationSink::record_contribution`] or the typed shim
+    /// [`AggregationSink::record`].
+    fn aggregate_section(
+        &self,
+        lang: &L,
+        section: &serde_json::Value,
+        sink: &mut dyn AggregationSink,
+    ) -> Result<(), AggregationError>;
+}
+
+// ─── Marker trait ─────────────────────────────────────────────────────────────
 
 /// Marker trait for compile-time validation of component-language compatibility.
 ///
