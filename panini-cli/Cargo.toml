@@ -15,8 +15,8 @@ name = "panini"
 path = "src/main.rs"
 
 [dependencies]
-panini-engine = { path = "../panini-engine" }
-panini-langs = { path = "../panini-langs", features = ["registry"] }
+panini-engine = { version = "0.3.0", path = "../panini-engine" }
+panini-langs = { version = "0.3.0", path = "../panini-langs", features = ["registry"] }
 rig-core = "0.33"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
