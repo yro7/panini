@@ -1,5 +1,5 @@
 [package]
-name = "panini-engine"
+name = "panini-lang-engine"
 version = "0.3.0"
 edition = "2024"
 description = "Execution engine for the Panini linguistic feature extraction framework"
@@ -11,7 +11,7 @@ readme = "../README.md"
 
 
 [dependencies]
-panini-core = { version = "0.3.0", path = "../panini-core" }
+panini-core = { version = "0.3.0", path = "../panini-core", package = "panini-lang-core" }
 rig-core = "0.33"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

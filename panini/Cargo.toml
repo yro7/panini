@@ -11,10 +11,10 @@ readme = "../README.md"
 
 
 [dependencies]
-panini-core = { version = "0.3.0", path = "../panini-core" }
-panini-engine = { version = "0.3.0", path = "../panini-engine" }
-panini-macro = { version = "0.3.0", path = "../panini-macro" }
-panini-langs = { version = "0.3.0", path = "../panini-langs", optional = true }
+panini-core = { version = "0.3.0", path = "../panini-core", package = "panini-lang-core" }
+panini-engine = { version = "0.3.0", path = "../panini-engine", package = "panini-lang-engine" }
+panini-macro = { version = "0.3.0", path = "../panini-macro", package = "panini-lang-macro" }
+panini-langs = { version = "0.3.0", path = "../panini-langs", optional = true, package = "panini-lang-langs" }
 rig-core = "0.33"
 
 [features]
