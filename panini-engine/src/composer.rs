@@ -204,6 +204,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use panini_core::aggregable::{Aggregable, FieldDescriptor};
     use panini_core::traits::{IsoLang, MorphologyInfo, Script, TypologicalFeature};
     use serde::{Deserialize, Serialize};
 
@@ -214,6 +215,18 @@ mod tests {
     enum TestMorphology {
         Noun { lemma: String },
         Verb { lemma: String },
+    }
+
+    impl Aggregable for TestMorphology {
+        fn group_key(&self) -> String {
+            self.pos_label().to_string()
+        }
+        fn instance_descriptors(&self) -> Vec<FieldDescriptor> {
+            vec![]
+        }
+        fn observations(&self) -> Vec<Vec<(String, String)>> {
+            vec![vec![]]
+        }
     }
 
     impl MorphologyInfo for TestMorphology {
