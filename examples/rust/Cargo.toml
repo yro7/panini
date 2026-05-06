@@ -11,9 +11,9 @@ readme = "../../README.md"
 
 [dependencies]
 panini-lang = { version = "0.3.0", path = "../../panini" }
-panini-core = { version = "0.3.0", path = "../../panini-core" }
-panini-langs = { version = "0.3.0", path = "../../panini-langs", features = ["registry"] }
-panini-engine = { version = "0.3.0", path = "../../panini-engine" }
+panini-core = { version = "0.3.0", path = "../../panini-core", package = "panini-lang-core" }
+panini-langs = { version = "0.3.0", path = "../../panini-langs", features = ["registry"], package = "panini-lang-langs" }
+panini-engine = { version = "0.3.0", path = "../../panini-engine", package = "panini-lang-engine" }
 rig-core = "0.33"
 tokio = { version = "1", features = ["full"] }
 anyhow = "1"
