@@ -849,22 +849,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-the-pivot-concept" class="md-nav__link">
+  <a href="#2-aggregating-morpheme-segmentations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. The Pivot Concept
+        2. Aggregating Morpheme Segmentations
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2. The Pivot Concept">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-the-pivot-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The Pivot Concept
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. The Pivot Concept">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-grouping-by-case-rather-than-by-pos" class="md-nav__link">
+  <a href="#typed-pivot-single-item-field-checked" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Grouping by Case rather than by POS
+        Typed Pivot (single item, field-checked)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sink-level-pivot-any-contribution-stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sink-Level Pivot (any contribution stream)
       
     </span>
   </a>
@@ -888,10 +910,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-automatic-discovery-zero-configuration" class="md-nav__link">
+  <a href="#4-automatic-discovery-zero-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Automatic Discovery (Zero Configuration)
+        4. Automatic Discovery (Zero Configuration)
       
     </span>
   </a>
@@ -899,10 +921,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-performance-considerations" class="md-nav__link">
+  <a href="#5-performance-considerations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Performance Considerations
+        5. Performance Considerations
       
     </span>
   </a>
@@ -1018,22 +1040,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-the-pivot-concept" class="md-nav__link">
+  <a href="#2-aggregating-morpheme-segmentations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. The Pivot Concept
+        2. Aggregating Morpheme Segmentations
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2. The Pivot Concept">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-the-pivot-concept" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. The Pivot Concept
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. The Pivot Concept">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#example-grouping-by-case-rather-than-by-pos" class="md-nav__link">
+  <a href="#typed-pivot-single-item-field-checked" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example: Grouping by Case rather than by POS
+        Typed Pivot (single item, field-checked)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sink-level-pivot-any-contribution-stream" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sink-Level Pivot (any contribution stream)
       
     </span>
   </a>
@@ -1057,10 +1101,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-automatic-discovery-zero-configuration" class="md-nav__link">
+  <a href="#4-automatic-discovery-zero-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Automatic Discovery (Zero Configuration)
+        4. Automatic Discovery (Zero Configuration)
       
     </span>
   </a>
@@ -1068,10 +1112,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-performance-considerations" class="md-nav__link">
+  <a href="#5-performance-considerations" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Performance Considerations
+        5. Performance Considerations
       
     </span>
   </a>
@@ -1099,64 +1143,78 @@
 <p>Once your data is aggregated, you can manipulate it to extract specific information or change the analysis axis.</p>
 <hr />
 <h2 id="1-creating-a-digest-the-basicaggregator">1. Creating a Digest: The BasicAggregator</h2>
-<p>The <code>BasicAggregator</code> is the default tool for ingesting <code>Aggregable</code> objects. It's designed to handle heterogeneous data (e.g., both <code>ExtractedFeature</code> and <code>WordSegmentation</code>).</p>
-<div class="language-rust highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">agg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<p>The <code>BasicAggregator</code> is the default tool for ingesting <code>Aggregable</code> objects. It handles heterogeneous data (e.g., both <code>ExtractedFeature</code> and <code>ExtractedMorpheme</code>).</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">use</span><span class="w"> </span><span class="n">panini_core</span><span class="p">::</span><span class="n">aggregable</span><span class="p">::</span><span class="n">digest</span><span class="p">::{</span><span class="n">AggregationSink</span><span class="p">,</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">};</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">for</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">feature</span><span class="p">);</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1">// Analyze the result without terminating the aggregator</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agg</span><span class="p">.</span><span class="n">result</span><span class="p">();</span><span class="w"> </span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1">// Finish and retrieve the final result</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">let</span><span class="w"> </span><span class="n">final_res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agg</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">agg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">for</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">features</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="n">feature</span><span class="p">);</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">// Peek at the result without consuming the aggregator</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agg</span><span class="p">.</span><span class="n">result</span><span class="p">();</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1">// Finish and retrieve the final result</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="kd">let</span><span class="w"> </span><span class="n">final_res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">agg</span><span class="p">.</span><span class="n">finish</span><span class="p">();</span>
 </span></code></pre></div>
 <hr />
-<h2 id="2-the-pivot-concept">2. The Pivot Concept</h2>
+<h2 id="2-aggregating-morpheme-segmentations">2. Aggregating Morpheme Segmentations</h2>
+<p>For agglutinative languages, morpheme segmentations are stored as <code>WordSegmentation&lt;F&gt;</code>, which contains a list of <code>ExtractedMorpheme&lt;F&gt;</code>. Each <strong>morpheme</strong> is the unit of aggregation — iterate the morphemes, not the segmentation objects.</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">segs</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">metadata</span><span class="p">.</span><span class="n">morpheme_segmentation</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">seg</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">segs</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">morpheme</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">seg</span><span class="p">.</span><span class="n">morphemes</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">            </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="n">morpheme</span><span class="p">);</span><span class="w"> </span><span class="c1">// one contribution per morpheme</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">total semantics for the <code>\"morpheme\"</code> group</p>
+<p><code>GroupResult.total</code> counts <strong>individual morphemes</strong> (not segmented words). Distribution counts and <code>total</code> are on the same scale.</p>
+</div>
+<hr />
+<h2 id="3-the-pivot-concept">3. The Pivot Concept</h2>
 <p>"Pivoting" is one of the most powerful features of the aggregation system. It allows you to change the grouping key on the fly.</p>
-<p>By default, objects are grouped by POS (e.g., "Noun", "Verb"). With a pivot, you can choose any other criteria.</p>
-<h3 id="example-grouping-by-case-rather-than-by-pos">Example: Grouping by Case rather than by POS</h3>
-<div class="language-rust highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="p">:</span><span class="w"> </span><span class="nc">AggregationResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">features</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">f</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">        </span><span class="c1">// Redefine the group key dynamically</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="n">f</span><span class="p">.</span><span class="n">pivoted</span><span class="p">(</span><span class="o">|</span><span class="n">inner</span><span class="o">|</span><span class="w"> </span><span class="n">inner</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">case</span><span class="p">().</span><span class="n">unwrap_or</span><span class="p">(</span><span class="s">&quot;NoCase&quot;</span><span class="p">).</span><span class="n">to_string</span><span class="p">())</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="p">})</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
+<p>By default, objects are grouped by POS (e.g., "Noun", "Verb"). With a pivot, you can choose any other criterion.</p>
+<h3 id="typed-pivot-single-item-field-checked">Typed Pivot (single item, field-checked)</h3>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Group Arabic verbs by triliteral root instead of POS</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">features</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">root</span><span class="p">().</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="n">feature</span><span class="p">.</span><span class="n">group_key</span><span class="p">());</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">feature</span><span class="p">.</span><span class="n">pivoted</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">root</span><span class="p">.</span><span class="n">clone</span><span class="p">()));</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">}</span>
 </span></code></pre></div>
+<h3 id="sink-level-pivot-any-contribution-stream">Sink-Level Pivot (any contribution stream)</h3>
+<p>Use <code>PivotingSink</code> when you want to re-key an entire contribution stream without touching individual items — see <a href="../custom/">Custom Aggregators</a> for details.</p>
 <h3 id="multi-field-pivot">Multi-Field Pivot</h3>
-<p>You can combine fields for finer analysis (e.g., Verbs by Root AND by Tense).</p>
-<div class="language-rust highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">agg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">for</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">features</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">&quot;{}-{}&quot;</span><span class="p">,</span><span class="w"> </span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="n">feature</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">root</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">(),</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">        </span><span class="n">feature</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">tense</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">()</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p">);</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="c1">// Enroll the object with its new pivoted key</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">feature</span><span class="p">.</span><span class="n">pivoted</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">key</span><span class="p">.</span><span class="n">clone</span><span class="p">()));</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">}</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="o">**</span><span class="n">Sample</span><span class="w"> </span><span class="nb">Result</span><span class="w"> </span><span class="p">(</span><span class="n">Pivot</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="n">Root</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Tense</span><span class="p">):</span><span class="o">**</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="err">```</span><span class="n">text</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">[</span><span class="n">KTR</span><span class="o">-</span><span class="n">present</span><span class="p">]</span><span class="w"> </span><span class="n">total</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="o">|-</span><span class="w"> </span><span class="n">case</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="o">/</span><span class="mi">7</span><span class="p">]:</span><span class="w"> </span><span class="nc">dative</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="n">accusative</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">[</span><span class="n">SL</span><span class="o">-</span><span class="n">past</span><span class="p">]</span><span class="w"> </span><span class="n">total</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">  </span><span class="o">|-</span><span class="w"> </span><span class="n">gender</span><span class="w"> </span><span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">]:</span><span class="w"> </span><span class="nc">masculine</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<p>You can combine fields for finer analysis (e.g., Arabic verbs by Root AND Tense):</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">agg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">for</span><span class="w"> </span><span class="n">feature</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="o">&amp;</span><span class="n">features</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">&quot;{}-{}&quot;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="n">feature</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">root</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">(),</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="n">feature</span><span class="p">.</span><span class="n">morphology</span><span class="p">.</span><span class="n">tense</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">()</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">);</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="n">agg</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="o">&amp;</span><span class="n">feature</span><span class="p">.</span><span class="n">pivoted</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">key</span><span class="p">.</span><span class="n">clone</span><span class="p">()));</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">}</span>
 </span></code></pre></div>
-<hr />
-<h2 id="3-automatic-discovery-zero-configuration">3. Automatic Discovery (Zero Configuration)</h2>
-<p>If you add a new field to your morphology (e.g., Aspect for a Verb), the digest system will automatically detect it without needing to modify the aggregator.</p>
-<p>Thanks to the Pāṇini macros, a new line will automatically appear in your reports:
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>  |- aspect [2/2]: perfective(12), imperfective(8)
+<p><strong>Sample Result (Pivot on Root + Tense):</strong>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>[KTR-present] total: 3
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  |- case [2/7]: dative(2), accusative(1)
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>[SL-past] total: 1
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  |- gender [1/3]: masculine(1)
 </span></code></pre></div></p>
 <hr />
-<h2 id="4-performance-considerations">4. Performance Considerations</h2>
+<h2 id="4-automatic-discovery-zero-configuration">4. Automatic Discovery (Zero Configuration)</h2>
+<p>If you add a new field to your morphology (e.g., Aspect for a Verb), the digest system will automatically detect it without needing to modify the aggregator.</p>
+<p>Thanks to the Pāṇini macros, a new line will automatically appear in your reports:
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>  |- aspect [2/2]: perfective(12), imperfective(8)
+</span></code></pre></div></p>
+<hr />
+<h2 id="5-performance-considerations">5. Performance Considerations</h2>
 <div class="admonition warning">
 <p class="admonition-title">Loop Optimization</p>
-<p>Avoid calling <code>item.observations()</code> multiple times in a processing loop. The <code>record</code> method is optimized as the single entry point. If you need complex logic, encapsulate it in a <code>pivoted()</code> closure or in a custom <code>Aggregator</code> implementation.</p>
+<p>Avoid calling <code>item.observations()</code> multiple times in a processing loop. The <code>record</code> method is optimized as the single entry point. If you need complex logic, encapsulate it in a <code>pivoted()</code> closure or in a custom <code>AggregationSink</code> implementation.</p>
 </div>
 
 

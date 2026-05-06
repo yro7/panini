@@ -698,12 +698,12 @@
   <a href="#steps-to-create-a-component" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔧 Steps to Create a Component
+        Steps to Create a Component
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🔧 Steps to Create a Component">
+    <nav class="md-nav" aria-label="Steps to Create a Component">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -745,15 +745,26 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recommended-patterns" class="md-nav__link">
+  <a href="#making-a-component-aggregable" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🏗 Recommended Patterns
+        Making a Component Aggregable
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🏗 Recommended Patterns">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Patterns">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -761,6 +772,17 @@
     <span class="md-ellipsis">
       
         Target Word vs. Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-gated-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language-Gated Components
       
     </span>
   </a>
@@ -1016,12 +1038,12 @@
   <a href="#steps-to-create-a-component" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🔧 Steps to Create a Component
+        Steps to Create a Component
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🔧 Steps to Create a Component">
+    <nav class="md-nav" aria-label="Steps to Create a Component">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1063,15 +1085,26 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#recommended-patterns" class="md-nav__link">
+  <a href="#making-a-component-aggregable" class="md-nav__link">
     <span class="md-ellipsis">
       
-        🏗 Recommended Patterns
+        Making a Component Aggregable
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🏗 Recommended Patterns">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Patterns">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1079,6 +1112,17 @@
     <span class="md-ellipsis">
       
         Target Word vs. Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#language-gated-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Language-Gated Components
       
     </span>
   </a>
@@ -1110,9 +1154,8 @@
 <h1 id="creating-an-analysis-component">Creating an Analysis Component</h1>
 <p>If you'd like to extend Panini with a new analysis axis (e.g., CEFR level, sentiment, etc.), you must implement the <code>AnalysisComponent</code> trait.</p>
 <hr />
-<h2 id="steps-to-create-a-component">🔧 Steps to Create a Component</h2>
+<h2 id="steps-to-create-a-component">Steps to Create a Component</h2>
 <h3 id="1-define-the-output-structure">1. Define the Output Structure</h3>
-<p>In <code>panini-core/src/components/complexity.rs</code> (or your component file):</p>
 <div class="language-rust highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">use</span><span class="w"> </span><span class="n">serde</span><span class="p">::{</span><span class="n">Deserialize</span><span class="p">,</span><span class="w"> </span><span class="n">Serialize</span><span class="p">};</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">use</span><span class="w"> </span><span class="n">schemars</span><span class="p">::</span><span class="n">JsonSchema</span><span class="p">;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -1135,41 +1178,73 @@
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">schema_key</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kp">&amp;</span><span class="o">&#39;</span><span class="nb">static</span><span class="w"> </span><span class="kt">str</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&quot;complexity&quot;</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
 </span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">schema_fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="c1">// Use schemars to generate the JSON schema</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">schemars</span><span class="p">::</span><span class="n">SchemaGenerator</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="p">.</span><span class="n">into_root_schema_for</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ComplexityResult</span><span class="o">&gt;</span><span class="p">();</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="n">serde_json</span><span class="p">::</span><span class="n">to_value</span><span class="p">(</span><span class="o">&amp;</span><span class="n">schema</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">prompt_fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">,</span><span class="w"> </span><span class="n">ctx</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">ComponentContext</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="fm">format!</span><span class="p">(</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">            </span><span class="s">&quot;Analyze the grammar and vocabulary of the sentence to determine its CEFR level.</span><span class="se">\n</span><span class="s">\</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="s">             Explain your reasoning in {}, identifying difficult structures.&quot;</span><span class="p">,</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">            </span><span class="n">ctx</span><span class="p">.</span><span class="n">learner_ui_language</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">        </span><span class="p">)</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">is_compatible</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">        </span><span class="kc">true</span><span class="w"> </span><span class="c1">// All languages support complexity analysis</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="p">}</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">schemars</span><span class="p">::</span><span class="n">SchemaGenerator</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="p">.</span><span class="n">into_root_schema_for</span><span class="p">::</span><span class="o">&lt;</span><span class="n">ComplexityResult</span><span class="o">&gt;</span><span class="p">();</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="n">serde_json</span><span class="p">::</span><span class="n">to_value</span><span class="p">(</span><span class="o">&amp;</span><span class="n">schema</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">prompt_fragment</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">,</span><span class="w"> </span><span class="n">ctx</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">ComponentContext</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">        </span><span class="fm">format!</span><span class="p">(</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">            </span><span class="s">&quot;Analyze the grammar and vocabulary of the sentence to determine its CEFR level.</span><span class="se">\n</span><span class="s">\</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s">             Explain your reasoning in {}, identifying difficult structures.&quot;</span><span class="p">,</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">            </span><span class="n">ctx</span><span class="p">.</span><span class="n">learner_ui_language</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">        </span><span class="p">)</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">is_compatible</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">        </span><span class="kc">true</span><span class="w"> </span><span class="c1">// All languages support complexity analysis</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="3-register-the-component">3. Register the Component</h3>
-<p>In <code>panini-langs/src/registry.rs</code>, add it to the <code>all_components</code> vector in the <code>extract_for_language</code> function:</p>
-<div class="language-rust highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">all_components</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="o">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">dyn</span><span class="w"> </span><span class="n">AnalysisComponent</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="p">(</span><span class="s">&quot;morphology&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">morphology_comp</span><span class="p">),</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="p">(</span><span class="s">&quot;complexity&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">ComplexityAnalysis</span><span class="p">::</span><span class="n">default</span><span class="p">()),</span><span class="w"> </span><span class="c1">// Your new component</span>
+<p>In <code>panini-langs/src/registry.rs</code>, add it to the component list:</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">components</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="n">AnalysisComponent</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nb">Box</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">MorphologyAnalysis</span><span class="p">),</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nb">Box</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">ComplexityAnalysis</span><span class="p">),</span><span class="w"> </span><span class="c1">// Your new component</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">];</span>
 </span></code></pre></div>
 <hr />
-<h2 id="recommended-patterns">🏗 Recommended Patterns</h2>
+<h2 id="making-a-component-aggregable">Making a Component Aggregable</h2>
+<p>If your component's output contains statistical data (counts, distributions), implement the <code>Aggregating&lt;L&gt;</code> sub-trait and override <code>as_aggregating</code>. The aggregation pipeline (<code>aggregate_extraction</code>) will then invoke your component automatically — no manual dispatch needed anywhere.</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">use</span><span class="w"> </span><span class="n">panini_core</span><span class="p">::</span><span class="n">component</span><span class="p">::{</span><span class="n">AggregationError</span><span class="p">,</span><span class="w"> </span><span class="n">Aggregating</span><span class="p">};</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">use</span><span class="w"> </span><span class="n">panini_core</span><span class="p">::</span><span class="n">aggregable</span><span class="p">::</span><span class="n">digest</span><span class="p">::{</span><span class="n">AggregationContribution</span><span class="p">,</span><span class="w"> </span><span class="n">AggregationSink</span><span class="p">};</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">use</span><span class="w"> </span><span class="n">panini_core</span><span class="p">::</span><span class="n">aggregable</span><span class="p">::{</span><span class="n">FieldDescriptor</span><span class="p">,</span><span class="w"> </span><span class="n">FieldKind</span><span class="p">};</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">impl</span><span class="o">&lt;</span><span class="n">L</span><span class="p">:</span><span class="w"> </span><span class="nc">LinguisticDefinition</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Aggregating</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">ComplexityAnalysis</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">aggregate_section</span><span class="p">(</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="n">_lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="n">section</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="n">sink</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="k">dyn</span><span class="w"> </span><span class="n">AggregationSink</span><span class="p">,</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="p">(),</span><span class="w"> </span><span class="n">AggregationError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">result</span><span class="p">:</span><span class="w"> </span><span class="nc">ComplexityResult</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">from_value</span><span class="p">(</span><span class="n">section</span><span class="p">.</span><span class="n">clone</span><span class="p">())</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="p">.</span><span class="n">map_err</span><span class="p">(</span><span class="o">|</span><span class="n">e</span><span class="o">|</span><span class="w"> </span><span class="n">AggregationError</span><span class="p">::</span><span class="n">Deserialize</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;complexity&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">source</span><span class="p">:</span><span class="w"> </span><span class="nc">e</span><span class="w"> </span><span class="p">})</span><span class="o">?</span><span class="p">;</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">        </span><span class="n">sink</span><span class="p">.</span><span class="n">record_contribution</span><span class="p">(</span><span class="n">AggregationContribution</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="n">group</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;complexity&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">            </span><span class="n">descriptors</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="n">FieldDescriptor</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;level&quot;</span><span class="p">.</span><span class="n">into</span><span class="p">(),</span><span class="w"> </span><span class="n">kind</span><span class="p">:</span><span class="w"> </span><span class="nc">FieldKind</span><span class="p">::</span><span class="n">Closed</span><span class="w"> </span><span class="p">}],</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">            </span><span class="n">observations</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="fm">vec!</span><span class="p">[(</span><span class="s">&quot;level&quot;</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">level</span><span class="p">))]],</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="n">total_increment</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">        </span><span class="p">});</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">        </span><span class="nb">Ok</span><span class="p">(())</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Then opt in by overriding <code>as_aggregating</code> in your <code>AnalysisComponent</code> impl:</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">as_aggregating</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Option</span><span class="o">&lt;&amp;</span><span class="k">dyn</span><span class="w"> </span><span class="n">Aggregating</span><span class="o">&lt;</span><span class="n">L</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>Components that don't contribute to aggregation don't need to override <code>as_aggregating</code> — the default returns <code>None</code> and the component is silently skipped during aggregation passes.</p>
+<hr />
+<h2 id="recommended-patterns">Recommended Patterns</h2>
 <h3 id="target-word-vs-context">Target Word vs. Context</h3>
-<p>Most linguistic components (like <code>MorphologyAnalysis</code>) follow the <code>SplitResult</code> pattern to distinguish the user's focus words from the rest of the sentence.</p>
-<div class="language-rust highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="cp">#[derive(Debug, Serialize, Deserialize, JsonSchema)]</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">SplitResult</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">target_features</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">context_features</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">}</span>
+<p>Most linguistic components (like <code>MorphologyAnalysis</code>) follow the split pattern to distinguish the user's focus words from the rest of the sentence.</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">#[derive(Debug, Serialize, Deserialize, JsonSchema)]</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">SplitResult</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">target_features</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">context_features</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
 </span></code></pre></div>
 <pre class="mermaid"><code>graph LR
     subgraph "Sentence: 'Le petit chat'"
@@ -1185,6 +1260,13 @@
 
     style W3 fill:#f96,stroke:#333</code></pre>
 <p>Using this pattern ensures consistency across the framework and simplifies UI rendering (e.g., highlighting target words).</p>
+<h3 id="language-gated-components">Language-Gated Components</h3>
+<p>If your component only makes sense for certain languages, override <code>is_compatible</code>:</p>
+<div class="language-rust highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">fn</span><span class="w"> </span><span class="nf">is_compatible</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">lang</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">L</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span><span class="n">lang</span><span class="p">.</span><span class="n">typological_features</span><span class="p">().</span><span class="n">contains</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TypologicalFeature</span><span class="p">::</span><span class="n">Agglutination</span><span class="p">)</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>The extraction pipeline calls <code>is_compatible</code> before invoking any hook (schema, prompt, <code>aggregate_section</code>). Incompatible components are silently skipped.</p>
 
 
 
