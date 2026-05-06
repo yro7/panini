@@ -5,9 +5,13 @@ use pythonize::{depythonize, pythonize};
 use std::collections::HashMap;
 
 use panini_core::aggregable::digest::{
-    AggregationResult, Aggregator, BasicAggregator, Dimension, Distribution, GroupResult, Inventory,
+    AggregationResult, AggregationSink, Aggregator, BasicAggregator, Dimension, Distribution,
+    GroupResult, Inventory,
 };
 use panini_core::aggregable::Aggregable;
+use panini_core::component::{AggregationError, AnalysisComponent, ExtractionResult};
+use panini_core::components::{MorphemeSegmentation, MorphologyAnalysis};
+use panini_core::traits::LinguisticDefinition;
 
 #[pyclass(name = "Distribution")]
 #[derive(Clone)]
@@ -171,45 +175,54 @@ impl PyBasicAggregator {
         pivot_callback: Option<PyObject>,
     ) -> PyResult<()> {
         let agg = self.inner_mut()?;
-        // Dispatches the extraction result to the correct morphology enum
-        // and records it into the aggregator.
+
         macro_rules! dispatch_record {
             ($($lang:ident),*) => {
                 match lang_code {
                     $(
-                        s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                        s if s == <panini_langs::$lang as LinguisticDefinition>::ISO_LANG.to_639_3() => {
                             use panini_langs::$lang;
-                            use panini_core::traits::LinguisticDefinition;
                             use panini_core::domain::ExtractedFeature;
 
-                            // We expect a morphology object containing target_features and context_features
-                            if let Some(morph) = value.get("morphology") {
-                                for field in ["target_features", "context_features"] {
-                                    if let Some(val) = morph.get(field) {
-                                        let features: Vec<ExtractedFeature<<$lang as LinguisticDefinition>::Morphology>> = serde_json::from_value(val.clone())
-                                            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Failed to parse {}: {}", field, e)))?;
-                                        for feat in features {
-                                            if let Some(cb) = &pivot_callback {
+                            if let Some(cb) = &pivot_callback {
+                                // Pivoted path: typed iteration so Python callback receives
+                                // a structured morphology object (field-accessible dict).
+                                if let Some(morph) = value.get("morphology") {
+                                    for field in ["target_features", "context_features"] {
+                                        if let Some(val) = morph.get(field) {
+                                            let features: Vec<ExtractedFeature<<$lang as LinguisticDefinition>::Morphology>> =
+                                                serde_json::from_value(val.clone())
+                                                    .map_err(|e| pyo3::exceptions::PyValueError::new_err(
+                                                        format!("Failed to parse {}: {}", field, e)
+                                                    ))?;
+                                            for feat in features {
                                                 let key = Python::with_gil(|py| -> PyResult<String> {
                                                     let dict = pythonize(py, &feat.morphology)?;
                                                     let res = cb.call1(py, (dict,))?;
                                                     res.extract::<String>(py)
                                                 })?;
                                                 agg.record(&feat.morphology.pivoted(|_| key.clone()));
-                                            } else {
-                                                agg.record(&feat.morphology);
                                             }
                                         }
                                     }
                                 }
-                            }
-                            // Also handle morpheme_segmentation if present
-                            if let Some(seg_val) = value.get("morpheme_segmentation") {
-                                use panini_core::morpheme::WordSegmentation;
-                                let segments: Vec<WordSegmentation<<$lang as LinguisticDefinition>::GrammaticalFunction>> = serde_json::from_value(seg_val.clone())
-                                    .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("Failed to parse morpheme_segmentation: {}", e)))?;
-                                for seg in segments {
-                                    agg.record(&seg);
+                            } else {
+                                // Non-pivoted path: component-driven dispatch.
+                                let lang = $lang;
+                                let morph = MorphologyAnalysis;
+                                let seg = MorphemeSegmentation;
+                                let components: &[&dyn AnalysisComponent<$lang>] = &[&morph, &seg];
+                                let extraction = ExtractionResult::new(
+                                    value.clone(),
+                                    components.iter().map(|c| c.schema_key()).collect(),
+                                );
+                                for comp in components.iter().filter(|c| c.is_compatible(&lang)) {
+                                    if let Some(a) = comp.as_aggregating() {
+                                        if let Some(section) = extraction.get_raw(comp.schema_key()) {
+                                            a.aggregate_section(&lang, section, agg)
+                                                .map_err(|e: AggregationError| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+                                        }
+                                    }
                                 }
                             }
                         }
