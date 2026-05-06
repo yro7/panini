@@ -1,5 +1,5 @@
 [package]
-name = "panini"
+name = "panini-lang"
 version = "0.3.0"
 edition = "2024"
 description = "Main entry point and orchestration for the Panini linguistic feature extraction framework"
