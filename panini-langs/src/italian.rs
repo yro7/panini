@@ -164,6 +164,13 @@ impl LinguisticDefinition for Italian {
     type GrammaticalFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Ita;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        ItalianMorphology::PIVOT_TENSE,
+        ItalianMorphology::PIVOT_MOOD,
+        ItalianMorphology::PIVOT_GENDER,
+        ItalianMorphology::PIVOT_NUMBER,
+        ItalianMorphology::PIVOT_CLITIC,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

@@ -75,7 +75,7 @@ pub fn is_option_type(ty: &Type) -> bool {
 /// Coarse classification of a field type used by the aggregable codegen.
 ///
 /// `Option` is **not** handled here — callers filter those out first.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum FieldClass {
     /// Plain `String` — emitted as `FieldKind::Open`.
     String,

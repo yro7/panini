@@ -294,7 +294,19 @@ impl LinguisticDefinition for Arabic {
     type Morphology = ArabicMorphology;
     type GrammaticalFunction = ();
 
+    // TODO: add automatically some pivot if languages features something
+    // e.g : case if has declension, tense if conjugation, etc
     const ISO_LANG: IsoLang = IsoLang::Ara;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        ArabicMorphology::PIVOT_ROOT,
+        ArabicMorphology::PIVOT_CASE,
+        ArabicMorphology::PIVOT_GENDER,
+        ArabicMorphology::PIVOT_NUMBER,
+        ArabicMorphology::PIVOT_TENSE,
+        ArabicMorphology::PIVOT_MOOD,
+        ArabicMorphology::PIVOT_VOICE,
+        ArabicMorphology::PIVOT_FORM,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::ARAB]

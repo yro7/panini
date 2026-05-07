@@ -220,6 +220,13 @@ impl LinguisticDefinition for French {
     type GrammaticalFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Fra;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        FrenchMorphology::PIVOT_TENSE,
+        FrenchMorphology::PIVOT_MOOD,
+        FrenchMorphology::PIVOT_GENDER,
+        FrenchMorphology::PIVOT_NUMBER,
+        FrenchMorphology::PIVOT_VOICE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]

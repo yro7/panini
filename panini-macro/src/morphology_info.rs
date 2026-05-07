@@ -1,5 +1,5 @@
 use crate::helpers::{classify, is_option_type, FieldClass};
-use heck::ToSnakeCase;
+use heck::{ToShoutySnakeCase, ToSnakeCase};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
@@ -110,10 +110,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let ts_getters = generate_field_getters(name, &variant_infos);
     let ts_aggregable = generate_aggregable_impl(name, &variant_infos);
     let ts_catalog = generate_catalog_impl(name, &variant_infos);
+    let ts_pivots = match generate_pivot_fields(name, &variant_infos) {
+        Ok(ts) => ts,
+        Err(err) => return err.to_compile_error().into(),
+    };
 
     let expanded = quote! {
         #ts_traits
         #ts_getters
+        #ts_pivots
         #ts_aggregable
         #ts_catalog
     };
@@ -205,6 +210,156 @@ fn generate_catalog_impl(
 struct VariantInfo<'a> {
     ident: &'a syn::Ident,
     aggregable: Vec<(&'a syn::Field, FieldClass)>,
+}
+
+struct PivotFieldInfo<'a> {
+    name: String,
+    label: String,
+    class: FieldClass,
+    ty: &'a syn::Type,
+}
+
+fn field_label(name: &str) -> String {
+    name.split('_')
+        .filter(|part| !part.is_empty())
+        .map(|part| {
+            let mut chars = part.chars();
+            match chars.next() {
+                Some(first) => format!("{}{}", first.to_uppercase(), chars.as_str()),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+fn collect_pivot_fields<'a>(
+    variant_infos: &'a [VariantInfo<'a>],
+) -> Result<Vec<PivotFieldInfo<'a>>, syn::Error> {
+    let mut fields: Vec<PivotFieldInfo<'a>> = Vec::new();
+
+    for info in variant_infos {
+        for (field, class) in &info.aggregable {
+            let name = field.ident.as_ref().unwrap().to_string();
+            if name == "lemma" {
+                continue;
+            }
+
+            if let Some(existing) = fields.iter().find(|candidate| candidate.name == name) {
+                let existing_ty = existing.ty;
+                let current_ty = &field.ty;
+                let same_type =
+                    quote! { #existing_ty }.to_string() == quote! { #current_ty }.to_string();
+                if existing.class != *class || !same_type {
+                    return Err(syn::Error::new_spanned(
+                        field,
+                        format!(
+                            "MorphologyInfo: field `{name}` appears with incompatible types across variants; use a single type for pivot generation"
+                        ),
+                    ));
+                }
+                continue;
+            }
+
+            fields.push(PivotFieldInfo {
+                label: field_label(&name),
+                name,
+                class: *class,
+                ty: &field.ty,
+            });
+        }
+    }
+
+    fields.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(fields)
+}
+
+fn generate_pivot_fields(
+    name: &syn::Ident,
+    variant_infos: &[VariantInfo],
+) -> Result<proc_macro2::TokenStream, syn::Error> {
+    let fields = collect_pivot_fields(variant_infos)?;
+
+    let extractors = fields.iter().map(|field| {
+        let field_name = &field.name;
+        let fn_ident = quote::format_ident!("__pivot_{}", field_name);
+        let arms = variant_infos.iter().map(|info| {
+            let variant_ident = info.ident;
+            let matching_field = info
+                .aggregable
+                .iter()
+                .find(|(candidate, _)| candidate.ident.as_ref().unwrap() == field_name);
+
+            if let Some((matching_field, class)) = matching_field {
+                let field_ident = matching_field.ident.as_ref().unwrap();
+                match class {
+                    FieldClass::String => quote! {
+                        Self::#variant_ident { #field_ident, .. } => Some(#field_ident.clone()),
+                    },
+                    FieldClass::Bool => quote! {
+                        Self::#variant_ident { #field_ident, .. } => Some(#field_ident.to_string()),
+                    },
+                    FieldClass::Closed => quote! {
+                        Self::#variant_ident { #field_ident, .. } => {
+                            Some(panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string())
+                        },
+                    },
+                }
+            } else {
+                quote! {
+                    Self::#variant_ident { .. } => None,
+                }
+            }
+        });
+
+        quote! {
+            fn #fn_ident(&self) -> Option<String> {
+                match self {
+                    #(#arms)*
+                }
+            }
+        }
+    });
+
+    let constants = fields.iter().map(|field| {
+        let const_ident = quote::format_ident!("PIVOT_{}", field.name.to_shouty_snake_case());
+        let fn_ident = quote::format_ident!("__pivot_{}", field.name);
+        let key = &field.name;
+        let label = &field.label;
+        let ty = field.ty;
+
+        match field.class {
+            FieldClass::String => quote! {
+                pub const #const_ident: panini_core::pivot::PivotField<Self> =
+                    panini_core::pivot::PivotField::open(#key, #label, Self::#fn_ident);
+            },
+            FieldClass::Bool => quote! {
+                pub const #const_ident: panini_core::pivot::PivotField<Self> =
+                    panini_core::pivot::PivotField::closed(
+                        #key,
+                        #label,
+                        panini_core::pivot::bool_values,
+                        Self::#fn_ident,
+                    );
+            },
+            FieldClass::Closed => quote! {
+                pub const #const_ident: panini_core::pivot::PivotField<Self> =
+                    panini_core::pivot::PivotField::closed(
+                        #key,
+                        #label,
+                        <#ty as panini_core::aggregable::ClosedValues>::all_variants,
+                        Self::#fn_ident,
+                    );
+            },
+        }
+    });
+
+    Ok(quote! {
+        impl #name {
+            #(#extractors)*
+            #(#constants)*
+        }
+    })
 }
 
 /// Generates the `PosTag` enum representing isolated parts of speech,

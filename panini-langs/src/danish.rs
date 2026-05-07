@@ -238,6 +238,15 @@ impl LinguisticDefinition for Danish {
     type GrammaticalFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Dan;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        DanishMorphology::PIVOT_GENDER,
+        DanishMorphology::PIVOT_NUMBER,
+        DanishMorphology::PIVOT_CASE,
+        DanishMorphology::PIVOT_DEFINITENESS,
+        DanishMorphology::PIVOT_MOOD,
+        DanishMorphology::PIVOT_VOICE,
+        DanishMorphology::PIVOT_DEGREE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]
