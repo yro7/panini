@@ -4,6 +4,7 @@ pub mod components;
 pub mod domain;
 pub mod morpheme;
 pub mod morphology_enums;
+pub mod pivot;
 pub mod text_processing;
 pub mod traits;
 
@@ -16,6 +17,7 @@ pub use component::{
     AggregationError, Aggregating, AnalysisComponent, ComponentContext, ComponentRequires,
     ExtractionResult, ExtractionResultError, LanguageLevel,
 };
+pub use pivot::{PivotField, PivotMeta, PivotValueKind};
 pub use traits::{
     FunctionVariantSchema, GrammaticalFunctionCatalog, LinguisticDefinition, MorphologyCatalog,
     MorphologyGroupSchema, MorphologyInfo,

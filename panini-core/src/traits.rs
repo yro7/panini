@@ -166,7 +166,8 @@ pub trait LinguisticDefinition {
         + MorphologyInfo
         + crate::aggregable::Aggregable
         + Send
-        + Sync;
+        + Sync
+        + 'static;
 
     /// The grammatical function type for morpheme segmentation.
     /// Non-agglutinative languages set this to `()`.
@@ -182,10 +183,18 @@ pub trait LinguisticDefinition {
         + schemars::JsonSchema
         + crate::aggregable::AggregableFields
         + Send
-        + Sync;
+        + Sync
+        + 'static;
 
     /// The ISO 639-3 language as a typed enum variant — invalid codes are impossible to express.
     const ISO_LANG: IsoLang;
+
+    /// Curated morphology pivots considered pedagogically useful for this language.
+    const MORPHOLOGY_PIVOTS: &'static [crate::pivot::PivotField<Self::Morphology>] = &[];
+
+    /// Curated morpheme-function pivots. Agglutinative languages opt in here;
+    /// non-agglutinative languages use the empty default.
+    const MORPHEME_PIVOTS: &'static [crate::pivot::PivotField<Self::GrammaticalFunction>] = &[];
 
     /// Returns the ISO 639-3 three-letter code string (e.g. `"pol"`, `"tur"`, `"fra"`).
     fn iso_code(&self) -> &'static str {

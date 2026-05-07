@@ -675,6 +675,20 @@ impl LinguisticDefinition for Turkish {
     type GrammaticalFunction = TurkishGrammaticalFunction;
 
     const ISO_LANG: IsoLang = IsoLang::Tur;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        TurkishMorphology::PIVOT_CASE,
+        TurkishMorphology::PIVOT_TENSE,
+        TurkishMorphology::PIVOT_MOOD,
+        TurkishMorphology::PIVOT_VOICE,
+        TurkishMorphology::PIVOT_POLARITY,
+        TurkishMorphology::PIVOT_NUMBER,
+        TurkishMorphology::PIVOT_PERSON,
+    ];
+    const MORPHEME_PIVOTS: &'static [panini_core::pivot::PivotField<Self::GrammaticalFunction>] = &[
+        TurkishGrammaticalFunction::PIVOT_POLARITY,
+        TurkishGrammaticalFunction::PIVOT_TENSE,
+        TurkishGrammaticalFunction::PIVOT_CASE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]
