@@ -592,3 +592,49 @@ fn generate_aggregable_impl(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pivot_generation_rejects_incompatible_same_name_fields() {
+        let input: DeriveInput = syn::parse_quote! {
+            #[serde(tag = "pos")]
+            enum BadMorphology {
+                Noun { lemma: String, case: BadCase },
+                Verb { lemma: String, case: String },
+            }
+        };
+        let variants = match &input.data {
+            Data::Enum(data_enum) => &data_enum.variants,
+            _ => panic!("test input must be an enum"),
+        };
+
+        let variant_infos: Vec<VariantInfo<'_>> = variants
+            .iter()
+            .map(|variant| {
+                let fields = match &variant.fields {
+                    Fields::Named(fields) => &fields.named,
+                    _ => panic!("test variants must have named fields"),
+                };
+                let aggregable = fields
+                    .iter()
+                    .filter(|field| !is_option_type(&field.ty))
+                    .map(|field| (field, classify(&field.ty)))
+                    .collect();
+
+                VariantInfo {
+                    ident: &variant.ident,
+                    aggregable,
+                }
+            })
+            .collect();
+
+        let error = generate_pivot_fields(&input.ident, &variant_infos).unwrap_err();
+
+        assert!(error
+            .to_string()
+            .contains("appears with incompatible types across variants"));
+    }
+}

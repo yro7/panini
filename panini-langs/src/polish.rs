@@ -166,7 +166,10 @@ impl LinguisticDefinition for Polish {
     }
 
     fn typological_features(&self) -> &[TypologicalFeature] {
-        &[TypologicalFeature::Conjugation, TypologicalFeature::Declension]
+        &[
+            TypologicalFeature::Conjugation,
+            TypologicalFeature::Declension,
+        ]
     }
 
     fn extraction_directives(&self) -> &'static str {

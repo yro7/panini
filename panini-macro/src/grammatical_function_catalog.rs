@@ -1,7 +1,7 @@
+use heck::ToShoutySnakeCase;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-use heck::ToShoutySnakeCase;
 
 use crate::helpers::{
     classify, get_serde_value, pascal_to_snake_case, variant_serialized_name, FieldClass,
@@ -119,7 +119,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
             Fields::Named(fields) => &fields.named,
             _ => unreachable!("non-named variants rejected in pre-validation"),
         };
-        let field_idents: Vec<_> = fields.iter().map(|field| field.ident.as_ref().unwrap()).collect();
+        let field_idents: Vec<_> = fields
+            .iter()
+            .map(|field| field.ident.as_ref().unwrap())
+            .collect();
         let value_parts: Vec<_> = fields
             .iter()
             .map(|field| {
@@ -137,7 +140,11 @@ pub fn derive(input: TokenStream) -> TokenStream {
         let value_expr = if value_parts.len() == 1 {
             quote! { #(#value_parts)* }
         } else {
-            let fmt = value_parts.iter().map(|_| "{}").collect::<Vec<_>>().join("_");
+            let fmt = value_parts
+                .iter()
+                .map(|_| "{}")
+                .collect::<Vec<_>>()
+                .join("_");
             quote! { format!(#fmt, #(#value_parts),*) }
         };
 

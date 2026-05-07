@@ -23,17 +23,11 @@ pub enum ExtractionFailureReason {
 
     /// A specific component failed its internal validation.
     #[error("Validation failed for component '{key}': {message}")]
-    ComponentValidation {
-        key: &'static str,
-        message: String,
-    },
+    ComponentValidation { key: &'static str, message: String },
 
     /// A specific component failed its internal post-processing.
     #[error("Post-processing failed for component '{key}': {message}")]
-    ComponentPostProcess {
-        key: &'static str,
-        message: String,
-    },
+    ComponentPostProcess { key: &'static str, message: String },
 }
 
 /// Error returned when feature extraction parsing fails, carrying the raw LLM output and structured reason.

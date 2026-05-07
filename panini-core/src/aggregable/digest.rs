@@ -590,10 +590,14 @@ mod tests {
             kind: FieldKind::Closed(&["Nominative", "Accusative"]),
         }];
 
-        let items1 = vec![MockAggregable::new("Noun", descriptors.clone())
-            .with_observation(vec![("case".to_string(), "Nominative".to_string())])];
-        let items2 = vec![MockAggregable::new("Noun", descriptors)
-            .with_observation(vec![("case".to_string(), "Accusative".to_string())])];
+        let items1 = vec![
+            MockAggregable::new("Noun", descriptors.clone())
+                .with_observation(vec![("case".to_string(), "Nominative".to_string())]),
+        ];
+        let items2 = vec![
+            MockAggregable::new("Noun", descriptors)
+                .with_observation(vec![("case".to_string(), "Accusative".to_string())]),
+        ];
 
         let mut result = AggregationResult::default();
         result.extend(items1);
