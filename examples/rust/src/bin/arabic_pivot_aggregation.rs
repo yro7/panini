@@ -5,7 +5,7 @@ use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
 use rig::providers::gemini;
 use rig::client::CompletionClient;
-use panini_core::aggregable::digest::{BasicAggregator, Aggregator};
+use panini_core::aggregable::digest::{AggregationSink, BasicAggregator, Aggregator};
 use panini_core::aggregable::Aggregable;
 use panini_langs::arabic::ArabicMorphology;
 use panini_core::domain::ExtractedFeature;

@@ -61,6 +61,26 @@ for feature in &features {
 }
 ```
 
+For application-facing lexicon views, prefer the generated `PivotField` handles curated on `LinguisticDefinition`. They keep wire keys stable while preserving typed extraction in Rust:
+
+```rust
+let pivot = ArabicMorphology::PIVOT_ROOT;
+
+for feature in &features {
+    let key = pivot
+        .value(&feature.morphology)
+        .unwrap_or_else(|| feature.group_key());
+    agg.record(&feature.pivoted(|_| key.clone()));
+}
+```
+
+Closed handles expose their allowed values:
+
+```rust
+assert_eq!(PolishMorphology::PIVOT_CASE.key, "case");
+let cases = PolishMorphology::PIVOT_CASE.values();
+```
+
 ### Sink-Level Pivot (any contribution stream)
 
 Use `PivotingSink` when you want to re-key an entire contribution stream without touching individual items — see [Custom Aggregators](custom.md) for details.
@@ -91,14 +111,28 @@ for feature in &features {
 
 ---
 
-## 4. Automatic Discovery (Zero Configuration)
+## 4. Field Discovery vs Curated Pivots
 
-If you add a new field to your morphology (e.g., Aspect for a Verb), the digest system will automatically detect it without needing to modify the aggregator.
+If you add a new field to your morphology (e.g., Aspect for a Verb), the digest system will automatically include it in aggregation observations without needing to modify the aggregator.
 
 Thanks to the Pāṇini macros, a new line will automatically appear in your reports:
 ```text
   |- aspect [2/2]: perfective(12), imperfective(8)
 ```
+
+That is different from publishing a pivot to users. User-facing pivot choices are curated per language:
+
+```rust
+impl LinguisticDefinition for Polish {
+    // ...
+    const MORPHOLOGY_PIVOTS: &'static [PivotField<Self::Morphology>] = &[
+        PolishMorphology::PIVOT_CASE,
+        PolishMorphology::PIVOT_ASPECT,
+    ];
+}
+```
+
+This keeps analysis rich internally while preventing frontends and APIs from exposing noisy or accidental dimensions.
 
 ---
 

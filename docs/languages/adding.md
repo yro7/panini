@@ -69,6 +69,17 @@ The framework translates `PolishMorphology` into a JSON schema ensuring the LLM 
 }
 ```
 
+**Generated Pivot Handles:**
+`#[derive(MorphologyInfo)]` also emits typed handles for non-optional, non-`lemma` fields. These handles are named `PIVOT_<FIELD>` and carry both metadata and a typed extractor.
+
+```rust
+PolishMorphology::PIVOT_CASE;   // closed pivot: values come from PolishCase
+PolishMorphology::PIVOT_ASPECT; // closed pivot: values come from SlavicAspect
+ArabicMorphology::PIVOT_ROOT;   // open pivot: String root values
+```
+
+If two POS variants define a pivotable field with the same name but incompatible types, the macro fails compilation. For example, `Noun { case: PolishCase }` and `Verb { case: String }` must be reconciled before the field can be exposed as a pivot.
+
 ### 3. Implement LinguisticDefinition
 This is where you define the language's identity and its extraction instructions.
 
@@ -78,7 +89,14 @@ pub struct Polish;
 impl LinguisticDefinition for Polish {
     type Morphology = PolishMorphology;
     type GrammaticalFunction = (); // Non-agglutinative
-    const ISO_CODE: &'static str = "pol";
+    const ISO_LANG: IsoLang = IsoLang::Pol;
+
+    const MORPHOLOGY_PIVOTS: &'static [PivotField<Self::Morphology>] = &[
+        PolishMorphology::PIVOT_CASE,
+        PolishMorphology::PIVOT_ASPECT,
+        PolishMorphology::PIVOT_GENDER,
+        PolishMorphology::PIVOT_TENSE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]
@@ -91,6 +109,8 @@ impl LinguisticDefinition for Polish {
     }
 }
 ```
+
+`MORPHOLOGY_PIVOTS` is intentionally curated. Do not expose every generated handle by default; pick the dimensions that make sense for learners or analytics in that language. Languages that do not need published pivots can omit the constant and use the empty default.
 
 **Prompts Composition Effect:**
 The framework will merge these directives into the global system prompt to steer the LLM's logic for the target language.

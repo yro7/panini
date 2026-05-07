@@ -7,6 +7,12 @@ use crate::helpers::{
     classify, get_serde_value, pascal_to_snake_case, variant_serialized_name, FieldClass,
 };
 
+/// Derives a static catalog and typed `PIVOT_*` handles for grammatical
+/// function enums used by morpheme segmentation.
+///
+/// Each named variant becomes a pivot category. The generated extractor returns
+/// a value only for matching variants, so `PIVOT_POLARITY` applies to
+/// `Polarity { .. }` morphemes and returns `None` for `Tense { .. }`.
 pub fn derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
