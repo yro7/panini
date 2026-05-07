@@ -23,7 +23,7 @@ graph TD
 | Crate | Responsibility | Key Files |
 | :--- | :--- | :--- |
 | `panini-macro` | Proc-macro derivations. | `morphology_info.rs`, `panini_result.rs` |
-| `panini-core` | Traits, shared enums, and built-in components. | `traits.rs`, `component.rs`, `morphology_enums.rs` |
+| `panini-core` | Traits, shared enums, pivot metadata, and built-in components. | `traits.rs`, `pivot.rs`, `component.rs`, `morphology_enums.rs` |
 | `panini-engine` | LLM orchestration and pipeline entry points. | `extractor.rs`, `composer.rs`, `prompts.rs` |
 | `panini-langs` | Language implementations and registry dispatch. | `registry.rs`, `arabic.rs`, `french.rs`, etc. |
 
@@ -42,7 +42,15 @@ pub struct French;
 impl LinguisticDefinition for French {
     type Morphology = FrenchMorphology;
     type GrammaticalFunction = (); // Non-agglutinative
-    const ISO_CODE: &'static str = "fra";
+    const ISO_LANG: IsoLang = IsoLang::Fra;
+
+    const MORPHOLOGY_PIVOTS: &'static [PivotField<Self::Morphology>] = &[
+        FrenchMorphology::PIVOT_TENSE,
+        FrenchMorphology::PIVOT_MOOD,
+        FrenchMorphology::PIVOT_GENDER,
+        FrenchMorphology::PIVOT_NUMBER,
+        FrenchMorphology::PIVOT_VOICE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] { &[Script::LATN] }
     fn default_script(&self) -> Script { Script::LATN }
@@ -51,6 +59,8 @@ impl LinguisticDefinition for French {
     }
 }
 ```
+
+`MORPHOLOGY_PIVOTS` and `MORPHEME_PIVOTS` are curated lists for downstream analytics. Their defaults are empty, so languages only opt in to pivots that are actually useful.
 
 ### `AnalysisComponent<L>`
 Defines a composable analysis unit.
@@ -105,6 +115,15 @@ pub enum PolishMorphology {
 > [!IMPORTANT]
 > **Compilation Check**
 > If you add a variant `Other { text: String }` without a `lemma` field, the code will **fail to compile** with a clear error from the macro.
+
+The derive also generates `PivotField` constants for pivotable fields:
+
+```rust
+PolishMorphology::PIVOT_CASE; // key: "case", closed values from PolishCase
+ArabicMorphology::PIVOT_ROOT; // key: "root", open String values
+```
+
+Use these handles in `LinguisticDefinition::MORPHOLOGY_PIVOTS` instead of writing pivot keys by hand. If two variants reuse the same field name with incompatible types, the macro emits a compile error so the pivot contract cannot become ambiguous.
 
 ### `#[derive(PaniniResult)]`
 Generates a type-safe extraction interface.

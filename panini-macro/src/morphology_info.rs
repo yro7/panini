@@ -11,6 +11,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 /// 2. An implementation of `MorphologyInfo` returning the lemma, pos label, and pos tag.
 /// 3. Getter methods for all unique aggregable fields (e.g. `pub fn gender(&self) -> Option<String>`).
 /// 4. An implementation of `Aggregable` for statistical grouping and analysis.
+/// 5. Typed `PIVOT_*` handles for non-optional, non-lemma fields.
 pub fn derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;

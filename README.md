@@ -302,6 +302,7 @@ result = extract(
 
 **You define:**
 - A **morphology enum** — the features you want extracted (POS, case, tense, aspect, gender… whatever your language needs)
+- **Curated pivot handles** — the morphology or morpheme fields that downstream lexicon analytics should expose
 - **Extraction directives** — natural-language instructions that guide the LLM on how to analyze your language
 - **Optional morpheme segmentation** — for agglutinative languages, a morpheme inventory with validation rules
 - **Optional post-processing** — hooks to validate or enrich the LLM's output after parsing
@@ -315,7 +316,7 @@ result = extract(
 ## Design principles
 
 - **No universal schema.** Each language defines its own morphology enum with exactly the features it needs. Polish has 7 cases and verbal aspect. Arabic has triliteral roots and wazn patterns. There is no lowest-common-denominator `Morphology` struct.
-- **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The LLM's JSON output is parsed into these types and rejected if it doesn't conform.
+- **Type safety over convention.** Morphology variants are strongly typed Rust enums, validated at compile time via `#[derive(MorphologyInfo)]`. Every variant must carry a `lemma`. The same macros generate typed `PIVOT_*` handles, so applications can expose stable wire keys without hand-authoring string pivots.
 - **LLM as untrusted source.** Responses are validated against a JSON schema, deserialized into typed structs, then post-processed. On parse failure, the raw output and error are returned for retry with self-correction.
 - **Provider-agnostic via rig.** The engine accepts any `rig::completion::CompletionModel` — OpenAI, Anthropic, Google Gemini, Mistral, Ollama, or any custom provider.
 - **Opt-in complexity.** A simple language (Polish) needs a morphology enum and a few directives. An agglutinative language (Turkish) can opt into morpheme inventories, segmentation, and validation. You only implement what you need.
@@ -324,7 +325,7 @@ result = extract(
 
 ```
 panini/              # Facade crate, re-exports everything
-panini-core/         # Traits, domain types, morphology enums, components
+panini-core/         # Traits, domain types, pivot metadata, morphology enums, components
   src/components/    # AnalysisComponent implementations
 panini-engine/       # LLM extraction pipeline, prompt assembly, schema composer
 panini-langs/        # Per-language implementations (Polish, Arabic, Turkish)
@@ -346,7 +347,8 @@ You should ALWAYS check the file output, especially for linguistic definitions, 
 1. Create `panini-langs/src/<language>.rs`
 2. Define a `Morphology` enum with `#[derive(MorphologyInfo)]` and `#[serde(tag = "pos")]` -- every variant must have `lemma: String` as its first field
 3. Implement `LinguisticDefinition` on a unit struct
-4. For agglutinative languages, also implement `Agglutinative` with a morpheme inventory
+4. Curate `MORPHOLOGY_PIVOTS` with generated handles such as `PolishMorphology::PIVOT_CASE`
+5. For agglutinative languages, also derive `GrammaticalFunctionCatalog`, implement `Agglutinative` with a morpheme inventory, and curate `MORPHEME_PIVOTS`
 
 See `panini-langs/src/polish.rs` or `panini-langs/src/turkish.rs` as references.
 

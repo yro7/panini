@@ -52,15 +52,36 @@ graph TD
 Unlike fusion languages, agglutinative languages define a `GrammaticalFunction` enum that describes the role of each morpheme.
 
 ```rust
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema, panini_macro::AggregableFields)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::AggregableFields,
+    panini_macro::GrammaticalFunctionCatalog,
+)]
+#[serde(tag = "category", rename_all = "snake_case")]
 pub enum TurkishGrammaticalFunction {
     Case { value: TurkishCase },
     Tense { value: TurkishTense },
+    Polarity { value: TurkishPolarity },
     Agreement { person: Person, number: BinaryNumber },
     Possessive { person: Person, number: BinaryNumber },
     Derivation { value: TurkishDerivation },
 }
 ```
+
+`#[derive(GrammaticalFunctionCatalog)]` generates curated-pivot handles for each function category:
+
+```rust
+TurkishGrammaticalFunction::PIVOT_CASE;
+TurkishGrammaticalFunction::PIVOT_TENSE;
+TurkishGrammaticalFunction::PIVOT_POLARITY;
+```
+
+For single-field variants, the pivot is closed when the field type implements `ClosedValues` and open when it is a `String`. For multi-field variants such as `Agreement { person, number }`, the generated pivot key represents that function category and extracts a combined value only from matching `Agreement` morphemes.
 
 ### 2. Morpheme Inventory
 Define a static list of `MorphemeDefinition`. These morphemes map archiphonemes to grammatical functions.
@@ -103,6 +124,12 @@ Sometimes the LLM response needs additional verification or static label injecti
 ```rust
 impl LinguisticDefinition for Turkish {
     // ...
+    const MORPHEME_PIVOTS: &'static [PivotField<Self::GrammaticalFunction>] = &[
+        TurkishGrammaticalFunction::PIVOT_POLARITY,
+        TurkishGrammaticalFunction::PIVOT_TENSE,
+        TurkishGrammaticalFunction::PIVOT_CASE,
+    ];
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<Self::GrammaticalFunction>>>,
@@ -122,3 +149,5 @@ impl LinguisticDefinition for Turkish {
     }
 }
 ```
+
+Morpheme pivots are opt-in. Non-agglutinative languages normally keep `type GrammaticalFunction = ()` and do not declare `MORPHEME_PIVOTS`.
