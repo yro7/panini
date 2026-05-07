@@ -8,13 +8,13 @@ pub mod pivot;
 pub mod text_processing;
 pub mod traits;
 
-pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor, FieldKind};
 pub use aggregable::digest::{
-    record_aggregable, AggregationContribution, AggregationSink, Aggregator, BasicAggregator,
-    PivotingSink,
+    AggregationContribution, AggregationSink, Aggregator, BasicAggregator, PivotingSink,
+    record_aggregable,
 };
+pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor, FieldKind};
 pub use component::{
-    AggregationError, Aggregating, AnalysisComponent, ComponentContext, ComponentRequires,
+    Aggregating, AggregationError, AnalysisComponent, ComponentContext, ComponentRequires,
     ExtractionResult, ExtractionResultError, LanguageLevel,
 };
 pub use pivot::{PivotField, PivotMeta, PivotValueKind};

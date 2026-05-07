@@ -2,9 +2,9 @@ use std::fmt::Debug;
 
 use serde::de::DeserializeOwned;
 
-use crate::aggregable::digest::{record_aggregable, AggregationSink};
 use crate::aggregable::Aggregable;
-use crate::component::{AggregationError, Aggregating, AnalysisComponent, ComponentContext};
+use crate::aggregable::digest::{AggregationSink, record_aggregable};
+use crate::component::{Aggregating, AggregationError, AnalysisComponent, ComponentContext};
 use crate::domain::ExtractedFeature;
 use crate::traits::LinguisticDefinition;
 

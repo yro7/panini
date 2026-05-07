@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
-use crate::aggregable::digest::{record_aggregable, AggregationSink};
 use crate::aggregable::AggregableFields;
-use crate::component::{AggregationError, Aggregating, AnalysisComponent, ComponentContext};
+use crate::aggregable::digest::{AggregationSink, record_aggregable};
+use crate::component::{Aggregating, AggregationError, AnalysisComponent, ComponentContext};
 use crate::morpheme::WordSegmentation;
 use crate::traits::{LinguisticDefinition, TypologicalFeature};
 
@@ -84,11 +84,9 @@ where
         sink: &mut dyn AggregationSink,
     ) -> Result<(), AggregationError> {
         let segmentations: Option<Vec<WordSegmentation<L::GrammaticalFunction>>> =
-            serde_json::from_value(section.clone()).map_err(|e| {
-                AggregationError::Deserialize {
-                    key: "morpheme_segmentation",
-                    source: e,
-                }
+            serde_json::from_value(section.clone()).map_err(|e| AggregationError::Deserialize {
+                key: "morpheme_segmentation",
+                source: e,
             })?;
 
         if let Some(segs) = segmentations {
