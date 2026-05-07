@@ -148,8 +148,14 @@ pub struct Polish;
 impl LinguisticDefinition for Polish {
     type Morphology = PolishMorphology;
     type GrammaticalFunction = ();
-
+    // TODO : add macro to generate pivots with big brain
     const ISO_LANG: IsoLang = IsoLang::Pol;
+    const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
+        PolishMorphology::PIVOT_CASE,
+        PolishMorphology::PIVOT_ASPECT,
+        PolishMorphology::PIVOT_GENDER,
+        PolishMorphology::PIVOT_TENSE,
+    ];
 
     fn supported_scripts(&self) -> &[Script] {
         &[Script::LATN]
