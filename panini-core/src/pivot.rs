@@ -10,12 +10,25 @@ pub enum PivotValueKind {
 /// The `key` is the stable wire identifier exposed to clients. It is generated
 /// by Panini macros from real Rust fields/variants; callers should curate by
 /// referencing these handles instead of hand-authoring string keys.
+///
+/// Morphology derives emit handles such as `PolishMorphology::PIVOT_CASE`.
+/// Grammatical-function derives emit handles such as
+/// `TurkishGrammaticalFunction::PIVOT_POLARITY`.
+///
+/// A closed pivot has a static value inventory, while an open pivot accepts any
+/// extracted string value (for example Arabic roots).
 #[derive(Clone, Copy)]
 pub struct PivotField<T: 'static> {
+    /// Stable wire key for API/frontend state, generated from the Rust field or
+    /// grammatical-function variant name.
     pub key: &'static str,
+    /// Human-readable label generated from the field or variant name.
     pub label: &'static str,
+    /// Whether values are open strings or a closed enum/bool inventory.
     pub value_kind: PivotValueKind,
+    /// Value inventory for closed pivots. Open pivots return an empty slice.
     pub values: fn() -> &'static [&'static str],
+    /// Typed extractor. Returns `None` when this pivot does not apply to the item.
     pub extract: fn(&T) -> Option<String>,
 }
 
