@@ -18,6 +18,9 @@ pub use danish::*;
 #[cfg(feature = "registry")]
 pub mod registry;
 
+pub mod mandarin_chinese;
+pub use mandarin_chinese::*;
+
 #[cfg(test)]
 mod pivot_tests {
     use panini_core::pivot::PivotValueKind;
