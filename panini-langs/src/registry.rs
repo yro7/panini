@@ -14,7 +14,7 @@ use panini_core::components::{
 use panini_engine::prompts::ExtractorPrompts;
 use panini_engine::{ExtractionOptions, ExtractionRequest, extract_with_components};
 
-use crate::{Arabic, Danish, French, Italian, Polish, Turkish, MandarinChinese};
+use crate::{Arabic, Danish, French, Italian, MandarinChinese, Polish, Turkish};
 
 /// Helper: build the component list for a concrete language and dispatch.
 async fn extract_for_language<L, M>(
@@ -128,7 +128,15 @@ macro_rules! generate_registry {
 }
 
 // Generate the registry for all supported languages
-generate_registry!(Polish, Turkish, Arabic, French, Italian, Danish, MandarinChinese);
+generate_registry!(
+    Polish,
+    Turkish,
+    Arabic,
+    French,
+    Italian,
+    Danish,
+    MandarinChinese
+);
 
 #[cfg(test)]
 mod tests {
