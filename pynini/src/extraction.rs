@@ -11,12 +11,10 @@ use panini_langs::registry;
 use rig::client::CompletionClient;
 use rig::providers::{anthropic, gemini, openai};
 
-const DEFAULT_PROMPTS_YAML: &str =
-    include_str!("../../panini-cli/prompts/default.yml");
+const DEFAULT_PROMPTS_YAML: &str = include_str!("../../panini-cli/prompts/default.yml");
 
 fn default_prompts() -> ExtractorPrompts {
-    serde_yml::from_str(DEFAULT_PROMPTS_YAML)
-        .expect("embedded default prompts must be valid YAML")
+    serde_yml::from_str(DEFAULT_PROMPTS_YAML).expect("embedded default prompts must be valid YAML")
 }
 
 /// Helper to load Prompts from a dictionary, a path, or fall back to embedded defaults.
@@ -49,7 +47,11 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
 }
 
 /// Helper to create an extraction request.
-const fn create_request(text: String, targets: Vec<String>, ui_language: String) -> ExtractionRequest {
+const fn create_request(
+    text: String,
+    targets: Vec<String>,
+    ui_language: String,
+) -> ExtractionRequest {
     ExtractionRequest {
         content: text,
         targets,
@@ -78,8 +80,9 @@ async fn do_extract(
 ) -> anyhow::Result<Value> {
     let request = create_request(text, targets, ui_language);
 
-    let component_refs: Option<Vec<&str>> =
-        components.as_ref().map(|c| c.iter().map(std::string::String::as_str).collect());
+    let component_refs: Option<Vec<&str>> = components
+        .as_ref()
+        .map(|c| c.iter().map(std::string::String::as_str).collect());
 
     match provider.as_str() {
         "openai" => {
