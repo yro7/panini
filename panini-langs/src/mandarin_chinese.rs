@@ -18,10 +18,10 @@ use panini_core::traits::{
 )]
 #[serde(rename_all = "snake_case")]
 pub enum ChineseAspect {
-    Perfective,    // 了 (le)
-    Progressive,   // 着 (zhe) / 在 (zai)
-    Experiential,  // 过 (guo)
-    Delimitative,  // reduplicated verbs (e.g., 看看)
+    Perfective,   // 了 (le)
+    Progressive,  // 着 (zhe) / 在 (zai)
+    Experiential, // 过 (guo)
+    Delimitative, // reduplicated verbs (e.g., 看看)
 }
 
 #[derive(
@@ -38,10 +38,10 @@ pub enum ChineseAspect {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum ChineseParticleType {
-    Structural,  // 的, 地, 得
-    Aspect,      // 了, 着, 过
-    Modal,       // 吗, 吧, 呢, 啊
-    Temporal,    // 以前, 以后
+    Structural, // 的, 地, 得
+    Aspect,     // 了, 着, 过
+    Modal,      // 吗, 吧, 呢, 啊
+    Temporal,   // 以前, 以后
 }
 
 #[derive(
