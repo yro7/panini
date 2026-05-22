@@ -254,6 +254,5 @@ fn load_prompts(config: &Config) -> Result<ExtractorPrompts> {
         )
     })?;
 
-    ExtractorPrompts::load(path)
-        .with_context(|| format!("Failed to load prompts from '{path}'"))
+    ExtractorPrompts::load(path).with_context(|| format!("Failed to load prompts from '{path}'"))
 }

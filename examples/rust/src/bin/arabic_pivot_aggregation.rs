@@ -1,16 +1,16 @@
 use anyhow::Result;
 use dotenv::dotenv;
-use std::env;
-use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
-use panini_langs::registry;
-use rig::providers::gemini;
-use rig::client::CompletionClient;
-use panini_core::aggregable::digest::{AggregationSink, BasicAggregator, Aggregator};
 use panini_core::aggregable::Aggregable;
-use panini_langs::arabic::ArabicMorphology;
-use panini_core::domain::ExtractedFeature;
+use panini_core::aggregable::digest::{AggregationSink, Aggregator, BasicAggregator};
 use panini_core::component::ExtractionResult;
+use panini_core::domain::ExtractedFeature;
+use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
+use panini_langs::arabic::ArabicMorphology;
+use panini_langs::registry;
+use rig::client::CompletionClient;
+use rig::providers::gemini;
 use serde::Deserialize;
+use std::env;
 
 #[derive(Deserialize)]
 struct MorphologySection<M> {
@@ -21,27 +21,29 @@ struct MorphologySection<M> {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
-    let api_key = env::var("GOOGLE_API_KEY")
-        .expect("GOOGLE_API_KEY must be set");
-    
+    let api_key = env::var("GOOGLE_API_KEY").expect("GOOGLE_API_KEY must be set");
+
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let prompts_path = std::path::Path::new(manifest_dir)
-        .join("../../panini-cli/prompts/default.yml");
+    let prompts_path =
+        std::path::Path::new(manifest_dir).join("../../panini-cli/prompts/default.yml");
     let prompts = ExtractorPrompts::load(prompts_path.to_str().unwrap())?;
 
     let client = gemini::Client::new(&api_key)?;
     let model = client.completion_model("gemini-3.1-flash-lite-preview");
 
     // 1. Load and prepare corpus
-    let data_path = std::path::Path::new(manifest_dir)
-        .join("../data/arabic_sample.txt");
+    let data_path = std::path::Path::new(manifest_dir).join("../data/arabic_sample.txt");
     let text = std::fs::read_to_string(data_path)?;
-    let sentences: Vec<String> = text.lines()
+    let sentences: Vec<String> = text
+        .lines()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .collect();
 
-    println!("--- Analyzing Arabic Corpus ({} sentences) ---", sentences.len());
+    println!(
+        "--- Analyzing Arabic Corpus ({} sentences) ---",
+        sentences.len()
+    );
 
     let mut pos_agg = BasicAggregator::new();
     let mut root_agg = BasicAggregator::new();
@@ -49,7 +51,11 @@ async fn main() -> Result<()> {
     // 2. Batch processing logic (n=5)
     for (i, batch) in sentences.chunks(5).enumerate() {
         let batch_text = batch.join(" ");
-        println!("\nProcessing batch {} ({} sentences)...", i + 1, batch.len());
+        println!(
+            "\nProcessing batch {} ({} sentences)...",
+            i + 1,
+            batch.len()
+        );
 
         let request = ExtractionRequest {
             content: batch_text,
@@ -70,13 +76,18 @@ async fn main() -> Result<()> {
             0.2,
             20000,
             &prompts,
-        ).await?;
+        )
+        .await?;
 
         // Get the morphology features safely
         let morph: MorphologySection<ArabicMorphology> = result.get("morphology")?;
-        
+
         // Record all features into aggregators
-        for feat in morph.target_features.iter().chain(morph.context_features.iter()) {
+        for feat in morph
+            .target_features
+            .iter()
+            .chain(morph.context_features.iter())
+        {
             // Aggregate by PoS
             pos_agg.record(&feat.morphology);
 

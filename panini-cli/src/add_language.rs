@@ -6,7 +6,7 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use rig::client::CompletionClient;
 use rig::completion::CompletionModel;
 
@@ -33,9 +33,8 @@ pub async fn run(
 ) -> Result<()> {
     // Validate ISO code if provided.
     if let Some(code) = iso_code {
-        isolang::Language::from_639_3(code).ok_or_else(|| {
-            anyhow!("ISO 639-3 code '{code}' not found in the isolang crate")
-        })?;
+        isolang::Language::from_639_3(code)
+            .ok_or_else(|| anyhow!("ISO 639-3 code '{code}' not found in the isolang crate"))?;
     }
 
     let workspace_root = find_workspace_root()?;
@@ -282,12 +281,12 @@ fn build_system_prompt(agglutinative: bool) -> String {
         prompt.push_str(
             "10. Set `type GrammaticalFunction` to a custom wrapper enum (see Turkish example).\n\
              11. Implement the `Agglutinative` trait with a complete morpheme inventory.\n\
-             12. Include `TypologicalFeature::Agglutination` in `typological_features()`.\n"
+             12. Include `TypologicalFeature::Agglutination` in `typological_features()`.\n",
         );
     } else {
         prompt.push_str(
             "10. Set `type GrammaticalFunction = ();` (this language is NOT agglutinative).\n\
-             11. Do NOT implement the `Agglutinative` trait.\n"
+             11. Do NOT implement the `Agglutinative` trait.\n",
         );
     }
 
@@ -295,7 +294,7 @@ fn build_system_prompt(agglutinative: bool) -> String {
         "\n## Output format\n\n\
          Output ONLY the Rust source code for the language module. \
          No markdown fences, no explanations, no comments outside the code. \
-         The output must be a complete, compilable Rust file.\n"
+         The output must be a complete, compilable Rust file.\n",
     );
 
     prompt
@@ -307,9 +306,7 @@ fn build_user_prompt(
     agglutinative: bool,
     previous_error: Option<&str>,
 ) -> String {
-    let mut prompt = format!(
-        "Generate the complete Rust implementation for: {language}"
-    );
+    let mut prompt = format!("Generate the complete Rust implementation for: {language}");
 
     if let Some(code) = iso_code {
         use std::fmt::Write;
@@ -326,12 +323,14 @@ fn build_user_prompt(
 
     if let Some(err) = previous_error {
         use std::fmt::Write;
-        write!(prompt,
+        write!(
+            prompt,
             "\n\n## PREVIOUS ATTEMPT FAILED\n\
              The code you generated previously failed to compile. Here are the errors:\n\n\
              {err}\n\n\
              Please fix ALL the compilation errors and output the corrected complete file."
-        ).unwrap();
+        )
+        .unwrap();
     }
 
     prompt
@@ -344,9 +343,7 @@ fn clean_generated_code(raw: &str) -> String {
 
     // Strip markdown code fences if present.
     let stripped = if trimmed.starts_with("```") {
-        let after_first_fence = trimmed
-            .find('\n')
-            .map_or(trimmed, |i| &trimmed[i + 1..]);
+        let after_first_fence = trimmed.find('\n').map_or(trimmed, |i| &trimmed[i + 1..]);
         after_first_fence
             .strip_suffix("```")
             .unwrap_or(after_first_fence)
@@ -415,12 +412,14 @@ fn patch_registry_rs(
 
 fn patch_import_line(content: &str, struct_name: &str) -> Result<String> {
     let marker = "use crate::{";
-    let start = content.find(marker).ok_or_else(|| {
-        anyhow!("Could not find '{marker}' in registry.rs")
-    })?;
-    let end = content[start..].find("};").ok_or_else(|| {
-        anyhow!("Could not find closing '}};\' for import in registry.rs")
-    })? + start + 2;
+    let start = content
+        .find(marker)
+        .ok_or_else(|| anyhow!("Could not find '{marker}' in registry.rs"))?;
+    let end = content[start..]
+        .find("};")
+        .ok_or_else(|| anyhow!("Could not find closing '}};\' for import in registry.rs"))?
+        + start
+        + 2;
 
     let import_line = &content[start..end];
 
@@ -452,12 +451,13 @@ fn patch_import_line(content: &str, struct_name: &str) -> Result<String> {
 
 fn patch_macro_invocation(content: &str, struct_name: &str) -> Result<String> {
     let marker = "generate_registry!(";
-    let start = content.find(marker).ok_or_else(|| {
-        anyhow!("Could not find 'generate_registry!(' in registry.rs")
-    })?;
-    let close = content[start..].find(");").ok_or_else(|| {
-        anyhow!("Could not find closing ');' for generate_registry! macro")
-    })? + start;
+    let start = content
+        .find(marker)
+        .ok_or_else(|| anyhow!("Could not find 'generate_registry!(' in registry.rs"))?;
+    let close = content[start..]
+        .find(");")
+        .ok_or_else(|| anyhow!("Could not find closing ');' for generate_registry! macro"))?
+        + start;
 
     let inner = &content[start + marker.len()..close];
 
@@ -504,8 +504,8 @@ fn find_workspace_root() -> Result<PathBuf> {
         return Err(anyhow!("cargo metadata failed"));
     }
 
-    let meta: serde_json::Value = serde_json::from_slice(&output.stdout)
-        .context("Failed to parse cargo metadata output")?;
+    let meta: serde_json::Value =
+        serde_json::from_slice(&output.stdout).context("Failed to parse cargo metadata output")?;
 
     let root = meta["workspace_root"]
         .as_str()
@@ -564,7 +564,10 @@ mod tests {
     fn test_patch_macro_invocation() {
         let content = "generate_registry!(Polish, Turkish, Arabic);";
         let result = patch_macro_invocation(content, "French").unwrap();
-        assert_eq!(result, "generate_registry!(Polish, Turkish, Arabic, French);");
+        assert_eq!(
+            result,
+            "generate_registry!(Polish, Turkish, Arabic, French);"
+        );
     }
 
     #[test]
