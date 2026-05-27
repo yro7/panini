@@ -51,15 +51,15 @@ impl LearnerProfile {
         global_ctx.insert("iso", ui_lang_iso_code);
 
         let mut learner_profile_content = String::new();
-        
+
         let ui_lang_str = interpolate(&self.ui_language, &global_ctx)?;
         learner_profile_content.push_str(&ui_lang_str);
-        
+
         if !linguistic_background.is_empty() {
             learner_profile_content.push_str("\n\n");
             learner_profile_content.push_str(&self.linguistic_background_intro);
             learner_profile_content.push('\n');
-            
+
             for lang in linguistic_background {
                 let mut ctx = global_ctx.clone();
                 ctx.insert("iso", lang.iso_639_3.clone());
@@ -69,7 +69,7 @@ impl LearnerProfile {
                 learner_profile_content.push('\n');
             }
         }
-        
+
         Ok(wrap_tag("learner_profile", &learner_profile_content))
     }
 }
@@ -201,7 +201,9 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
 
     // Learner profile section
-    let wrapped_profile = cfg.learner_profile.build_prompt(ui_lang_name, &request.linguistic_background)?;
+    let wrapped_profile = cfg
+        .learner_profile
+        .build_prompt(ui_lang_name, &request.linguistic_background)?;
     blocks.push(wrapped_profile);
 
     // Skill context section
