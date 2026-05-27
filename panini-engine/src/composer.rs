@@ -118,7 +118,9 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
 
     // Learner profile section
-    let wrapped_profile = cfg.learner_profile.build_prompt(ui_lang_name, &request.linguistic_background)?;
+    let wrapped_profile = cfg
+        .learner_profile
+        .build_prompt(ui_lang_name, &request.linguistic_background)?;
     blocks.push(wrapped_profile);
 
     // Skill context section
