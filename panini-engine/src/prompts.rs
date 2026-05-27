@@ -36,6 +36,44 @@ pub struct LearnerProfile {
     pub linguistic_background_entry: String,
 }
 
+impl LearnerProfile {
+    pub fn build_prompt(
+        &self,
+        ui_lang_name: &str,
+        linguistic_background: &[panini_core::component::LanguageLevel],
+    ) -> Result<String, PromptBuilderError> {
+        let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
+            .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+
+        let mut global_ctx = HashMap::new();
+        global_ctx.insert("language", ui_lang_name.to_string());
+        global_ctx.insert("name", ui_lang_name.to_string());
+        global_ctx.insert("iso", ui_lang_iso_code);
+
+        let mut learner_profile_content = String::new();
+        
+        let ui_lang_str = interpolate(&self.ui_language, &global_ctx)?;
+        learner_profile_content.push_str(&ui_lang_str);
+        
+        if !linguistic_background.is_empty() {
+            learner_profile_content.push_str("\n\n");
+            learner_profile_content.push_str(&self.linguistic_background_intro);
+            learner_profile_content.push('\n');
+            
+            for lang in linguistic_background {
+                let mut ctx = global_ctx.clone();
+                ctx.insert("iso", lang.iso_639_3.clone());
+                ctx.insert("level", lang.level.clone());
+                let entry = interpolate(&self.linguistic_background_entry, &ctx)?;
+                learner_profile_content.push_str(&entry);
+                learner_profile_content.push('\n');
+            }
+        }
+        
+        Ok(wrap_tag("learner_profile", &learner_profile_content))
+    }
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct SkillContextPrompts {
     pub skill_tree_path: String,
@@ -163,29 +201,8 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
 
     // Learner profile section
-    let mut learner_profile_content = String::new();
-
-    let mut ui_lang_ctx = global_ctx.clone();
-    ui_lang_ctx.insert("language", ui_lang_name.clone());
-    let ui_lang_str = interpolate(&cfg.learner_profile.ui_language, &ui_lang_ctx)?;
-    learner_profile_content.push_str(&ui_lang_str);
-
-    if !request.linguistic_background.is_empty() {
-        learner_profile_content.push_str("\n\n");
-        learner_profile_content.push_str(&cfg.learner_profile.linguistic_background_intro);
-        learner_profile_content.push('\n');
-
-        for lang in &request.linguistic_background {
-            let mut ctx = global_ctx.clone();
-            ctx.insert("iso", lang.iso_639_3.clone());
-            ctx.insert("level", lang.level.clone());
-            let entry = interpolate(&cfg.learner_profile.linguistic_background_entry, &ctx)?;
-            learner_profile_content.push_str(&entry);
-            learner_profile_content.push('\n');
-        }
-    }
-
-    blocks.push(wrap_tag("learner_profile", &learner_profile_content));
+    let wrapped_profile = cfg.learner_profile.build_prompt(ui_lang_name, &request.linguistic_background)?;
+    blocks.push(wrapped_profile);
 
     // Skill context section
     let mut skill_context_content = String::new();

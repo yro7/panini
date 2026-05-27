@@ -118,29 +118,8 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
 
     // Learner profile section
-    let mut learner_profile_content = String::new();
-
-    let mut ui_lang_ctx = global_ctx.clone();
-    ui_lang_ctx.insert("language", ui_lang_name.clone());
-    let ui_lang_str = interpolate(&cfg.learner_profile.ui_language, &ui_lang_ctx)?;
-    learner_profile_content.push_str(&ui_lang_str);
-
-    if !request.linguistic_background.is_empty() {
-        learner_profile_content.push_str("\n\n");
-        learner_profile_content.push_str(&cfg.learner_profile.linguistic_background_intro);
-        learner_profile_content.push('\n');
-
-        for lang_bg in &request.linguistic_background {
-            let mut ctx = global_ctx.clone();
-            ctx.insert("iso", lang_bg.iso_639_3.clone());
-            ctx.insert("level", lang_bg.level.clone());
-            let entry = interpolate(&cfg.learner_profile.linguistic_background_entry, &ctx)?;
-            learner_profile_content.push_str(&entry);
-            learner_profile_content.push('\n');
-        }
-    }
-
-    blocks.push(wrap_tag("learner_profile", &learner_profile_content));
+    let wrapped_profile = cfg.learner_profile.build_prompt(ui_lang_name, &request.linguistic_background)?;
+    blocks.push(wrapped_profile);
 
     // Skill context section
     let mut skill_context_content = String::new();
