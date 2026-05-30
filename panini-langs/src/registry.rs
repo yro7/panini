@@ -25,6 +25,7 @@ async fn extract_for_language<L, M>(
     temperature: f32,
     max_tokens: u32,
     extractor_prompts: &ExtractorPrompts,
+    user_id: String,
 ) -> Result<ExtractionResult>
 where
     L: panini_core::LinguisticDefinition + Send + Sync,
@@ -74,7 +75,7 @@ where
         },
     );
 
-    let mut options = ExtractionOptions::new(extractor_prompts);
+    let mut options = ExtractionOptions::new(extractor_prompts, user_id);
     options.temperature = temperature;
     options.max_tokens = max_tokens;
 
@@ -100,6 +101,7 @@ macro_rules! generate_registry {
             temperature: f32,
             max_tokens: u32,
             extractor_prompts: &ExtractorPrompts,
+            user_id: String,
         ) -> Result<ExtractionResult> {
             match lang_code {
                 $(
@@ -112,6 +114,7 @@ macro_rules! generate_registry {
                             temperature,
                             max_tokens,
                             extractor_prompts,
+                            user_id,
                         )
                         .await
                     }
