@@ -100,17 +100,19 @@ pub struct ExtractionOptions<'a> {
     pub extractor_prompts: &'a ExtractorPrompts,
     pub retry: RetryConfig,
     pub timeout: Duration,
+    pub user_id: String,
 }
 
 impl<'a> ExtractionOptions<'a> {
     #[must_use]
-    pub fn new(extractor_prompts: &'a ExtractorPrompts) -> Self {
+    pub fn new(extractor_prompts: &'a ExtractorPrompts, user_id: String) -> Self {
         Self {
             temperature: 0.2,
             max_tokens: 4096,
             extractor_prompts,
             retry: RetryConfig::default(),
             timeout: Duration::from_secs(30),
+            user_id,
         }
     }
 }
@@ -220,7 +222,10 @@ where
         .preamble(system_prompt)
         .temperature(f64::from(options.temperature))
         .max_tokens(u64::from(options.max_tokens))
-        .output_schema(rig_schema);
+        .output_schema(rig_schema)
+        .additional_params(serde_json::json!({
+            "user": options.user_id
+        }));
 
     if let Some(prev) = previous_attempt {
         builder = builder
