@@ -103,3 +103,4 @@ impl<A: Aggregable, F: Fn(&A) -> String> Aggregable for Pivoted<'_, A, F> {
 }
 
 pub mod digest;
+pub mod digest_output;

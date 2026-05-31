@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Aggregable, FieldKind};
+use crate::{Aggregable, FieldDescriptor, FieldKind};
 
 // ─── Dimension types ──────────────────────────────────────────────────────────
 
@@ -54,6 +54,15 @@ impl Distribution {
             self.seen_count() as f64 / self.total_count() as f64
         }
     }
+
+    fn merge_possible(&mut self, possible: impl IntoIterator<Item = String>) {
+        for value in possible {
+            if !self.possible.contains(&value) {
+                self.possible.push(value);
+            }
+        }
+        self.possible.sort();
+    }
 }
 
 /// An open-set dimension: values are arbitrary strings (e.g. `lemma`, `base_form`).
@@ -76,6 +85,57 @@ impl Dimension {
             Self::Inv(i) => *i.counts.entry(value).or_insert(0) += 1,
         }
     }
+
+    fn from_descriptor(descriptor: &FieldDescriptor) -> Self {
+        match &descriptor.kind {
+            FieldKind::Closed(variants) => Self::Dist(Distribution::new(variants)),
+            FieldKind::Open => Self::Inv(Inventory::default()),
+        }
+    }
+
+    fn merge_descriptor(&mut self, descriptor: &FieldDescriptor) {
+        match (&mut *self, &descriptor.kind) {
+            (Self::Inv(_), _) => {}
+            (Self::Dist(_), FieldKind::Open) => self.promote_to_inventory(),
+            (Self::Dist(dist), FieldKind::Closed(variants)) => {
+                dist.merge_possible(variants.iter().map(|value| (*value).to_string()));
+            }
+        }
+    }
+
+    fn merge_dimension(&mut self, other: Self) {
+        match (&mut *self, other) {
+            (Self::Dist(existing), Self::Dist(incoming)) => {
+                existing.merge_possible(incoming.possible);
+                merge_counts(&mut existing.counts, incoming.counts);
+            }
+            (Self::Inv(existing), Self::Inv(incoming)) => {
+                merge_counts(&mut existing.counts, incoming.counts);
+            }
+            (Self::Inv(existing), Self::Dist(incoming)) => {
+                merge_counts(&mut existing.counts, incoming.counts);
+            }
+            (Self::Dist(_), Self::Inv(incoming)) => {
+                self.promote_to_inventory();
+                if let Self::Inv(existing) = self {
+                    merge_counts(&mut existing.counts, incoming.counts);
+                }
+            }
+        }
+    }
+
+    fn promote_to_inventory(&mut self) {
+        if let Self::Dist(dist) = self {
+            let counts = std::mem::take(&mut dist.counts);
+            *self = Self::Inv(Inventory { counts });
+        }
+    }
+}
+
+fn merge_counts(target: &mut HashMap<String, usize>, source: HashMap<String, usize>) {
+    for (value, count) in source {
+        *target.entry(value).or_insert(0) += count;
+    }
 }
 
 // ─── GroupResult ──────────────────────────────────────────────────────────────
@@ -94,18 +154,28 @@ pub struct GroupResult {
 }
 
 impl GroupResult {
-    fn from_descriptors(descriptors: &[super::FieldDescriptor]) -> Self {
+    fn from_descriptors(descriptors: &[FieldDescriptor]) -> Self {
         let mut dimensions = HashMap::new();
         for d in descriptors {
-            let dim = match &d.kind {
-                FieldKind::Closed(variants) => Dimension::Dist(Distribution::new(variants)),
-                FieldKind::Open => Dimension::Inv(Inventory::default()),
-            };
-            dimensions.insert(d.name.clone(), dim);
+            dimensions.insert(d.name.clone(), Dimension::from_descriptor(d));
         }
         Self {
             total: 0,
             dimensions,
+        }
+    }
+
+    fn merge_descriptors(&mut self, descriptors: &[FieldDescriptor]) {
+        for descriptor in descriptors {
+            match self.dimensions.get_mut(&descriptor.name) {
+                Some(dim) => dim.merge_descriptor(descriptor),
+                None => {
+                    self.dimensions.insert(
+                        descriptor.name.clone(),
+                        Dimension::from_descriptor(descriptor),
+                    );
+                }
+            }
         }
     }
 }
@@ -121,7 +191,7 @@ impl GroupResult {
 #[derive(Debug, Clone)]
 pub struct AggregationContribution {
     pub group: String,
-    pub descriptors: Vec<super::FieldDescriptor>,
+    pub descriptors: Vec<FieldDescriptor>,
     pub observations: Vec<Vec<(String, String)>>,
     pub total_increment: usize,
 }
@@ -224,12 +294,15 @@ impl AggregationSink for AggregationResult {
             .by_group
             .entry(c.group)
             .or_insert_with(|| GroupResult::from_descriptors(&c.descriptors));
+        group_result.merge_descriptors(&c.descriptors);
         group_result.total += c.total_increment;
         for observation in c.observations {
             for (field, value) in observation {
-                if let Some(dim) = group_result.dimensions.get_mut(&field) {
-                    dim.record(value);
-                }
+                group_result
+                    .dimensions
+                    .entry(field)
+                    .or_insert_with(|| Dimension::Inv(Inventory::default()))
+                    .record(value);
             }
         }
     }
@@ -242,34 +315,10 @@ impl AggregationResult {
             let entry = self.by_group.entry(group).or_default();
             entry.total += other_group.total;
             for (field, other_dim) in other_group.dimensions {
-                match other_dim {
-                    Dimension::Dist(od) => {
-                        let possible = od.possible.clone();
-                        let dim = entry.dimensions.entry(field).or_insert_with(|| {
-                            Dimension::Dist(Distribution {
-                                possible,
-                                counts: HashMap::new(),
-                            })
-                        });
-                        if let Dimension::Dist(d) = dim {
-                            if d.possible.is_empty() {
-                                d.possible = od.possible;
-                            }
-                            for (v, c) in od.counts {
-                                *d.counts.entry(v).or_insert(0) += c;
-                            }
-                        }
-                    }
-                    Dimension::Inv(oi) => {
-                        let dim = entry
-                            .dimensions
-                            .entry(field)
-                            .or_insert_with(|| Dimension::Inv(Inventory::default()));
-                        if let Dimension::Inv(i) = dim {
-                            for (v, c) in oi.counts {
-                                *i.counts.entry(v).or_insert(0) += c;
-                            }
-                        }
+                match entry.dimensions.get_mut(&field) {
+                    Some(existing) => existing.merge_dimension(other_dim),
+                    None => {
+                        entry.dimensions.insert(field, other_dim);
                     }
                 }
             }
@@ -290,43 +339,26 @@ impl AggregationResult {
 
     /// Print the aggregation result in a human-readable format.
     pub fn print(&self) {
-        let mut groups: Vec<_> = self.by_group.keys().collect();
-        groups.sort();
-
-        for group in groups {
-            let group_data = &self.by_group[group];
-            println!("\n[{}] total: {}", group.to_uppercase(), group_data.total);
-
-            let mut dims: Vec<_> = group_data.dimensions.keys().collect();
-            dims.sort();
-
-            for dim_name in dims {
-                let dim = &group_data.dimensions[dim_name];
-                match dim {
-                    Dimension::Dist(d) => {
-                        let seen = d.seen_count();
-                        let total = d.total_count();
-                        print!("  |- {dim_name} [{seen}/{total}]: ");
-                        let mut variants: Vec<_> = d.counts.iter().collect();
-                        variants.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
-                        let summary: Vec<_> =
-                            variants.iter().map(|(k, c)| format!("{k}({c})")).collect();
-                        println!("{}", summary.join(", "));
-                    }
-                    Dimension::Inv(i) => {
-                        let unique = i.counts.len();
-                        print!("  |- {dim_name} [{unique}unique]: ");
-                        let mut entries: Vec<_> = i.counts.iter().collect();
-                        entries.sort_by_key(|(_, c)| std::cmp::Reverse(**c));
-                        let summary: Vec<_> = entries
-                            .iter()
-                            .take(5)
-                            .map(|(k, c)| format!("{k}({c})"))
-                            .collect();
-                        let suffix = if entries.len() > 5 { ", ..." } else { "" };
-                        println!("{}{}", summary.join(", "), suffix);
-                    }
-                }
+        let opts = crate::aggregable::digest_output::DigestOptions {
+            max_values_per_dimension: 5,
+            exclude_dimensions: Vec::new(),
+        };
+        let groups = self.to_digest(&opts);
+        for group in &groups {
+            println!("\n[{}] total: {}", group.key.to_uppercase(), group.total);
+            for dim in &group.dimensions {
+                let header = match dim.total_possible {
+                    Some(total) => format!("[{}/{}]", dim.unique_count, total),
+                    None => format!("[{}unique]", dim.unique_count),
+                };
+                print!("  |- {} {}: ", dim.key, header);
+                let summary: Vec<String> = dim
+                    .values
+                    .iter()
+                    .map(|v| format!("{}({})", v.value, v.count))
+                    .collect();
+                let suffix = if dim.truncated { ", ..." } else { "" };
+                println!("{}{}", summary.join(", "), suffix);
             }
         }
     }
@@ -560,6 +592,153 @@ mod tests {
         if let Dimension::Dist(case) = &noun.dimensions["case"] {
             assert_eq!(case.counts["Nominative"], 1);
             assert_eq!(case.counts["Accusative"], 1);
+        }
+    }
+
+    #[test]
+    fn later_descriptors_in_same_group_are_recorded() {
+        let case_item = MockAggregable::new(
+            "Mixed",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Closed(&["Nominative", "Accusative"]),
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
+        let tense_item = MockAggregable::new(
+            "Mixed",
+            vec![FieldDescriptor {
+                name: "tense".to_string(),
+                kind: FieldKind::Closed(&["Present", "Past"]),
+            }],
+        )
+        .with_observation(vec![("tense".to_string(), "Present".to_string())]);
+
+        let mut agg = BasicAggregator::new();
+        agg.record(&case_item);
+        agg.record(&tense_item);
+        let result = agg.finish();
+        let mixed = &result.by_group["Mixed"];
+
+        assert!(mixed.dimensions.contains_key("case"));
+        assert!(mixed.dimensions.contains_key("tense"));
+        if let Dimension::Dist(tense) = &mixed.dimensions["tense"] {
+            assert_eq!(tense.counts["Present"], 1);
+            assert_eq!(tense.total_count(), 2);
+        } else {
+            panic!("Expected Distribution for tense");
+        }
+    }
+
+    #[test]
+    fn closed_descriptor_merge_unions_possible_values() {
+        let first = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Closed(&["Nominative", "Accusative"]),
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
+        let second = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Closed(&["Genitive", "Accusative"]),
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "Genitive".to_string())]);
+
+        let mut agg = BasicAggregator::new();
+        agg.record(&first);
+        agg.record(&second);
+        let result = agg.finish();
+
+        if let Dimension::Dist(case) = &result.by_group["Noun"].dimensions["case"] {
+            assert_eq!(case.total_count(), 3);
+            assert_eq!(case.counts["Nominative"], 1);
+            assert_eq!(case.counts["Genitive"], 1);
+        } else {
+            panic!("Expected Distribution for case");
+        }
+    }
+
+    #[test]
+    fn open_closed_conflict_promotes_to_inventory() {
+        let closed = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Closed(&["Nominative", "Accusative"]),
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
+        let open = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Open,
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "unexpected".to_string())]);
+
+        let mut agg = BasicAggregator::new();
+        agg.record(&closed);
+        agg.record(&open);
+        let result = agg.finish();
+
+        if let Dimension::Inv(case) = &result.by_group["Noun"].dimensions["case"] {
+            assert_eq!(case.counts["Nominative"], 1);
+            assert_eq!(case.counts["unexpected"], 1);
+        } else {
+            panic!("Expected Inventory after open/closed conflict");
+        }
+    }
+
+    #[test]
+    fn observed_field_without_descriptor_is_open_inventory() {
+        let item = MockAggregable::new("Noun", vec![])
+            .with_observation(vec![("lemma".to_string(), "dom".to_string())]);
+
+        let mut agg = BasicAggregator::new();
+        agg.record(&item);
+        let result = agg.finish();
+
+        if let Dimension::Inv(lemma) = &result.by_group["Noun"].dimensions["lemma"] {
+            assert_eq!(lemma.counts["dom"], 1);
+        } else {
+            panic!("Expected Inventory for undescribed observed field");
+        }
+    }
+
+    #[test]
+    fn merge_uses_same_open_closed_conflict_policy() {
+        let closed = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Closed(&["Nominative"]),
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "Nominative".to_string())]);
+        let open = MockAggregable::new(
+            "Noun",
+            vec![FieldDescriptor {
+                name: "case".to_string(),
+                kind: FieldKind::Open,
+            }],
+        )
+        .with_observation(vec![("case".to_string(), "freeform".to_string())]);
+
+        let mut merged: AggregationResult = std::iter::once(closed).collect();
+        let incoming: AggregationResult = std::iter::once(open).collect();
+        merged.merge(incoming);
+
+        if let Dimension::Inv(case) = &merged.by_group["Noun"].dimensions["case"] {
+            assert_eq!(case.counts["Nominative"], 1);
+            assert_eq!(case.counts["freeform"], 1);
+        } else {
+            panic!("Expected Inventory after merge conflict");
         }
     }
 
