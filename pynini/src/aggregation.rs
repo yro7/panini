@@ -115,6 +115,24 @@ impl PyAggregationResult {
     fn print(&self) {
         self.inner.print();
     }
+
+    #[pyo3(signature = (max_values = 12, exclude_dimensions = None))]
+    fn to_digest(
+        &self,
+        py: Python<'_>,
+        max_values: usize,
+        exclude_dimensions: Option<Vec<String>>,
+    ) -> PyResult<PyObject> {
+        let opts = panini_core::DigestOptions {
+            max_values_per_dimension: max_values,
+            exclude_dimensions: exclude_dimensions.unwrap_or_default(),
+        };
+        let digest = self.inner.to_digest(&opts);
+        let val = serde_json::to_value(digest)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
+        let dict = pythonize(py, &val)?;
+        Ok(dict.into())
+    }
 }
 
 #[pyclass(name = "BasicAggregator")]

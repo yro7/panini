@@ -1,5 +1,6 @@
 /// Whether a pivot value comes from an open inventory or a statically known set.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PivotValueKind {
     Open,
     Closed,
@@ -96,13 +97,33 @@ impl<T: 'static> std::fmt::Debug for PivotField<T> {
     }
 }
 
-/// Serializable metadata view of a typed pivot.
-#[derive(Debug, Clone, Copy)]
+/// Static metadata view of a typed pivot.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 pub struct PivotMeta {
     pub key: &'static str,
     pub label: &'static str,
     pub value_kind: PivotValueKind,
-    pub values: fn() -> &'static [&'static str],
+    pub values: &'static [&'static str],
+}
+
+/// Owned, serializable metadata for API/domain payloads.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct OwnedPivotMeta {
+    pub key: String,
+    pub label: String,
+    pub value_kind: PivotValueKind,
+    pub values: Vec<String>,
+}
+
+impl From<PivotMeta> for OwnedPivotMeta {
+    fn from(value: PivotMeta) -> Self {
+        Self {
+            key: value.key.to_string(),
+            label: value.label.to_string(),
+            value_kind: value.value_kind,
+            values: value.values.iter().map(|v| (*v).to_string()).collect(),
+        }
+    }
 }
 
 impl<T: 'static> From<&PivotField<T>> for PivotMeta {
@@ -111,7 +132,7 @@ impl<T: 'static> From<&PivotField<T>> for PivotMeta {
             key: value.key,
             label: value.label,
             value_kind: value.value_kind,
-            values: value.values,
+            values: (value.values)(),
         }
     }
 }

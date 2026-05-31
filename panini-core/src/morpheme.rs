@@ -73,6 +73,48 @@ impl<F: AggregableFields> Aggregable for ExtractedMorpheme<F> {
     }
 }
 
+/// A helper struct that couples an `ExtractedMorpheme` with the containing word's surface form,
+/// allowing native morpheme-level aggregation with word and surface dimensions.
+pub struct MorphemeObservation<'a, F> {
+    pub morpheme: &'a ExtractedMorpheme<F>,
+    pub word: &'a str,
+}
+
+impl<F: AggregableFields> Aggregable for MorphemeObservation<'_, F> {
+    fn group_key(&self) -> String {
+        "morpheme".to_string()
+    }
+
+    fn instance_descriptors(&self) -> Vec<FieldDescriptor> {
+        let mut d = vec![
+            FieldDescriptor {
+                name: "base_form".into(),
+                kind: FieldKind::Open,
+            },
+            FieldDescriptor {
+                name: "surface".into(),
+                kind: FieldKind::Open,
+            },
+            FieldDescriptor {
+                name: "word".into(),
+                kind: FieldKind::Open,
+            },
+        ];
+        d.extend(F::descriptors());
+        d
+    }
+
+    fn observations(&self) -> Vec<Vec<(String, String)>> {
+        let mut obs = vec![
+            ("base_form".to_string(), self.morpheme.base_form.clone()),
+            ("surface".to_string(), self.morpheme.surface.clone()),
+            ("word".to_string(), self.word.to_string()),
+        ];
+        obs.extend(self.morpheme.function.field_values());
+        vec![obs]
+    }
+}
+
 /// Delegate `Aggregable` from `ExtractedFeature<M>` to the inner `morphology`.
 impl<M: Aggregable> Aggregable for ExtractedFeature<M> {
     fn group_key(&self) -> String {
