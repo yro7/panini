@@ -56,14 +56,16 @@ async fn main() -> Result<()> {
             user_prompt: None,
         };
 
+        let mut options = panini_engine::ExtractionOptions::new(&prompts, "panini-example");
+        options.temperature = 0.2;
+        options.max_tokens = 8192;
+
         let result: ExtractionResult = registry::extract_erased_with_components(
             "tur",
             &model,
             &request,
             Some(&["morpheme_segmentation"]),
-            0.2,
-            8192,
-            &prompts,
+            options,
         )
         .await?;
 

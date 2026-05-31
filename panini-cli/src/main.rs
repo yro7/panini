@@ -188,6 +188,10 @@ async fn run_component_extraction(
     temperature: f32,
     max_tokens: u32,
 ) -> Result<serde_json::Value> {
+    let mut options = panini_engine::ExtractionOptions::new(prompts, "panini-cli");
+    options.temperature = temperature;
+    options.max_tokens = max_tokens;
+
     match config.provider {
         Provider::Openai => {
             let client = rig::providers::openai::Client::new(&config.api_key)
@@ -198,9 +202,7 @@ async fn run_component_extraction(
                 &model,
                 request,
                 component_keys,
-                temperature,
-                max_tokens,
-                prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())
@@ -214,9 +216,7 @@ async fn run_component_extraction(
                 &model,
                 request,
                 component_keys,
-                temperature,
-                max_tokens,
-                prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())
@@ -230,9 +230,7 @@ async fn run_component_extraction(
                 &model,
                 request,
                 component_keys,
-                temperature,
-                max_tokens,
-                prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())
