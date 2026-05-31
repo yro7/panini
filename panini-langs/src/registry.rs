@@ -11,8 +11,10 @@ use panini_core::components::{
     LeipzigAlignment, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
     PedagogicalExplanation,
 };
-use panini_engine::prompts::ExtractorPrompts;
-use panini_engine::{ExtractionOptions, ExtractionRequest, extract_with_components};
+use panini_engine::{
+    ExtractionOptions, ExtractionRequest, extract_with_components,
+    extract_with_components_executor,
+};
 
 use crate::{Arabic, Danish, French, Italian, MandarinChinese, Polish, Turkish};
 
@@ -22,10 +24,7 @@ async fn extract_for_language<L, M>(
     model: &M,
     request: &ExtractionRequest,
     component_keys: Option<&[&str]>,
-    temperature: f32,
-    max_tokens: u32,
-    extractor_prompts: &ExtractorPrompts,
-    user_id: String,
+    options: ExtractionOptions<'_>,
 ) -> Result<ExtractionResult>
 where
     L: panini_core::LinguisticDefinition + Send + Sync,
@@ -48,7 +47,7 @@ where
         + schemars::JsonSchema
         + Send
         + Sync,
-    M: CompletionModel,
+    M: CompletionModel + Sync,
 {
     let pedagogical = PedagogicalExplanation;
     let morphology = MorphologyAnalysis;
@@ -75,11 +74,65 @@ where
         },
     );
 
-    let mut options = ExtractionOptions::new(extractor_prompts, user_id);
-    options.temperature = temperature;
-    options.max_tokens = max_tokens;
-
     Ok(extract_with_components(lang, model, request, &selected, options).await?)
+}
+
+async fn extract_for_language_executor<L, E>(
+    lang: &L,
+    executor: &E,
+    request: &ExtractionRequest,
+    component_keys: Option<&[&str]>,
+    options: ExtractionOptions<'_>,
+) -> Result<ExtractionResult>
+where
+    L: panini_core::LinguisticDefinition + Send + Sync,
+    L::Morphology: std::fmt::Debug
+        + Clone
+        + PartialEq
+        + std::hash::Hash
+        + Eq
+        + serde::Serialize
+        + for<'de> serde::Deserialize<'de>
+        + schemars::JsonSchema
+        + panini_core::MorphologyInfo
+        + Send
+        + Sync,
+    L::GrammaticalFunction: std::fmt::Debug
+        + Clone
+        + PartialEq
+        + serde::Serialize
+        + for<'de> serde::Deserialize<'de>
+        + schemars::JsonSchema
+        + Send
+        + Sync,
+    E: panini_engine::structured_llm::StructuredLlmExecutor,
+{
+    let pedagogical = PedagogicalExplanation;
+    let morphology = MorphologyAnalysis;
+    let multiword = MultiwordExpressions;
+    let morpheme_seg = MorphemeSegmentation;
+    let leipzig = LeipzigAlignment;
+
+    let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
+        ("pedagogical_explanation", &pedagogical),
+        ("morphology", &morphology),
+        ("multiword_expressions", &multiword),
+        ("morpheme_segmentation", &morpheme_seg),
+        ("leipzig_alignment", &leipzig),
+    ];
+
+    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
+        || all_components.iter().map(|(_, c)| *c).collect(),
+        |keys| {
+            all_components
+                .iter()
+                .filter(|(k, _)| keys.contains(k))
+                .map(|(_, c)| *c)
+                .collect()
+        },
+    );
+
+    Ok(extract_with_components_executor(lang, executor, request, &selected, options).await?)
 }
 
 /// Macro to generate the registry functions for all languages.
@@ -93,15 +146,12 @@ macro_rules! generate_registry {
         ///
         /// # Errors
         /// Returns an error if the language code is unsupported, or if extraction fails.
-        pub async fn extract_erased_with_components<M: CompletionModel>(
+        pub async fn extract_erased_with_components<M: CompletionModel + Sync>(
             lang_code: &str,
             model: &M,
             request: &ExtractionRequest,
             component_keys: Option<&[&str]>,
-            temperature: f32,
-            max_tokens: u32,
-            extractor_prompts: &ExtractorPrompts,
-            user_id: String,
+            options: ExtractionOptions<'_>,
         ) -> Result<ExtractionResult> {
             match lang_code {
                 $(
@@ -111,10 +161,38 @@ macro_rules! generate_registry {
                             model,
                             request,
                             component_keys,
-                            temperature,
-                            max_tokens,
-                            extractor_prompts,
-                            user_id,
+                            options,
+                        )
+                        .await
+                    }
+                )*
+                _ => Err(anyhow!("Unsupported language: {lang_code}")),
+            }
+        }
+
+        /// Extracts features using composable components and an injected structured executor for any supported language.
+        ///
+        /// `component_keys` selects which analyses to include (e.g. `["pedagogical_explanation", "morphology"]`).
+        /// If `None`, all compatible components are used.
+        ///
+        /// # Errors
+        /// Returns an error if the language code is unsupported, or if extraction fails.
+        pub async fn extract_erased_with_components_executor<E: panini_engine::structured_llm::StructuredLlmExecutor>(
+            lang_code: &str,
+            executor: &E,
+            request: &ExtractionRequest,
+            component_keys: Option<&[&str]>,
+            options: ExtractionOptions<'_>,
+        ) -> Result<ExtractionResult> {
+            match lang_code {
+                $(
+                    s if s == <$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                        extract_for_language_executor(
+                            &$lang,
+                            executor,
+                            request,
+                            component_keys,
+                            options,
                         )
                         .await
                     }

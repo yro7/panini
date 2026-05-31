@@ -1,7 +1,7 @@
 use crate::helpers::is_option_type;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields};
+use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
 // ─── PaniniResult derive macro ────────────────────────────────────────────────
 
@@ -115,10 +115,15 @@ fn generate_extract_impl(
         quote! { ::panini::__macro_support::panini_core::component::ExtractionResultError };
     let ling = quote! { ::panini::__macro_support::panini_core::traits::LinguisticDefinition };
     let model = quote! { ::panini::__macro_support::rig::completion::CompletionModel };
+    let executor =
+        quote! { ::panini::__macro_support::panini_engine::structured_llm::StructuredLlmExecutor };
     let req = quote! { ::panini::__macro_support::panini_engine::prompts::ExtractionRequest };
     let opts = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionOptions };
     let extract_fn =
         quote! { ::panini::__macro_support::panini_engine::extractor::extract_with_components };
+    let extract_executor_fn = quote! {
+        ::panini::__macro_support::panini_engine::extractor::extract_with_components_executor
+    };
 
     let component_lets: Vec<_> = component_fields
         .iter()
@@ -186,7 +191,7 @@ fn generate_extract_impl(
             #(#requires_bounds,)*
         {
             /// Extract features from text using an LLM, returning this typed result struct.
-            pub async fn extract<__M: #model>(
+            pub async fn extract<__M: #model + Sync>(
                 language: &#lang_ident,
                 model: &__M,
                 request: &#req,
@@ -195,6 +200,26 @@ fn generate_extract_impl(
                 #(#component_lets)*
                 let __components: Vec<&dyn #ac> = vec![#(#component_refs,)*];
                 let __raw = #extract_fn(language, model, request, &__components, options).await?;
+                Ok(Self { #(#field_deserializations,)* })
+            }
+
+            /// Extract features using an injected structured LLM executor.
+            pub async fn extract_with_executor<__E: #executor>(
+                language: &#lang_ident,
+                executor: &__E,
+                request: &#req,
+                options: #opts<'_>,
+            ) -> Result<Self, #ex_err> {
+                #(#component_lets)*
+                let __components: Vec<&dyn #ac> = vec![#(#component_refs,)*];
+                let __raw = #extract_executor_fn(
+                    language,
+                    executor,
+                    request,
+                    &__components,
+                    options,
+                )
+                .await?;
                 Ok(Self { #(#field_deserializations,)* })
             }
         }

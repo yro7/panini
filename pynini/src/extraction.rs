@@ -84,6 +84,10 @@ async fn do_extract(
         .as_ref()
         .map(|c| c.iter().map(std::string::String::as_str).collect());
 
+    let mut options = panini_engine::ExtractionOptions::new(&prompts, "pynini");
+    options.temperature = temperature;
+    options.max_tokens = max_tokens;
+
     match provider.as_str() {
         "openai" => {
             let client = openai::Client::new(&api_key)
@@ -94,9 +98,7 @@ async fn do_extract(
                 &model,
                 &request,
                 component_refs.as_deref(),
-                temperature,
-                max_tokens,
-                &prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())
@@ -110,9 +112,7 @@ async fn do_extract(
                 &model,
                 &request,
                 component_refs.as_deref(),
-                temperature,
-                max_tokens,
-                &prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())
@@ -126,9 +126,7 @@ async fn do_extract(
                 &model,
                 &request,
                 component_refs.as_deref(),
-                temperature,
-                max_tokens,
-                &prompts,
+                options,
             )
             .await?;
             Ok(result.into_raw())

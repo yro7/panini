@@ -68,14 +68,16 @@ async fn main() -> Result<()> {
         };
 
         // Extract features
+        let mut options = panini_engine::ExtractionOptions::new(&prompts, "panini-example");
+        options.temperature = 0.2;
+        options.max_tokens = 20000;
+
         let result: ExtractionResult = registry::extract_erased_with_components(
             "ara",
             &model,
             &request,
             Some(&["morphology"]),
-            0.2,
-            20000,
-            &prompts,
+            options,
         )
         .await?;
 
