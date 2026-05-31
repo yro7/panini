@@ -1,0 +1,704 @@
+diff --git a/examples/rust/src/bin/arabic_pivot_aggregation.rs b/examples/rust/src/bin/arabic_pivot_aggregation.rs
+index ab6965c..c5886e8 100644
+--- a/examples/rust/src/bin/arabic_pivot_aggregation.rs
++++ b/examples/rust/src/bin/arabic_pivot_aggregation.rs
+@@ -76,6 +76,7 @@ async fn main() -> Result<()> {
+             0.2,
+             20000,
+             &prompts,
++            "panini-example".to_string(),
+         )
+         .await?;
+ 
+diff --git a/examples/rust/src/bin/turkish_segmentation.rs b/examples/rust/src/bin/turkish_segmentation.rs
+index f3fa1fb..9247345 100644
+--- a/examples/rust/src/bin/turkish_segmentation.rs
++++ b/examples/rust/src/bin/turkish_segmentation.rs
+@@ -64,6 +64,7 @@ async fn main() -> Result<()> {
+             0.2,
+             8192,
+             &prompts,
++            "panini-example".to_string(),
+         )
+         .await?;
+ 
+diff --git a/panini-cli/src/main.rs b/panini-cli/src/main.rs
+index 7175942..24265ce 100644
+--- a/panini-cli/src/main.rs
++++ b/panini-cli/src/main.rs
+@@ -201,6 +201,7 @@ async fn run_component_extraction(
+                 temperature,
+                 max_tokens,
+                 prompts,
++                "panini-cli".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())
+@@ -217,6 +218,7 @@ async fn run_component_extraction(
+                 temperature,
+                 max_tokens,
+                 prompts,
++                "panini-cli".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())
+@@ -233,6 +235,7 @@ async fn run_component_extraction(
+                 temperature,
+                 max_tokens,
+                 prompts,
++                "panini-cli".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())
+diff --git a/panini-engine/src/extractor.rs b/panini-engine/src/extractor.rs
+index cd2c6c5..7a65ae4 100644
+--- a/panini-engine/src/extractor.rs
++++ b/panini-engine/src/extractor.rs
+@@ -2,7 +2,7 @@ use panini_core::component::{AnalysisComponent, ExtractionResult};
+ use panini_core::traits::LinguisticDefinition;
+ use rig::completion::{CompletionModel, CompletionRequestBuilder};
+ use rig::message::Message;
+-use std::time::Duration;
++use std::{future::Future, pin::Pin, time::Duration};
+ 
+ use crate::composer::{compose_prompt, compose_schema};
+ use crate::llm_utils::clean_llm_json;
+@@ -38,6 +38,34 @@ pub struct ExtractionParseError {
+     pub reason: ExtractionFailureReason,
+ }
+ 
++/// Error returned by a structured LLM transport implementation.
++#[derive(Debug, thiserror::Error)]
++#[error("{message}")]
++pub struct StructuredLlmError {
++    message: String,
++}
++
++impl StructuredLlmError {
++    #[must_use]
++    pub fn new(message: impl Into<String>) -> Self {
++        Self {
++            message: message.into(),
++        }
++    }
++}
++
++impl From<anyhow::Error> for StructuredLlmError {
++    fn from(error: anyhow::Error) -> Self {
++        Self::new(error.to_string())
++    }
++}
++
++impl From<rig::completion::request::CompletionError> for StructuredLlmError {
++    fn from(error: rig::completion::request::CompletionError) -> Self {
++        Self::new(error.to_string())
++    }
++}
++
+ /// Typed error enum for the extraction pipeline.
+ #[derive(Debug, thiserror::Error)]
+ pub enum ExtractionError {
+@@ -45,6 +73,10 @@ pub enum ExtractionError {
+     #[error("LLM completion failed: {0}")]
+     Llm(#[from] rig::completion::request::CompletionError),
+ 
++    /// LLM transport errors from an injected structured executor.
++    #[error("LLM executor failed: {0}")]
++    StructuredLlm(#[from] StructuredLlmError),
++
+     /// JSON serialization/deserialization errors (schema conversion, response parsing)
+     #[error("JSON error: {0}")]
+     Json(#[from] serde_json::Error),
+@@ -117,6 +149,100 @@ impl<'a> ExtractionOptions<'a> {
+     }
+ }
+ 
++/// Prior failed LLM output and validation feedback for self-correction.
++#[derive(Debug, Clone, Copy)]
++pub struct StructuredLlmRetryContext<'a> {
++    pub raw_response: &'a str,
++    pub error: &'a str,
++}
++
++/// Structured output request passed to an LLM transport.
++pub struct StructuredLlmRequest<'a> {
++    pub system_prompt: &'a str,
++    pub user_content: &'a str,
++    pub schema: schemars::Schema,
++    pub temperature: f32,
++    pub max_tokens: u32,
++    pub user_id: &'a str,
++    pub retry_context: Option<StructuredLlmRetryContext<'a>>,
++}
++
++/// Structured output response returned by an LLM transport.
++#[derive(Debug, Clone)]
++pub struct StructuredLlmResponse {
++    pub text: String,
++    pub tokens_in: u32,
++    pub tokens_out: u32,
++}
++
++pub type StructuredLlmFuture<'a> =
++    Pin<Box<dyn Future<Output = Result<StructuredLlmResponse, StructuredLlmError>> + Send + 'a>>;
++
++/// Transport boundary for structured LLM calls used by Panini extraction.
++pub trait StructuredLlmExecutor: Send + Sync {
++    fn execute_structured<'a>(
++        &'a self,
++        request: StructuredLlmRequest<'a>,
++    ) -> StructuredLlmFuture<'a>;
++}
++
++struct RigStructuredLlmExecutor<'a, M> {
++    model: &'a M,
++}
++
++impl<M> StructuredLlmExecutor for RigStructuredLlmExecutor<'_, M>
++where
++    M: CompletionModel + Sync,
++{
++    fn execute_structured<'a>(
++        &'a self,
++        request: StructuredLlmRequest<'a>,
++    ) -> StructuredLlmFuture<'a> {
++        Box::pin(async move {
++            let mut builder: CompletionRequestBuilder<M> = self
++                .model
++                .completion_request(request.user_content)
++                .preamble(request.system_prompt.to_string())
++                .temperature(f64::from(request.temperature))
++                .max_tokens(u64::from(request.max_tokens))
++                .output_schema(request.schema)
++                .additional_params(serde_json::json!({
++                    "user": request.user_id
++                }));
++
++            if let Some(retry) = request.retry_context {
++                builder = builder
++                    .message(Message::assistant(retry.raw_response))
++                    .message(Message::user(format!(
++                        "Your output is not conform to what I'm expecting. \
++                         Please look at the error and correct yourself: {}",
++                        retry.error
++                    )));
++            }
++
++            let completion_response = builder.send().await.map_err(StructuredLlmError::from)?;
++
++            let text = completion_response
++                .choice
++                .into_iter()
++                .find_map(|c| {
++                    if let rig::completion::message::AssistantContent::Text(t) = c {
++                        Some(t.text)
++                    } else {
++                        None
++                    }
++                })
++                .ok_or_else(|| StructuredLlmError::new("LLM returned no text content"))?;
++
++            Ok(StructuredLlmResponse {
++                text,
++                tokens_in: completion_response.usage.input_tokens as u32,
++                tokens_out: completion_response.usage.output_tokens as u32,
++            })
++        })
++    }
++}
++
+ // ─── Composable entry point ───────────────────────────────────────────────────
+ 
+ /// Extracts features using composable `AnalysisComponent`s.
+@@ -136,7 +262,26 @@ pub async fn extract_with_components<L, M>(
+ ) -> Result<ExtractionResult, ExtractionError>
+ where
+     L: LinguisticDefinition + Send + Sync,
+-    M: CompletionModel,
++    M: CompletionModel + Sync,
++{
++    let executor = RigStructuredLlmExecutor { model };
++    extract_with_components_executor(language, &executor, request, components, options).await
++}
++
++/// Extracts features using an injected structured LLM executor.
++///
++/// This entry-point lets applications enforce their own LLM policy boundary
++/// while Panini keeps the same schema, retry, validation, and component logic.
++pub async fn extract_with_components_executor<L, E>(
++    language: &L,
++    executor: &E,
++    request: &ExtractionRequest,
++    components: &[&dyn AnalysisComponent<L>],
++    options: ExtractionOptions<'_>,
++) -> Result<ExtractionResult, ExtractionError>
++where
++    L: LinguisticDefinition + Send + Sync,
++    E: StructuredLlmExecutor,
+ {
+     let mut prev_attempt: Option<PreviousAttempt> = None;
+     let mut backoff = backoff::ExponentialBackoffBuilder::new()
+@@ -148,7 +293,7 @@ where
+     loop {
+         let result = perform_single_shot_extraction(
+             language,
+-            model,
++            executor,
+             request,
+             components,
+             &options,
+@@ -183,9 +328,9 @@ where
+ }
+ 
+ /// Internal function to perform a single extraction attempt.
+-async fn perform_single_shot_extraction<L, M>(
++async fn perform_single_shot_extraction<L, E>(
+     language: &L,
+-    model: &M,
++    executor: &E,
+     request: &ExtractionRequest,
+     components: &[&dyn AnalysisComponent<L>],
+     options: &ExtractionOptions<'_>,
+@@ -193,7 +338,7 @@ async fn perform_single_shot_extraction<L, M>(
+ ) -> Result<ExtractionResult, ExtractionError>
+ where
+     L: LinguisticDefinition + Send + Sync,
+-    M: CompletionModel,
++    E: StructuredLlmExecutor,
+ {
+     // 1. Filter to compatible components
+     let compatible: Vec<&dyn AnalysisComponent<L>> = components
+@@ -206,7 +351,7 @@ where
+ 
+     // 2. Compose schema
+     let schema_value = compose_schema(language, &compatible);
+-    let rig_schema: schemars::Schema = serde_json::from_value(schema_value.clone())?;
++    let schema: schemars::Schema = serde_json::from_value(schema_value.clone())?;
+ 
+     // 3. Compose prompt
+     let system_prompt = compose_prompt(language, request, options.extractor_prompts, &compatible)?;
+@@ -216,40 +361,23 @@ where
+         request.content, request.targets
+     );
+ 
+-    // 4. Build LLM request
+-    let mut builder: CompletionRequestBuilder<M> = model
+-        .completion_request(user_message.as_str())
+-        .preamble(system_prompt)
+-        .temperature(f64::from(options.temperature))
+-        .max_tokens(u64::from(options.max_tokens))
+-        .output_schema(rig_schema)
+-        .additional_params(serde_json::json!({
+-            "user": options.user_id
+-        }));
+-
+-    if let Some(prev) = previous_attempt {
+-        builder = builder
+-            .message(Message::assistant(&prev.raw_response))
+-            .message(Message::user(format!(
+-                "Your output is not conform to what I'm expecting. \
+-                 Please look at the error and correct yourself: {}",
+-                prev.error
+-            )));
+-    }
+-
+-    let completion_response = builder.send().await?;
+-
+-    let raw_text = completion_response
+-        .choice
+-        .into_iter()
+-        .find_map(|c| {
+-            if let rig::completion::message::AssistantContent::Text(t) = c {
+-                Some(t.text)
+-            } else {
+-                None
+-            }
++    // 4. Run LLM request through the injected transport.
++    let retry_context = previous_attempt.map(|prev| StructuredLlmRetryContext {
++        raw_response: &prev.raw_response,
++        error: &prev.error,
++    });
++    let raw_text = executor
++        .execute_structured(StructuredLlmRequest {
++            system_prompt: &system_prompt,
++            user_content: &user_message,
++            schema,
++            temperature: options.temperature,
++            max_tokens: options.max_tokens,
++            user_id: &options.user_id,
++            retry_context,
+         })
+-        .ok_or(ExtractionError::EmptyResponse)?;
++        .await?
++        .text;
+ 
+     // 5. Chain pre_process from each component
+     let cleaned = clean_llm_json(&raw_text);
+@@ -316,3 +444,218 @@ where
+     // 9. Return ExtractionResult
+     Ok(ExtractionResult::new(json_value, requested_keys))
+ }
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use panini_core::aggregable::{Aggregable, FieldDescriptor};
++    use panini_core::component::ComponentContext;
++    use panini_core::traits::{IsoLang, MorphologyInfo, Script};
++    use serde::{Deserialize, Serialize};
++    use std::collections::VecDeque;
++    use std::sync::Mutex;
++
++    #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
++    #[serde(tag = "pos", rename_all = "lowercase")]
++    enum TestMorphology {
++        Word { lemma: String },
++    }
++
++    impl Aggregable for TestMorphology {
++        fn group_key(&self) -> String {
++            self.pos_label().to_string()
++        }
++
++        fn instance_descriptors(&self) -> Vec<FieldDescriptor> {
++            vec![]
++        }
++
++        fn observations(&self) -> Vec<Vec<(String, String)>> {
++            vec![vec![]]
++        }
++    }
++
++    impl MorphologyInfo for TestMorphology {
++        type PosTag = TestPosTag;
++
++        fn lemma(&self) -> &str {
++            match self {
++                Self::Word { lemma } => lemma,
++            }
++        }
++
++        fn pos_tag(&self) -> Self::PosTag {
++            TestPosTag::Word
++        }
++
++        fn pos_label(&self) -> &'static str {
++            "Word"
++        }
++    }
++
++    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
++    enum TestPosTag {
++        Word,
++    }
++
++    struct TestLang;
++
++    impl LinguisticDefinition for TestLang {
++        type Morphology = TestMorphology;
++        type GrammaticalFunction = ();
++
++        const ISO_LANG: IsoLang = IsoLang::Eng;
++
++        fn supported_scripts(&self) -> &[Script] {
++            &[Script::LATN]
++        }
++
++        fn default_script(&self) -> Script {
++            Script::LATN
++        }
++
++        fn extraction_directives(&self) -> &str {
++            "Extract test values."
++        }
++    }
++
++    #[derive(Debug)]
++    struct AlphaComponent;
++
++    impl AnalysisComponent<TestLang> for AlphaComponent {
++        fn name(&self) -> &'static str {
++            "Alpha"
++        }
++
++        fn schema_key(&self) -> &'static str {
++            "alpha"
++        }
++
++        fn schema_fragment(&self, _lang: &TestLang) -> serde_json::Value {
++            serde_json::json!({ "type": "string" })
++        }
++
++        fn prompt_fragment(&self, _lang: &TestLang, _ctx: &ComponentContext) -> String {
++            "Extract alpha.".to_string()
++        }
++    }
++
++    #[derive(Debug, Clone, PartialEq, Eq)]
++    struct ExecutorCall {
++        user_id: String,
++        had_retry_context: bool,
++    }
++
++    struct FakeExecutor {
++        responses: Mutex<VecDeque<String>>,
++        calls: Mutex<Vec<ExecutorCall>>,
++    }
++
++    impl FakeExecutor {
++        fn new(responses: Vec<&str>) -> Self {
++            Self {
++                responses: Mutex::new(
++                    responses
++                        .into_iter()
++                        .map(std::string::ToString::to_string)
++                        .collect(),
++                ),
++                calls: Mutex::new(Vec::new()),
++            }
++        }
++    }
++
++    impl StructuredLlmExecutor for FakeExecutor {
++        fn execute_structured<'a>(
++            &'a self,
++            request: StructuredLlmRequest<'a>,
++        ) -> StructuredLlmFuture<'a> {
++            Box::pin(async move {
++                self.calls.lock().unwrap().push(ExecutorCall {
++                    user_id: request.user_id.to_string(),
++                    had_retry_context: request.retry_context.is_some(),
++                });
++                let text =
++                    self.responses.lock().unwrap().pop_front().ok_or_else(|| {
++                        StructuredLlmError::new("fake executor response exhausted")
++                    })?;
++                Ok(StructuredLlmResponse {
++                    text,
++                    tokens_in: 1,
++                    tokens_out: 1,
++                })
++            })
++        }
++    }
++
++    fn test_prompts() -> ExtractorPrompts {
++        ExtractorPrompts {
++            system_role: "system".to_string(),
++            target_language: "{language}".to_string(),
++            extraction_directives: "{directives}".to_string(),
++            learner_profile: crate::prompts::LearnerProfile {
++                ui_language: "{name}".to_string(),
++                linguistic_background_intro: "Known languages:".to_string(),
++                linguistic_background_entry: "{iso}:{level}".to_string(),
++            },
++            skill_context: crate::prompts::SkillContextPrompts {
++                skill_tree_path: "{path}".to_string(),
++                pedagogical_focus: "{instructions}".to_string(),
++            },
++            user_context: "{context_description}".to_string(),
++            output_instruction: "Return valid JSON.".to_string(),
++        }
++    }
++
++    #[tokio::test]
++    async fn executor_entrypoint_uses_injected_transport_for_retry() {
++        let executor =
++            FakeExecutor::new(vec![r#"{"alpha": 1}"#, r#"{"alpha": "valid after retry"}"#]);
++        let request = ExtractionRequest {
++            content: "content".to_string(),
++            targets: vec!["content".to_string()],
++            pedagogical_context: None,
++            skill_path: None,
++            learner_ui_language: "English".to_string(),
++            linguistic_background: vec![],
++            user_prompt: None,
++        };
++        let options = ExtractionOptions {
++            temperature: 0.2,
++            max_tokens: 256,
++            extractor_prompts: &test_prompts(),
++            retry: RetryConfig {
++                max_retries: 2,
++                initial_backoff_secs: 0,
++            },
++            timeout: Duration::from_secs(5),
++            user_id: "test-user".to_string(),
++        };
++
++        let result = extract_with_components_executor(
++            &TestLang,
++            &executor,
++            &request,
++            &[&AlphaComponent as &dyn AnalysisComponent<TestLang>],
++            options,
++        )
++        .await
++        .expect("executor-backed extraction should retry and succeed");
++
++        let alpha: String = result.get("alpha").expect("alpha should deserialize");
++        assert_eq!(alpha, "valid after retry");
++        assert_eq!(
++            *executor.calls.lock().unwrap(),
++            vec![
++                ExecutorCall {
++                    user_id: "test-user".to_string(),
++                    had_retry_context: false,
++                },
++                ExecutorCall {
++                    user_id: "test-user".to_string(),
++                    had_retry_context: true,
++                },
++            ]
++        );
++    }
++}
+diff --git a/panini-engine/src/lib.rs b/panini-engine/src/lib.rs
+index 0de54de..0f16332 100644
+--- a/panini-engine/src/lib.rs
++++ b/panini-engine/src/lib.rs
+@@ -4,6 +4,8 @@ pub mod llm_utils;
+ pub mod prompts;
+ 
+ pub use extractor::{
+-    ExtractionError, ExtractionOptions, ExtractionParseError, extract_with_components,
++    ExtractionError, ExtractionOptions, ExtractionParseError, StructuredLlmError,
++    StructuredLlmExecutor, StructuredLlmFuture, StructuredLlmRequest, StructuredLlmResponse,
++    StructuredLlmRetryContext, extract_with_components, extract_with_components_executor,
+ };
+ pub use prompts::ExtractionRequest;
+diff --git a/panini-langs/src/registry.rs b/panini-langs/src/registry.rs
+index 4f7bea0..953ce77 100644
+--- a/panini-langs/src/registry.rs
++++ b/panini-langs/src/registry.rs
+@@ -48,7 +48,7 @@ where
+         + schemars::JsonSchema
+         + Send
+         + Sync,
+-    M: CompletionModel,
++    M: CompletionModel + Sync,
+ {
+     let pedagogical = PedagogicalExplanation;
+     let morphology = MorphologyAnalysis;
+@@ -93,7 +93,7 @@ macro_rules! generate_registry {
+         ///
+         /// # Errors
+         /// Returns an error if the language code is unsupported, or if extraction fails.
+-        pub async fn extract_erased_with_components<M: CompletionModel>(
++        pub async fn extract_erased_with_components<M: CompletionModel + Sync>(
+             lang_code: &str,
+             model: &M,
+             request: &ExtractionRequest,
+diff --git a/panini-macro/src/panini_result.rs b/panini-macro/src/panini_result.rs
+index fee8c1c..a949a4b 100644
+--- a/panini-macro/src/panini_result.rs
++++ b/panini-macro/src/panini_result.rs
+@@ -1,7 +1,7 @@
+ use crate::helpers::is_option_type;
+ use proc_macro::TokenStream;
+ use quote::quote;
+-use syn::{parse_macro_input, Data, DeriveInput, Fields};
++use syn::{Data, DeriveInput, Fields, parse_macro_input};
+ 
+ // ─── PaniniResult derive macro ────────────────────────────────────────────────
+ 
+@@ -115,10 +115,15 @@ fn generate_extract_impl(
+         quote! { ::panini::__macro_support::panini_core::component::ExtractionResultError };
+     let ling = quote! { ::panini::__macro_support::panini_core::traits::LinguisticDefinition };
+     let model = quote! { ::panini::__macro_support::rig::completion::CompletionModel };
++    let executor =
++        quote! { ::panini::__macro_support::panini_engine::extractor::StructuredLlmExecutor };
+     let req = quote! { ::panini::__macro_support::panini_engine::prompts::ExtractionRequest };
+     let opts = quote! { ::panini::__macro_support::panini_engine::extractor::ExtractionOptions };
+     let extract_fn =
+         quote! { ::panini::__macro_support::panini_engine::extractor::extract_with_components };
++    let extract_executor_fn = quote! {
++        ::panini::__macro_support::panini_engine::extractor::extract_with_components_executor
++    };
+ 
+     let component_lets: Vec<_> = component_fields
+         .iter()
+@@ -186,7 +191,7 @@ fn generate_extract_impl(
+             #(#requires_bounds,)*
+         {
+             /// Extract features from text using an LLM, returning this typed result struct.
+-            pub async fn extract<__M: #model>(
++            pub async fn extract<__M: #model + Sync>(
+                 language: &#lang_ident,
+                 model: &__M,
+                 request: &#req,
+@@ -197,6 +202,26 @@ fn generate_extract_impl(
+                 let __raw = #extract_fn(language, model, request, &__components, options).await?;
+                 Ok(Self { #(#field_deserializations,)* })
+             }
++
++            /// Extract features using an injected structured LLM executor.
++            pub async fn extract_with_executor<__E: #executor>(
++                language: &#lang_ident,
++                executor: &__E,
++                request: &#req,
++                options: #opts<'_>,
++            ) -> Result<Self, #ex_err> {
++                #(#component_lets)*
++                let __components: Vec<&dyn #ac> = vec![#(#component_refs,)*];
++                let __raw = #extract_executor_fn(
++                    language,
++                    executor,
++                    request,
++                    &__components,
++                    options,
++                )
++                .await?;
++                Ok(Self { #(#field_deserializations,)* })
++            }
+         }
+     }
+ }
+diff --git a/panini/src/lib.rs b/panini/src/lib.rs
+index 2d23ebd..e1ea8da 100644
+--- a/panini/src/lib.rs
++++ b/panini/src/lib.rs
+@@ -10,8 +10,13 @@ pub use panini_core::components::{
+     MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions, PedagogicalExplanation,
+ };
+ pub use panini_core::{LinguisticDefinition, MorphologyInfo};
+-pub use panini_engine::extractor::{ExtractionError, ExtractionOptions};
+-pub use panini_engine::{ExtractionRequest, extract_with_components};
++pub use panini_engine::extractor::{
++    ExtractionError, ExtractionOptions, StructuredLlmError, StructuredLlmExecutor,
++    StructuredLlmFuture, StructuredLlmRequest, StructuredLlmResponse, StructuredLlmRetryContext,
++};
++pub use panini_engine::{
++    ExtractionRequest, extract_with_components, extract_with_components_executor,
++};
+ pub use panini_macro::PaniniResult;
+ 
+ /// Internal re-exports used by `#[derive(PaniniResult)]` generated code.
+diff --git a/pynini/src/extraction.rs b/pynini/src/extraction.rs
+index 9a38eed..9fab533 100644
+--- a/pynini/src/extraction.rs
++++ b/pynini/src/extraction.rs
+@@ -97,6 +97,7 @@ async fn do_extract(
+                 temperature,
+                 max_tokens,
+                 &prompts,
++                "pynini".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())
+@@ -113,6 +114,7 @@ async fn do_extract(
+                 temperature,
+                 max_tokens,
+                 &prompts,
++                "pynini".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())
+@@ -129,6 +131,7 @@ async fn do_extract(
+                 temperature,
+                 max_tokens,
+                 &prompts,
++                "pynini".to_string(),
+             )
+             .await?;
+             Ok(result.into_raw())

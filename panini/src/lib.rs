@@ -11,7 +11,13 @@ pub use panini_core::components::{
 };
 pub use panini_core::{LinguisticDefinition, MorphologyInfo};
 pub use panini_engine::extractor::{ExtractionError, ExtractionOptions};
-pub use panini_engine::{ExtractionRequest, extract_with_components};
+pub use panini_engine::structured_llm::{
+    StructuredLlmError, StructuredLlmExecutor, StructuredLlmFuture, StructuredLlmRequest,
+    StructuredLlmResponse, StructuredLlmRetryContext,
+};
+pub use panini_engine::{
+    ExtractionRequest, extract_with_components, extract_with_components_executor,
+};
 pub use panini_macro::PaniniResult;
 
 /// Internal re-exports used by `#[derive(PaniniResult)]` generated code.

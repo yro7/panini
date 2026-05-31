@@ -1,12 +1,15 @@
 use panini_core::component::{AnalysisComponent, ExtractionResult};
 use panini_core::traits::LinguisticDefinition;
-use rig::completion::{CompletionModel, CompletionRequestBuilder};
-use rig::message::Message;
+use rig::completion::CompletionModel;
 use std::time::Duration;
 
 use crate::composer::{compose_prompt, compose_schema};
 use crate::llm_utils::clean_llm_json;
 use crate::prompts::{ExtractionRequest, ExtractorPrompts};
+use crate::structured_llm::{
+    RigStructuredLlmExecutor, StructuredLlmError, StructuredLlmExecutor, StructuredLlmRequest,
+    StructuredLlmRetryContext,
+};
 
 // ─── Error types ──────────────────────────────────────────────────────────────
 
@@ -44,6 +47,10 @@ pub enum ExtractionError {
     /// LLM provider errors (rig-core completion failures, network, auth, etc.)
     #[error("LLM completion failed: {0}")]
     Llm(#[from] rig::completion::request::CompletionError),
+
+    /// LLM transport errors from an injected structured executor.
+    #[error("LLM executor failed: {0}")]
+    StructuredLlm(#[from] StructuredLlmError),
 
     /// JSON serialization/deserialization errors (schema conversion, response parsing)
     #[error("JSON error: {0}")]
@@ -100,12 +107,12 @@ pub struct ExtractionOptions<'a> {
     pub extractor_prompts: &'a ExtractorPrompts,
     pub retry: RetryConfig,
     pub timeout: Duration,
-    pub user_id: String,
+    pub user_id: &'a str,
 }
 
 impl<'a> ExtractionOptions<'a> {
     #[must_use]
-    pub fn new(extractor_prompts: &'a ExtractorPrompts, user_id: String) -> Self {
+    pub fn new(extractor_prompts: &'a ExtractorPrompts, user_id: &'a str) -> Self {
         Self {
             temperature: 0.2,
             max_tokens: 4096,
@@ -136,8 +143,48 @@ pub async fn extract_with_components<L, M>(
 ) -> Result<ExtractionResult, ExtractionError>
 where
     L: LinguisticDefinition + Send + Sync,
-    M: CompletionModel,
+    M: CompletionModel + Sync,
 {
+    let executor = RigStructuredLlmExecutor::new(model);
+    extract_with_components_executor(language, &executor, request, components, options).await
+}
+
+/// Extracts features using an injected structured LLM executor.
+///
+/// This entry-point lets applications enforce their own LLM policy boundary
+/// while Panini keeps the same schema, retry, validation, and component logic.
+pub async fn extract_with_components_executor<L, E>(
+    language: &L,
+    executor: &E,
+    request: &ExtractionRequest,
+    components: &[&dyn AnalysisComponent<L>],
+    options: ExtractionOptions<'_>,
+) -> Result<ExtractionResult, ExtractionError>
+where
+    L: LinguisticDefinition + Send + Sync,
+    E: StructuredLlmExecutor,
+{
+    // --- 1. Filter to compatible components once ---
+    let compatible: Vec<&dyn AnalysisComponent<L>> = components
+        .iter()
+        .filter(|c| c.is_compatible(language))
+        .copied()
+        .collect();
+
+    let requested_keys: Vec<&'static str> = compatible.iter().map(|c| c.schema_key()).collect();
+
+    // --- 2. Compose schema once ---
+    let schema_value = compose_schema(language, &compatible);
+    let schema: schemars::Schema = serde_json::from_value(schema_value.clone())?;
+
+    // --- 3. Compose prompt once ---
+    let system_prompt = compose_prompt(language, request, options.extractor_prompts, &compatible)?;
+
+    let user_message = format!(
+        "Extract features from this card:\n{}\n\nTARGET WORDS: {:?}",
+        request.content, request.targets
+    );
+
     let mut prev_attempt: Option<PreviousAttempt> = None;
     let mut backoff = backoff::ExponentialBackoffBuilder::new()
         .with_initial_interval(Duration::from_secs(options.retry.initial_backoff_secs))
@@ -145,13 +192,28 @@ where
         .with_max_elapsed_time(Some(options.timeout))
         .build();
 
+    let start_time = std::time::Instant::now();
+
     loop {
+        let elapsed = start_time.elapsed();
+        if elapsed >= options.timeout {
+            return Err(ExtractionError::StructuredLlm(StructuredLlmError::new(
+                "total timeout exceeded"
+            )));
+        }
+        let remaining = options.timeout - elapsed;
+
         let result = perform_single_shot_extraction(
             language,
-            model,
-            request,
-            components,
+            executor,
+            &schema,
+            &schema_value,
+            &system_prompt,
+            &user_message,
+            &compatible,
+            &requested_keys,
             &options,
+            remaining,
             prev_attempt.as_ref(),
         )
         .await;
@@ -183,78 +245,53 @@ where
 }
 
 /// Internal function to perform a single extraction attempt.
-async fn perform_single_shot_extraction<L, M>(
+#[allow(clippy::too_many_arguments)]
+async fn perform_single_shot_extraction<L, E>(
     language: &L,
-    model: &M,
-    request: &ExtractionRequest,
-    components: &[&dyn AnalysisComponent<L>],
+    executor: &E,
+    schema: &schemars::Schema,
+    schema_value: &serde_json::Value,
+    system_prompt: &str,
+    user_message: &str,
+    compatible: &[&dyn AnalysisComponent<L>],
+    requested_keys: &[&'static str],
     options: &ExtractionOptions<'_>,
+    remaining_total_timeout: Duration,
     previous_attempt: Option<&PreviousAttempt>,
 ) -> Result<ExtractionResult, ExtractionError>
 where
     L: LinguisticDefinition + Send + Sync,
-    M: CompletionModel,
+    E: StructuredLlmExecutor,
 {
-    // 1. Filter to compatible components
-    let compatible: Vec<&dyn AnalysisComponent<L>> = components
-        .iter()
-        .filter(|c| c.is_compatible(language))
-        .copied()
-        .collect();
+    let attempt_timeout = std::cmp::min(options.timeout, remaining_total_timeout);
 
-    let requested_keys: Vec<&'static str> = compatible.iter().map(|c| c.schema_key()).collect();
+    // 4. Run LLM request through the injected transport with timeout wrapper.
+    let retry_context = previous_attempt.map(|prev| StructuredLlmRetryContext {
+        raw_response: &prev.raw_response,
+        error: &prev.error,
+    });
 
-    // 2. Compose schema
-    let schema_value = compose_schema(language, &compatible);
-    let rig_schema: schemars::Schema = serde_json::from_value(schema_value.clone())?;
-
-    // 3. Compose prompt
-    let system_prompt = compose_prompt(language, request, options.extractor_prompts, &compatible)?;
-
-    let user_message = format!(
-        "Extract features from this card:\n{}\n\nTARGET WORDS: {:?}",
-        request.content, request.targets
-    );
-
-    // 4. Build LLM request
-    let mut builder: CompletionRequestBuilder<M> = model
-        .completion_request(user_message.as_str())
-        .preamble(system_prompt)
-        .temperature(f64::from(options.temperature))
-        .max_tokens(u64::from(options.max_tokens))
-        .output_schema(rig_schema)
-        .additional_params(serde_json::json!({
-            "user": options.user_id
-        }));
-
-    if let Some(prev) = previous_attempt {
-        builder = builder
-            .message(Message::assistant(&prev.raw_response))
-            .message(Message::user(format!(
-                "Your output is not conform to what I'm expecting. \
-                 Please look at the error and correct yourself: {}",
-                prev.error
-            )));
-    }
-
-    let completion_response = builder.send().await?;
-
-    let raw_text = completion_response
-        .choice
-        .into_iter()
-        .find_map(|c| {
-            if let rig::completion::message::AssistantContent::Text(t) = c {
-                Some(t.text)
-            } else {
-                None
-            }
+    let raw_text = tokio::time::timeout(
+        attempt_timeout,
+        executor.execute_structured(StructuredLlmRequest {
+            system_prompt,
+            user_content: user_message,
+            schema,
+            temperature: options.temperature,
+            max_tokens: options.max_tokens,
+            user_id: options.user_id,
+            timeout: attempt_timeout,
+            retry_context,
         })
-        .ok_or(ExtractionError::EmptyResponse)?;
+    )
+    .await
+    .map_err(|_| StructuredLlmError::new("LLM request timed out"))??
+    .text;
 
     // 5. Chain pre_process from each component
     let cleaned = clean_llm_json(&raw_text);
     let mut processed = cleaned.to_string();
-    for comp in &compatible {
+    for comp in compatible {
         processed = comp.pre_process(&processed);
     }
 
@@ -273,7 +310,7 @@ where
     };
 
     // 7. Validate composed schema
-    if let Ok(validator) = jsonschema::validator_for(&schema_value) {
+    if let Ok(validator) = jsonschema::validator_for(schema_value) {
         let schema_errors: Vec<_> = validator.iter_errors(&json_value).collect();
         if !schema_errors.is_empty() {
             let mut err_msgs = Vec::new();
@@ -291,7 +328,7 @@ where
     }
 
     // 8. Per-component validate + post_process
-    for comp in &compatible {
+    for comp in compatible {
         let key = comp.schema_key();
         if let Some(section) = json_value.get(key) {
             comp.validate(language, section)
@@ -302,7 +339,7 @@ where
         }
     }
 
-    for comp in &compatible {
+    for comp in compatible {
         let key = comp.schema_key();
         if let Some(section) = json_value.get_mut(key) {
             comp.post_process(language, section)
@@ -314,5 +351,222 @@ where
     }
 
     // 9. Return ExtractionResult
-    Ok(ExtractionResult::new(json_value, requested_keys))
+    Ok(ExtractionResult::new(json_value, requested_keys.to_vec()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use panini_core::aggregable::{Aggregable, FieldDescriptor};
+    use panini_core::component::ComponentContext;
+    use panini_core::traits::{IsoLang, MorphologyInfo, Script};
+    use serde::{Deserialize, Serialize};
+    use std::collections::VecDeque;
+    use std::sync::Mutex;
+
+    use crate::structured_llm::{StructuredLlmFuture, StructuredLlmResponse};
+
+    #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
+    #[serde(tag = "pos", rename_all = "lowercase")]
+    enum TestMorphology {
+        Word { lemma: String },
+    }
+
+    impl Aggregable for TestMorphology {
+        fn group_key(&self) -> String {
+            self.pos_label().to_string()
+        }
+
+        fn instance_descriptors(&self) -> Vec<FieldDescriptor> {
+            vec![]
+        }
+
+        fn observations(&self) -> Vec<Vec<(String, String)>> {
+            vec![vec![]]
+        }
+    }
+
+    impl MorphologyInfo for TestMorphology {
+        type PosTag = TestPosTag;
+
+        fn lemma(&self) -> &str {
+            match self {
+                Self::Word { lemma } => lemma,
+            }
+        }
+
+        fn pos_tag(&self) -> Self::PosTag {
+            TestPosTag::Word
+        }
+
+        fn pos_label(&self) -> &'static str {
+            "Word"
+        }
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    enum TestPosTag {
+        Word,
+    }
+
+    struct TestLang;
+
+    impl LinguisticDefinition for TestLang {
+        type Morphology = TestMorphology;
+        type GrammaticalFunction = ();
+
+        const ISO_LANG: IsoLang = IsoLang::Eng;
+
+        fn supported_scripts(&self) -> &[Script] {
+            &[Script::LATN]
+        }
+
+        fn default_script(&self) -> Script {
+            Script::LATN
+        }
+
+        fn extraction_directives(&self) -> &str {
+            "Extract test values."
+        }
+    }
+
+    #[derive(Debug)]
+    struct AlphaComponent;
+
+    impl AnalysisComponent<TestLang> for AlphaComponent {
+        fn name(&self) -> &'static str {
+            "Alpha"
+        }
+
+        fn schema_key(&self) -> &'static str {
+            "alpha"
+        }
+
+        fn schema_fragment(&self, _lang: &TestLang) -> serde_json::Value {
+            serde_json::json!({ "type": "string" })
+        }
+
+        fn prompt_fragment(&self, _lang: &TestLang, _ctx: &ComponentContext) -> String {
+            "Extract alpha.".to_string()
+        }
+    }
+
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct ExecutorCall {
+        user_id: String,
+        had_retry_context: bool,
+    }
+
+    struct FakeExecutor {
+        responses: Mutex<VecDeque<String>>,
+        calls: Mutex<Vec<ExecutorCall>>,
+    }
+
+    impl FakeExecutor {
+        fn new(responses: Vec<&str>) -> Self {
+            Self {
+                responses: Mutex::new(
+                    responses
+                        .into_iter()
+                        .map(std::string::ToString::to_string)
+                        .collect(),
+                ),
+                calls: Mutex::new(Vec::new()),
+            }
+        }
+    }
+
+    impl StructuredLlmExecutor for FakeExecutor {
+        fn execute_structured<'a>(
+            &'a self,
+            request: StructuredLlmRequest<'a>,
+        ) -> StructuredLlmFuture<'a> {
+            Box::pin(async move {
+                self.calls.lock().unwrap().push(ExecutorCall {
+                    user_id: request.user_id.to_string(),
+                    had_retry_context: request.retry_context.is_some(),
+                });
+                let text =
+                    self.responses.lock().unwrap().pop_front().ok_or_else(|| {
+                        StructuredLlmError::new("fake executor response exhausted")
+                    })?;
+                Ok(StructuredLlmResponse {
+                    text,
+                    tokens_in: 1,
+                    tokens_out: 1,
+                })
+            })
+        }
+    }
+
+    fn test_prompts() -> ExtractorPrompts {
+        ExtractorPrompts {
+            system_role: "system".to_string(),
+            target_language: "{language}".to_string(),
+            extraction_directives: "{directives}".to_string(),
+            learner_profile: crate::prompts::LearnerProfile {
+                ui_language: "{name}".to_string(),
+                linguistic_background_intro: "Known languages:".to_string(),
+                linguistic_background_entry: "{iso}:{level}".to_string(),
+            },
+            skill_context: crate::prompts::SkillContextPrompts {
+                skill_tree_path: "{path}".to_string(),
+                pedagogical_focus: "{instructions}".to_string(),
+            },
+            user_context: "{context_description}".to_string(),
+            output_instruction: "Return valid JSON.".to_string(),
+        }
+    }
+
+    #[tokio::test]
+    async fn executor_entrypoint_uses_injected_transport_for_retry() {
+        let executor =
+            FakeExecutor::new(vec![r#"{"alpha": 1}"#, r#"{"alpha": "valid after retry"}"#]);
+        let request = ExtractionRequest {
+            content: "content".to_string(),
+            targets: vec!["content".to_string()],
+            pedagogical_context: None,
+            skill_path: None,
+            learner_ui_language: "English".to_string(),
+            linguistic_background: vec![],
+            user_prompt: None,
+        };
+        let options = ExtractionOptions {
+            temperature: 0.2,
+            max_tokens: 256,
+            extractor_prompts: &test_prompts(),
+            retry: RetryConfig {
+                max_retries: 2,
+                initial_backoff_secs: 0,
+            },
+            timeout: Duration::from_secs(5),
+            user_id: "test-user",
+        };
+
+        let result = extract_with_components_executor(
+            &TestLang,
+            &executor,
+            &request,
+            &[&AlphaComponent as &dyn AnalysisComponent<TestLang>],
+            options,
+        )
+        .await
+        .expect("executor-backed extraction should retry and succeed");
+
+        let alpha: String = result.get("alpha").expect("alpha should deserialize");
+        assert_eq!(alpha, "valid after retry");
+        assert_eq!(
+            *executor.calls.lock().unwrap(),
+            vec![
+                ExecutorCall {
+                    user_id: "test-user".to_string(),
+                    had_retry_context: false,
+                },
+                ExecutorCall {
+                    user_id: "test-user".to_string(),
+                    had_retry_context: true,
+                },
+            ]
+        );
+    }
 }
