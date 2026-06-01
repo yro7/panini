@@ -1,7 +1,7 @@
 use crate::helpers::is_option_type;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Data, DeriveInput, Fields, parse_macro_input};
+use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 // ─── PaniniResult derive macro ────────────────────────────────────────────────
 

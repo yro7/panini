@@ -12,8 +12,7 @@ use panini_core::components::{
     PedagogicalExplanation,
 };
 use panini_engine::{
-    ExtractionOptions, ExtractionRequest, extract_with_components,
-    extract_with_components_executor,
+    ExtractionOptions, ExtractionRequest, extract_with_components, extract_with_components_executor,
 };
 
 use crate::{Arabic, Danish, French, Italian, MandarinChinese, Polish, Turkish};
