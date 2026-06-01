@@ -198,7 +198,7 @@ where
         let elapsed = start_time.elapsed();
         if elapsed >= options.timeout {
             return Err(ExtractionError::StructuredLlm(StructuredLlmError::new(
-                "total timeout exceeded"
+                "total timeout exceeded",
             )));
         }
         let remaining = options.timeout - elapsed;
@@ -282,7 +282,7 @@ where
             user_id: options.user_id,
             timeout: attempt_timeout,
             retry_context,
-        })
+        }),
     )
     .await
     .map_err(|_| StructuredLlmError::new("LLM request timed out"))??
