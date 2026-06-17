@@ -160,6 +160,9 @@ pub trait LinguisticDefinition {
     /// All current language morphology enums satisfy this via `#[derive(MorphologyInfo)]`.
     type Morphology: Debug
         + Clone
+        + PartialEq
+        + Eq
+        + std::hash::Hash
         + Serialize
         + for<'de> Deserialize<'de>
         + schemars::JsonSchema
