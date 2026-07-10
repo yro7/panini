@@ -377,10 +377,9 @@ fn generate_pos_tag_and_traits(
         quote! { Self::#ident { lemma, .. } => lemma, }
     });
 
-    let pos_label_arms = variants.iter().map(|v| {
+    let pos_arms = variants.iter().map(|v| {
         let ident = &v.ident;
-        let label = ident.to_string();
-        quote! { Self::#ident { .. } => #label, }
+        quote! { Self::#ident { .. } => panini_core::traits::Upos::#ident, }
     });
 
     let pos_tag_arms = variants.iter().map(|v| {
@@ -410,9 +409,9 @@ fn generate_pos_tag_and_traits(
                 }
             }
 
-            fn pos_label(&self) -> &'static str {
+            fn pos(&self) -> panini_core::traits::Upos {
                 match self {
-                    #(#pos_label_arms)*
+                    #(#pos_arms)*
                 }
             }
         }
