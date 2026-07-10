@@ -223,10 +223,10 @@ mod tests {
                 Self::Verb { .. } => TestPosTag::Verb,
             }
         }
-        fn pos_label(&self) -> &'static str {
+        fn pos(&self) -> panini_core::traits::Upos {
             match self {
-                Self::Noun { .. } => "Noun",
-                Self::Verb { .. } => "Verb",
+                Self::Noun { .. } => panini_core::traits::Upos::Noun,
+                Self::Verb { .. } => panini_core::traits::Upos::Verb,
             }
         }
     }

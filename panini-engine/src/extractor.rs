@@ -399,6 +399,11 @@ mod tests {
             TestPosTag::Word
         }
 
+        fn pos(&self) -> panini_core::traits::Upos {
+            panini_core::traits::Upos::Other
+        }
+
+        // `Word` is a synthetic test PoS with no UD tag; keep the string label.
         fn pos_label(&self) -> &'static str {
             "Word"
         }
