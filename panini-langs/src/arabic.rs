@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
     BinaryGender, BinaryVoice, IsoLang, LinguisticDefinition, Person, Script, TernaryNumber,
+    TypologicalFeature, Upos,
 };
 
 #[derive(
@@ -219,9 +220,6 @@ pub enum ArabicMorphology {
     Adverb {
         lemma: String,
     },
-    Auxiliary {
-        lemma: String,
-    },
     CoordinatingConjunction {
         lemma: String,
     },
@@ -328,5 +326,12 @@ impl LinguisticDefinition for Arabic {
          - `number` MUST be exactly one of: \"singular\", \"dual\", \"plural\".\n\
          - `gender` MUST be exactly one of: \"masculine\", \"feminine\".\n\
          - NEVER use gender values (masculine/feminine) in the number field."
+    }
+
+    fn typological_features(&self) -> &[TypologicalFeature] {
+        &[
+            TypologicalFeature::Conjugation(&[Upos::Verb]),
+            TypologicalFeature::Declension(&[Upos::Noun, Upos::Adjective, Upos::ProperNoun]),
+        ]
     }
 }

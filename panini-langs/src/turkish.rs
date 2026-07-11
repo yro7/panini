@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use panini_core::morpheme::{Agglutinative, MorphemeDefinition, WordSegmentation};
 use panini_core::traits::{
     BinaryNumber, IsoLang, LinguisticDefinition, MorphologyInfo, Person, Script, TypologicalFeature,
+    Upos,
 };
 
 // ─── Existing Turkish grammatical enums ──────────────────────────────────────
@@ -243,9 +244,6 @@ pub enum TurkishMorphology {
         lemma: String,
     },
     Adverb {
-        lemma: String,
-    },
-    Auxiliary {
         lemma: String,
     },
     CoordinatingConjunction {
@@ -700,7 +698,7 @@ impl LinguisticDefinition for Turkish {
 
     fn typological_features(&self) -> &[TypologicalFeature] {
         &[
-            TypologicalFeature::Conjugation,
+            TypologicalFeature::Conjugation(&[Upos::Verb]),
             TypologicalFeature::Agglutination,
         ]
     }
