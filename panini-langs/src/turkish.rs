@@ -645,7 +645,7 @@ impl Agglutinative for Turkish {
              one per word that carries derivational or inflectional suffixes.\n\
              Each object has:\n\
              - `word`: the surface form of the word\n\
-             - `morphemes`: one entry per suffix (NOT the root/stem — the root is already in `lemma`):\n\
+             - `morphemes`: one entry per suffix (NOT the stem — its dictionary form is the word's `lemma`):\n\
                - `surface`: the actual allomorph as it appears (e.g. \"de\", \"yor\", \"lar\")\n\
                - `base_form`: the archiphonemic identifier from the inventory below\n\
                - `function`: {{\"category\": \"<type>\", ...value fields...}}\n\
@@ -658,7 +658,7 @@ impl Agglutinative for Turkish {
              VOWEL HARMONY: Turkish suffixes harmonize with the preceding vowel. \
              Map surface allomorphs to the correct base_form.\n\
              ORDERING: list morphemes in the order they appear in the word (left to right).\n\
-             ROOTS: do NOT include the root/stem — it is already captured in `lemma`.\n\
+             STEM: do NOT include the stem — its dictionary form is already captured in `lemma`.\n\
              Only segment words that have at least one suffix worth annotating."
         )
     }
