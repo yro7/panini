@@ -40,7 +40,8 @@ pub struct ExtractedMorpheme<F> {
 pub struct WordSegmentation<F> {
     /// Surface form of the whole word.
     pub word: String,
-    /// Ordered list of extracted morphemes (excluding the root/stem, which is in `lemma`).
+    /// Ordered list of extracted affix morphemes. The stem itself is not
+    /// listed; the word's dictionary form is carried by the morphology's `lemma`.
     pub morphemes: Vec<ExtractedMorpheme<F>>,
 }
 
