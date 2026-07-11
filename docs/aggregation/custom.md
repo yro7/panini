@@ -62,7 +62,7 @@ For convenience, `AggregationSink` provides a default `record<A: Aggregable>` me
 ```rust
 let mut agg = JsonAggregator { data: vec![] };
 
-agg.record(&feature);    // ExtractedFeature<M>
+agg.record(&feature);    // TokenAnalysis<M>
 agg.record(&morpheme);   // ExtractedMorpheme<F>
 
 let json = agg.finish();

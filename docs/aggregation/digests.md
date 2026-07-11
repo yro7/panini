@@ -6,7 +6,7 @@ Once your data is aggregated, you can manipulate it to extract specific informat
 
 ## 1. Creating a Digest: The BasicAggregator
 
-The `BasicAggregator` is the default tool for ingesting `Aggregable` objects. It handles heterogeneous data (e.g., both `ExtractedFeature` and `ExtractedMorpheme`).
+The `BasicAggregator` is the default tool for ingesting `Aggregable` objects. It handles heterogeneous data (e.g., both `TokenAnalysis` and `ExtractedMorpheme`).
 
 ```rust
 use panini_core::aggregable::digest::{AggregationSink, BasicAggregator};
