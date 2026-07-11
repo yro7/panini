@@ -1143,7 +1143,7 @@
 <p>Once your data is aggregated, you can manipulate it to extract specific information or change the analysis axis.</p>
 <hr />
 <h2 id="1-creating-a-digest-the-basicaggregator">1. Creating a Digest: The BasicAggregator</h2>
-<p>The <code>BasicAggregator</code> is the default tool for ingesting <code>Aggregable</code> objects. It handles heterogeneous data (e.g., both <code>ExtractedFeature</code> and <code>ExtractedMorpheme</code>).</p>
+<p>The <code>BasicAggregator</code> is the default tool for ingesting <code>Aggregable</code> objects. It handles heterogeneous data (e.g., both <code>TokenAnalysis</code> and <code>ExtractedMorpheme</code>).</p>
 <div class="language-rust highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">use</span><span class="w"> </span><span class="n">panini_core</span><span class="p">::</span><span class="n">aggregable</span><span class="p">::</span><span class="n">digest</span><span class="p">::{</span><span class="n">AggregationSink</span><span class="p">,</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">};</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">agg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">BasicAggregator</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
