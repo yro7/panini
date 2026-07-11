@@ -4,7 +4,7 @@ use std::hash::Hash;
 use serde::{Deserialize, Serialize};
 
 use crate::aggregable::{Aggregable, AggregableFields, FieldDescriptor, FieldKind};
-use crate::domain::ExtractedFeature;
+use crate::domain::TokenAnalysis;
 use crate::traits::{LinguisticDefinition, MorphologyInfo};
 
 // ─── Morpheme types ───────────────────────────────────────────────────────────
@@ -115,8 +115,8 @@ impl<F: AggregableFields> Aggregable for MorphemeObservation<'_, F> {
     }
 }
 
-/// Delegate `Aggregable` from `ExtractedFeature<M>` to the inner `morphology`.
-impl<M: Aggregable> Aggregable for ExtractedFeature<M> {
+/// Delegate `Aggregable` from `TokenAnalysis<M>` to the inner `morphology`.
+impl<M: Aggregable> Aggregable for TokenAnalysis<M> {
     fn group_key(&self) -> String {
         self.morphology.group_key()
     }

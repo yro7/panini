@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-/// Morphological feature extracted from a sentence.
+/// Analysis of a single token extracted from a sentence.
 /// Wraps the surface form (word as it appears) with its language-specific morphological analysis.
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
 #[schemars(bound = "M: schemars::JsonSchema")]
-pub struct ExtractedFeature<M> {
+pub struct TokenAnalysis<M> {
     /// The word as it appears in the sentence (surface form).
     pub word: String,
     /// Language-specific morphological analysis (lemma, case, gender, etc.).

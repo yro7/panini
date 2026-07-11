@@ -3,7 +3,7 @@ use dotenv::dotenv;
 use panini_core::aggregable::Aggregable;
 use panini_core::aggregable::digest::{AggregationSink, Aggregator, BasicAggregator};
 use panini_core::component::ExtractionResult;
-use panini_core::domain::ExtractedFeature;
+use panini_core::domain::TokenAnalysis;
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::arabic::ArabicMorphology;
 use panini_langs::registry;
@@ -14,8 +14,8 @@ use std::env;
 
 #[derive(Deserialize)]
 struct MorphologySection<M> {
-    target_features: Vec<ExtractedFeature<M>>,
-    context_features: Vec<ExtractedFeature<M>>,
+    target_features: Vec<TokenAnalysis<M>>,
+    context_features: Vec<TokenAnalysis<M>>,
 }
 
 #[tokio::main]

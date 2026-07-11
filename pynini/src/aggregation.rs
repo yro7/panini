@@ -200,7 +200,7 @@ impl PyBasicAggregator {
                     $(
                         s if s == <panini_langs::$lang as LinguisticDefinition>::ISO_LANG.to_639_3() => {
                             use panini_langs::$lang;
-                            use panini_core::domain::ExtractedFeature;
+                            use panini_core::domain::TokenAnalysis;
 
                             if let Some(cb) = &pivot_callback {
                                 // Pivoted path: typed iteration so Python callback receives
@@ -208,7 +208,7 @@ impl PyBasicAggregator {
                                 if let Some(morph) = value.get("morphology") {
                                     for field in ["target_features", "context_features"] {
                                         if let Some(val) = morph.get(field) {
-                                            let features: Vec<ExtractedFeature<<$lang as LinguisticDefinition>::Morphology>> =
+                                            let features: Vec<TokenAnalysis<<$lang as LinguisticDefinition>::Morphology>> =
                                                 serde_json::from_value(val.clone())
                                                     .map_err(|e| pyo3::exceptions::PyValueError::new_err(
                                                         format!("Failed to parse {}: {}", field, e)
