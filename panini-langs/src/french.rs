@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
     BinaryGender, BinaryNumber, BinaryVoice, IsoLang, LinguisticDefinition, Person, Script,
-    TypologicalFeature,
+    TypologicalFeature, Upos,
 };
 
 #[derive(
@@ -138,13 +138,6 @@ pub enum FrenchMorphology {
     Adverb {
         lemma: String,
     },
-    Auxiliary {
-        lemma: String,
-        tense: FrenchTense,
-        mood: FrenchMood,
-        person: Person,
-        number: BinaryNumber,
-    },
     CoordinatingConjunction {
         lemma: String,
     },
@@ -237,7 +230,7 @@ impl LinguisticDefinition for French {
     }
 
     fn typological_features(&self) -> &[TypologicalFeature] {
-        &[TypologicalFeature::Conjugation]
+        &[TypologicalFeature::Conjugation(&[Upos::Verb])]
     }
 
     fn extraction_directives(&self) -> &'static str {

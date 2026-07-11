@@ -143,15 +143,58 @@ impl<'de> Deserialize<'de> for Script {
     }
 }
 
-/// Typological features of a language that influence its behavior or available card models.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum TypologicalFeature {
-    /// The language features verb conjugation (e.g. Polish, French, Spanish).
+/// The kind (discriminant) of a [`TypologicalFeature`], independent of its payload.
+///
+/// Used to match a card-model variant (e.g. a Conjugation cloze) against the
+/// features a language declares, without inspecting the inflected-PoS payload.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum TypologicalFeatureKind {
     Conjugation,
-    /// The language features declension (e.g. Polish, Arabic, Turkish...).
     Declension,
+    Agglutination,
+}
+
+/// Typological features of a language that influence its behavior or available card models.
+///
+/// `Conjugation` and `Declension` carry the set of parts of speech that actually
+/// inflect for that feature in the language (Korean adjectives conjugate, Polish
+/// numerals decline). The payload is a typed `&[Upos]` — a label that isn't a real
+/// PoS is a compile error, not a silently-empty filter.
+///
+/// Not `Deserialize`: the `&'static [Upos]` payloads are compile-time language
+/// declarations, never parsed from data.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum TypologicalFeature {
+    /// The language features verb conjugation (e.g. Polish, French, Spanish),
+    /// with the parts of speech that conjugate.
+    Conjugation(&'static [Upos]),
+    /// The language features declension (e.g. Polish, Arabic, Turkish...),
+    /// with the parts of speech that decline.
+    Declension(&'static [Upos]),
     /// The language is agglutinative (e.g. Turkish, Finnish, Korean).
     Agglutination,
+}
+
+impl TypologicalFeature {
+    /// The payload-independent kind of this feature.
+    #[must_use]
+    pub fn kind(&self) -> TypologicalFeatureKind {
+        match self {
+            TypologicalFeature::Conjugation(_) => TypologicalFeatureKind::Conjugation,
+            TypologicalFeature::Declension(_) => TypologicalFeatureKind::Declension,
+            TypologicalFeature::Agglutination => TypologicalFeatureKind::Agglutination,
+        }
+    }
+
+    /// The parts of speech that inflect for this feature, if any.
+    /// `None` for features without a PoS scope (e.g. `Agglutination`).
+    #[must_use]
+    pub fn inflected_pos(&self) -> Option<&'static [Upos]> {
+        match self {
+            TypologicalFeature::Conjugation(pos) | TypologicalFeature::Declension(pos) => Some(pos),
+            TypologicalFeature::Agglutination => None,
+        }
+    }
 }
 
 /// Defines a language's linguistic properties for morphological feature extraction.

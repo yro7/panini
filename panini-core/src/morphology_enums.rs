@@ -166,9 +166,12 @@ pub enum BinaryVoice {
 
 /// Universal part-of-speech tag — the single typed PoS currency across the system.
 ///
-/// The 17 [Universal Dependencies UPOS](https://universaldependencies.org/u/pos/)
-/// categories, plus `Classifier` for languages (e.g. Mandarin) whose morphology
-/// model exposes measure words as a first-class part of speech.
+/// The [Universal Dependencies UPOS](https://universaldependencies.org/u/pos/)
+/// categories **except `AUX`** — panglot deliberately models auxiliaries as plain
+/// verbs (the AUX/VERB split is a UD flattening that dilutes lexicon analysis; an
+/// exercise needing auxiliaries specifically asks the LLM for them). Plus
+/// `Classifier` for languages (e.g. Mandarin) whose morphology model exposes
+/// measure words as a first-class part of speech.
 ///
 /// Every `{Language}Morphology` enum's outer variants are named identically to
 /// these, so `#[derive(MorphologyInfo)]` maps each variant to its `Upos` with a
@@ -188,8 +191,6 @@ pub enum Upos {
     Adposition,
     /// Adverb (ADV).
     Adverb,
-    /// Auxiliary (AUX).
-    Auxiliary,
     /// Coordinating conjunction (CCONJ).
     CoordinatingConjunction,
     /// Determiner (DET).
@@ -223,11 +224,10 @@ pub enum Upos {
 
 impl Upos {
     /// Every `Upos` value, in declaration order.
-    pub const ALL: [Upos; 18] = [
+    pub const ALL: [Upos; 17] = [
         Upos::Adjective,
         Upos::Adposition,
         Upos::Adverb,
-        Upos::Auxiliary,
         Upos::CoordinatingConjunction,
         Upos::Determiner,
         Upos::Interjection,
@@ -252,7 +252,6 @@ impl Upos {
             Upos::Adjective => "Adjective",
             Upos::Adposition => "Adposition",
             Upos::Adverb => "Adverb",
-            Upos::Auxiliary => "Auxiliary",
             Upos::CoordinatingConjunction => "CoordinatingConjunction",
             Upos::Determiner => "Determiner",
             Upos::Interjection => "Interjection",
