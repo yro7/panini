@@ -418,7 +418,7 @@ mod tests {
 
     impl LinguisticDefinition for TestLang {
         type Morphology = TestMorphology;
-        type GrammaticalFunction = ();
+        type MorphemeFunction = ();
 
         const ISO_LANG: IsoLang = IsoLang::Eng;
 

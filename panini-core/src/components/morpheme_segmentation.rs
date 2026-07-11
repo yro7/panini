@@ -22,7 +22,7 @@ impl<L: LinguisticDefinition + crate::morpheme::Agglutinative>
 where
     <L::Morphology as crate::traits::MorphologyInfo>::PosTag:
         std::fmt::Debug + Clone + Copy + PartialEq + Eq + std::hash::Hash + 'static,
-    L::GrammaticalFunction: std::fmt::Debug
+    L::MorphemeFunction: std::fmt::Debug
         + Clone
         + PartialEq
         + serde::Serialize
@@ -45,7 +45,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
 
     fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
         let r#gen = schemars::SchemaGenerator::default();
-        let schema = r#gen.into_root_schema_for::<Vec<WordSegmentation<L::GrammaticalFunction>>>();
+        let schema = r#gen.into_root_schema_for::<Vec<WordSegmentation<L::MorphemeFunction>>>();
         serde_json::to_value(&schema).unwrap()
     }
 
@@ -54,7 +54,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
     }
 
     fn post_process(&self, lang: &L, section: &mut serde_json::Value) -> Result<(), String> {
-        let mut segmentation: Option<Vec<WordSegmentation<L::GrammaticalFunction>>> =
+        let mut segmentation: Option<Vec<WordSegmentation<L::MorphemeFunction>>> =
             serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
 
         lang.post_process_extraction(&mut segmentation)?;
@@ -75,7 +75,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
 
 impl<L: LinguisticDefinition> Aggregating<L> for MorphemeSegmentation
 where
-    L::GrammaticalFunction: AggregableFields + for<'de> serde::Deserialize<'de>,
+    L::MorphemeFunction: AggregableFields + for<'de> serde::Deserialize<'de>,
 {
     fn aggregate_section(
         &self,
@@ -83,7 +83,7 @@ where
         section: &serde_json::Value,
         sink: &mut dyn AggregationSink,
     ) -> Result<(), AggregationError> {
-        let segmentations: Option<Vec<WordSegmentation<L::GrammaticalFunction>>> =
+        let segmentations: Option<Vec<WordSegmentation<L::MorphemeFunction>>> =
             serde_json::from_value(section.clone()).map_err(|e| AggregationError::Deserialize {
                 key: "morpheme_segmentation",
                 source: e,

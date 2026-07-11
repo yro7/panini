@@ -14,14 +14,14 @@ pub enum PivotValueKind {
 ///
 /// Morphology derives emit handles such as `PolishMorphology::PIVOT_CASE`.
 /// Grammatical-function derives emit handles such as
-/// `TurkishGrammaticalFunction::PIVOT_POLARITY`.
+/// `TurkishMorphemeFunction::PIVOT_POLARITY`.
 ///
 /// A closed pivot has a static value inventory, while an open pivot accepts any
 /// extracted string value (for example Arabic roots).
 #[derive(Clone, Copy)]
 pub struct PivotField<T: 'static> {
     /// Stable wire key for API/frontend state, generated from the Rust field or
-    /// grammatical-function variant name.
+    /// morpheme-function variant name.
     pub key: &'static str,
     /// Human-readable label generated from the field or variant name.
     pub label: &'static str,

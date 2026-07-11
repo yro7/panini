@@ -154,7 +154,7 @@ pub enum TurkishCopula {
     Epistemic,
 }
 
-// ─── GrammaticalFunction wrapper enum ────────────────────────────────────────
+// ─── MorphemeFunction wrapper enum ────────────────────────────────────────
 
 #[derive(
     Debug,
@@ -165,10 +165,10 @@ pub enum TurkishCopula {
     Deserialize,
     schemars::JsonSchema,
     panini_macro::AggregableFields,
-    panini_macro::GrammaticalFunctionCatalog,
+    panini_macro::MorphemeFunctionCatalog,
 )]
 #[serde(tag = "category", rename_all = "snake_case")]
-pub enum TurkishGrammaticalFunction {
+pub enum TurkishMorphemeFunction {
     Case {
         value: TurkishCase,
     },
@@ -203,7 +203,7 @@ pub enum TurkishGrammaticalFunction {
     },
 }
 
-impl TurkishGrammaticalFunction {
+impl TurkishMorphemeFunction {
     fn directive_label(&self) -> String {
         let json = serde_json::to_value(self).unwrap();
         let cat = json["category"].as_str().unwrap();
@@ -303,7 +303,7 @@ pub enum TurkishMorphology {
 // ─── Static morpheme inventory ────────────────────────────────────────────────
 
 type P = TurkishMorphologyPosTag;
-type F = TurkishGrammaticalFunction;
+type F = TurkishMorphemeFunction;
 
 static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     // === Cases (nominal) ===
@@ -620,7 +620,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
 
 impl Agglutinative for Turkish {
     fn morpheme_inventory() -> &'static [MorphemeDefinition<
-        TurkishGrammaticalFunction,
+        TurkishMorphemeFunction,
         <TurkishMorphology as MorphologyInfo>::PosTag,
     >] {
         TURKISH_MORPHEMES
@@ -633,7 +633,7 @@ impl Agglutinative for Turkish {
                 let funcs: Vec<String> = m
                     .functions
                     .iter()
-                    .map(TurkishGrammaticalFunction::directive_label)
+                    .map(TurkishMorphemeFunction::directive_label)
                     .collect();
                 format!("  {} → {}", m.base_form, funcs.join(" / "))
             })
@@ -670,7 +670,7 @@ pub struct Turkish;
 
 impl LinguisticDefinition for Turkish {
     type Morphology = TurkishMorphology;
-    type GrammaticalFunction = TurkishGrammaticalFunction;
+    type MorphemeFunction = TurkishMorphemeFunction;
 
     const ISO_LANG: IsoLang = IsoLang::Tur;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
@@ -682,10 +682,10 @@ impl LinguisticDefinition for Turkish {
         TurkishMorphology::PIVOT_NUMBER,
         TurkishMorphology::PIVOT_PERSON,
     ];
-    const MORPHEME_PIVOTS: &'static [panini_core::pivot::PivotField<Self::GrammaticalFunction>] = &[
-        TurkishGrammaticalFunction::PIVOT_POLARITY,
-        TurkishGrammaticalFunction::PIVOT_TENSE,
-        TurkishGrammaticalFunction::PIVOT_CASE,
+    const MORPHEME_PIVOTS: &'static [panini_core::pivot::PivotField<Self::MorphemeFunction>] = &[
+        TurkishMorphemeFunction::PIVOT_POLARITY,
+        TurkishMorphemeFunction::PIVOT_TENSE,
+        TurkishMorphemeFunction::PIVOT_CASE,
     ];
 
     fn supported_scripts(&self) -> &[Script] {
@@ -717,7 +717,7 @@ impl LinguisticDefinition for Turkish {
 
     fn post_process_extraction(
         &self,
-        segmentation: &mut Option<Vec<WordSegmentation<TurkishGrammaticalFunction>>>,
+        segmentation: &mut Option<Vec<WordSegmentation<TurkishMorphemeFunction>>>,
     ) -> Result<(), String> {
         self.validate_and_enrich(segmentation)
     }

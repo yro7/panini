@@ -210,7 +210,7 @@ pub struct French;
 
 impl LinguisticDefinition for French {
     type Morphology = FrenchMorphology;
-    type GrammaticalFunction = ();
+    type MorphemeFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Fra;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[

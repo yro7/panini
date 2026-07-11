@@ -290,7 +290,7 @@ pub struct Arabic;
 
 impl LinguisticDefinition for Arabic {
     type Morphology = ArabicMorphology;
-    type GrammaticalFunction = ();
+    type MorphemeFunction = ();
 
     // TODO: add automatically some pivot if languages features something
     // e.g : case if has declension, tense if conjugation, etc

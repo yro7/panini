@@ -7,7 +7,7 @@ use syn::{parse_macro_input, Data, DeriveInput, Fields};
 
 // ─── AggregableFields derive ──────────────────────────────────────────────────
 
-/// Derive `AggregableFields` for internally-tagged enums (`GrammaticalFunction` style).
+/// Derive `AggregableFields` for internally-tagged enums (`MorphemeFunction` style).
 ///
 /// Requires `#[serde(tag = "...")]` on the enum. Generates two aggregate dimensions:
 /// - `function_category` (Closed) — the serialized variant name

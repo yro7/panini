@@ -154,7 +154,7 @@ pub struct Italian;
 
 impl LinguisticDefinition for Italian {
     type Morphology = ItalianMorphology;
-    type GrammaticalFunction = ();
+    type MorphemeFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Ita;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
