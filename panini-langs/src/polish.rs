@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature,
+    IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature, Upos,
 };
 
 #[derive(
@@ -105,8 +105,6 @@ pub enum PolishMorphology {
     },
     /// Adverb (ADV)
     Adverb { lemma: String },
-    /// Auxiliary (AUX)
-    Auxiliary { lemma: String },
     /// Coordinating conjunction (CCONJ)
     CoordinatingConjunction { lemma: String },
     /// Determiner (DET)
@@ -166,8 +164,15 @@ impl LinguisticDefinition for Polish {
 
     fn typological_features(&self) -> &[TypologicalFeature] {
         &[
-            TypologicalFeature::Conjugation,
-            TypologicalFeature::Declension,
+            TypologicalFeature::Conjugation(&[Upos::Verb]),
+            TypologicalFeature::Declension(&[
+                Upos::Noun,
+                Upos::ProperNoun,
+                Upos::Adjective,
+                Upos::Pronoun,
+                Upos::Numeral,
+                Upos::Determiner,
+            ]),
         ]
     }
 

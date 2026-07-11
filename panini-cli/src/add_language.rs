@@ -274,7 +274,7 @@ fn build_system_prompt(agglutinative: bool) -> String {
          6. The unit struct must be `pub struct <Name>;` with no fields.\n\
          7. Define `const ISO_LANG: panini_core::traits::IsoLang = panini_core::traits::IsoLang::<Variant>;` — use the typed enum (e.g. `IsoLang::Fra` for French). Invalid codes are impossible.\n\
          8. Import only from: `use serde::{Deserialize, Serialize};` and `use panini_core::traits::{...};`\n\
-         9. Use UPOS tag set for morphology variants (Adjective, Adposition, Adverb, Auxiliary, CoordinatingConjunction, Determiner, Interjection, Noun, Numeral, Particle, Pronoun, ProperNoun, Punctuation, SubordinatingConjunction, Symbol, Verb, Other).\n"
+         9. Use UPOS tag set for morphology variants (Adjective, Adposition, Adverb, CoordinatingConjunction, Determiner, Interjection, Noun, Numeral, Particle, Pronoun, ProperNoun, Punctuation, SubordinatingConjunction, Symbol, Verb, Other). Tag auxiliaries as Verb (no separate Auxiliary category).\n"
     );
 
     if agglutinative {

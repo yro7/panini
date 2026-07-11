@@ -87,9 +87,6 @@ pub enum MandarinChineseMorphology {
     Adverb {
         lemma: String,
     },
-    Auxiliary {
-        lemma: String,
-    },
     Classifier {
         lemma: String,
     },

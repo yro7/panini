@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature,
+    BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature, Upos,
 };
 
 #[derive(
@@ -164,12 +164,6 @@ pub enum DanishMorphology {
     Adverb {
         lemma: String,
     },
-    Auxiliary {
-        lemma: String,
-        tense: Option<DanishTense>,
-        mood: DanishMood,
-        voice: DanishVoice,
-    },
     CoordinatingConjunction {
         lemma: String,
     },
@@ -257,7 +251,7 @@ impl LinguisticDefinition for Danish {
     }
 
     fn typological_features(&self) -> &[TypologicalFeature] {
-        &[TypologicalFeature::Conjugation]
+        &[TypologicalFeature::Conjugation(&[Upos::Verb])]
     }
 
     fn extraction_directives(&self) -> &'static str {
