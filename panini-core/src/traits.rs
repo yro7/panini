@@ -291,9 +291,7 @@ pub trait LinguisticDefinition {
     /// Returns a string describing any validation errors encountered during post-processing.
     fn post_process_extraction(
         &self,
-        _segmentation: &mut Option<
-            Vec<crate::morpheme::WordSegmentation<Self::MorphemeFunction>>,
-        >,
+        _segmentation: &mut Option<Vec<crate::morpheme::WordSegmentation<Self::MorphemeFunction>>>,
     ) -> Result<(), String> {
         Ok(())
     }
