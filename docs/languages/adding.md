@@ -88,7 +88,7 @@ pub struct Polish;
 
 impl LinguisticDefinition for Polish {
     type Morphology = PolishMorphology;
-    type GrammaticalFunction = (); // Non-agglutinative
+    type MorphemeFunction = (); // Non-agglutinative
     const ISO_LANG: IsoLang = IsoLang::Pol;
 
     const MORPHOLOGY_PIVOTS: &'static [PivotField<Self::Morphology>] = &[

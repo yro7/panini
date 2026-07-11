@@ -24,6 +24,6 @@ pub use morpheme::{ExtractedMorpheme, MorphemeObservation, WordSegmentation};
 pub use morphology_enums::{ParseUposError, Upos};
 pub use pivot::{OwnedPivotMeta, PivotField, PivotMeta, PivotValueKind};
 pub use traits::{
-    FunctionVariantSchema, GrammaticalFunctionCatalog, LinguisticDefinition, MorphologyCatalog,
+    FunctionVariantSchema, MorphemeFunctionCatalog, LinguisticDefinition, MorphologyCatalog,
     MorphologyGroupSchema, MorphologyInfo,
 };

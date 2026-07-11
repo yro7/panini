@@ -26,7 +26,7 @@ pub trait ClosedValues {
 /// Implemented by any type that can contribute named (field, value) pairs to the digest.
 ///
 /// Simple enums implementing `ClosedValues` get a blanket impl.
-/// Complex types (e.g. `TurkishGrammaticalFunction`) implement this manually.
+/// Complex types (e.g. `TurkishMorphemeFunction`) implement this manually.
 pub trait AggregableFields {
     fn descriptors() -> Vec<FieldDescriptor>;
     fn field_values(&self) -> Vec<(String, String)>;

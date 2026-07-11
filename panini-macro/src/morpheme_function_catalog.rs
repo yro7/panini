@@ -23,7 +23,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         _ => {
             return syn::Error::new_spanned(
                 name,
-                "GrammaticalFunctionCatalog can only be derived for enums",
+                "MorphemeFunctionCatalog can only be derived for enums",
             )
             .to_compile_error()
             .into();
@@ -38,7 +38,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 return syn::Error::new_spanned(
                     &v.ident,
                     format!(
-                        "GrammaticalFunctionCatalog: variant `{}` must have named fields (not unit)",
+                        "MorphemeFunctionCatalog: variant `{}` must have named fields (not unit)",
                         v.ident
                     ),
                 )
@@ -49,7 +49,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 return syn::Error::new_spanned(
                     &v.ident,
                     format!(
-                        "GrammaticalFunctionCatalog: variant `{}` must not be a tuple variant",
+                        "MorphemeFunctionCatalog: variant `{}` must not be a tuple variant",
                         v.ident
                     ),
                 )
@@ -208,7 +208,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        impl panini_core::traits::GrammaticalFunctionCatalog for #name {
+        impl panini_core::traits::MorphemeFunctionCatalog for #name {
             fn function_descriptors() -> Vec<panini_core::traits::FunctionVariantSchema> {
                 vec![#(#schema_entries),*]
             }

@@ -229,7 +229,7 @@ pub struct Danish;
 
 impl LinguisticDefinition for Danish {
     type Morphology = DanishMorphology;
-    type GrammaticalFunction = ();
+    type MorphemeFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Dan;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[

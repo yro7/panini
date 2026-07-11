@@ -75,7 +75,7 @@ let result = registry::extract_erased_with_components(
 | ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------- |
 | `morphology`              | `MorphologyAnalysis`     | POS tagging, lemmatization, case/tense/aspect/gender — language-specific morphological features | All languages                 |
 | `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap)                | All languages                 |
-| `morpheme_segmentation`   | `MorphemeSegmentation`   | Morpheme-by-morpheme segmentation with grammatical function labels                              | Agglutinative languages only* |
+| `morpheme_segmentation`   | `MorphemeSegmentation`   | Morpheme-by-morpheme segmentation with morpheme function labels                              | Agglutinative languages only* |
 | `multiword_expressions`   | `MultiwordExpressions`   | Extracts idioms, collocations, and phrasal expressions                                          | All languages                 |
 | `leipzig_alignment`       | `LeipzigAlignment`       | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
 
@@ -348,7 +348,7 @@ You should ALWAYS check the file output, especially for linguistic definitions, 
 2. Define a `Morphology` enum with `#[derive(MorphologyInfo)]` and `#[serde(tag = "pos")]` -- every variant must have `lemma: String` as its first field
 3. Implement `LinguisticDefinition` on a unit struct
 4. Curate `MORPHOLOGY_PIVOTS` with generated handles such as `PolishMorphology::PIVOT_CASE`
-5. For agglutinative languages, also derive `GrammaticalFunctionCatalog`, implement `Agglutinative` with a morpheme inventory, and curate `MORPHEME_PIVOTS`
+5. For agglutinative languages, also derive `MorphemeFunctionCatalog`, implement `Agglutinative` with a morpheme inventory, and curate `MORPHEME_PIVOTS`
 
 See `panini-langs/src/polish.rs` or `panini-langs/src/turkish.rs` as references.
 

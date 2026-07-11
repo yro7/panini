@@ -279,13 +279,13 @@ fn build_system_prompt(agglutinative: bool) -> String {
 
     if agglutinative {
         prompt.push_str(
-            "10. Set `type GrammaticalFunction` to a custom wrapper enum (see Turkish example).\n\
+            "10. Set `type MorphemeFunction` to a custom wrapper enum (see Turkish example).\n\
              11. Implement the `Agglutinative` trait with a complete morpheme inventory.\n\
              12. Include `TypologicalFeature::Agglutination` in `typological_features()`.\n",
         );
     } else {
         prompt.push_str(
-            "10. Set `type GrammaticalFunction = ();` (this language is NOT agglutinative).\n\
+            "10. Set `type MorphemeFunction = ();` (this language is NOT agglutinative).\n\
              11. Do NOT implement the `Agglutinative` trait.\n",
         );
     }
@@ -316,7 +316,7 @@ fn build_user_prompt(
     if agglutinative {
         prompt.push_str(". This language IS agglutinative — implement the Agglutinative trait with a morpheme inventory.");
     } else {
-        prompt.push_str(". This language is NOT agglutinative — set GrammaticalFunction = ().");
+        prompt.push_str(". This language is NOT agglutinative — set MorphemeFunction = ().");
     }
 
     prompt.push_str("\n\nInclude all PoS categories relevant to this language's morphology, with linguistically accurate fields (cases, genders, tenses, moods, aspects, etc.).");

@@ -75,20 +75,20 @@ mod pivot_tests {
     }
 
     #[test]
-    fn grammatical_function_handle_extracts_matching_category_only() {
-        let polarity = turkish::TurkishGrammaticalFunction::Polarity {
+    fn morpheme_function_handle_extracts_matching_category_only() {
+        let polarity = turkish::TurkishMorphemeFunction::Polarity {
             value: turkish::TurkishPolarity::Negative,
         };
-        let tense = turkish::TurkishGrammaticalFunction::Tense {
+        let tense = turkish::TurkishMorphemeFunction::Tense {
             value: turkish::TurkishTense::Past,
         };
 
         assert_eq!(
-            turkish::TurkishGrammaticalFunction::PIVOT_POLARITY.value(&polarity),
+            turkish::TurkishMorphemeFunction::PIVOT_POLARITY.value(&polarity),
             Some("negative".to_string())
         );
         assert_eq!(
-            turkish::TurkishGrammaticalFunction::PIVOT_POLARITY.value(&tense),
+            turkish::TurkishMorphemeFunction::PIVOT_POLARITY.value(&tense),
             None
         );
     }

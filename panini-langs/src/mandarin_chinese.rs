@@ -145,7 +145,7 @@ pub struct MandarinChinese;
 
 impl LinguisticDefinition for MandarinChinese {
     type Morphology = MandarinChineseMorphology;
-    type GrammaticalFunction = ();
+    type MorphemeFunction = ();
 
     const ISO_LANG: IsoLang = IsoLang::Cmn;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
