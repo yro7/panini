@@ -4,7 +4,7 @@ use panini_core::component::ExtractionResult;
 use panini_core::morpheme::WordSegmentation;
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
-use panini_langs::turkish::TurkishGrammaticalFunction;
+use panini_langs::turkish::TurkishMorphemeFunction;
 use rig::client::CompletionClient;
 use rig::providers::gemini;
 use std::env;
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         sentences.len()
     );
 
-    let mut all_segments: Vec<WordSegmentation<TurkishGrammaticalFunction>> = Vec::new();
+    let mut all_segments: Vec<WordSegmentation<TurkishMorphemeFunction>> = Vec::new();
 
     for (i, batch) in sentences.chunks(3).enumerate() {
         let batch_text = batch.join(" ");
@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         println!("API Response:");
         println!("{result:#?}");
 
-        let segments: Vec<WordSegmentation<TurkishGrammaticalFunction>> =
+        let segments: Vec<WordSegmentation<TurkishMorphemeFunction>> =
             result.get("morpheme_segmentation")?;
 
         all_segments.extend(segments);

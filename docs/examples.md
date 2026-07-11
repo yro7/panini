@@ -5,7 +5,7 @@ Explore how Pāṇini handles real-world linguistic data across different langua
 ## 🇹🇷 Turkish: Agglutinative Segmentation
 
 ### Key Concept: Morpheme Inventory
-Turkish is a highly agglutinative language where a single word can contain multiple grammatical functions. Pāṇini uses an `Inventory` to match surface forms to grammatical meanings.
+Turkish is a highly agglutinative language where a single word can contain multiple morpheme functions. Pāṇini uses an `Inventory` to match surface forms to grammatical meanings.
 
 ```python
 # Example of Turkish segmentation

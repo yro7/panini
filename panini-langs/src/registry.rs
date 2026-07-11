@@ -38,7 +38,7 @@ where
         + panini_core::MorphologyInfo
         + Send
         + Sync,
-    L::GrammaticalFunction: std::fmt::Debug
+    L::MorphemeFunction: std::fmt::Debug
         + Clone
         + PartialEq
         + serde::Serialize
@@ -96,7 +96,7 @@ where
         + panini_core::MorphologyInfo
         + Send
         + Sync,
-    L::GrammaticalFunction: std::fmt::Debug
+    L::MorphemeFunction: std::fmt::Debug
         + Clone
         + PartialEq
         + serde::Serialize

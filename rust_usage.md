@@ -41,7 +41,7 @@ pub struct French;
 
 impl LinguisticDefinition for French {
     type Morphology = FrenchMorphology;
-    type GrammaticalFunction = (); // Non-agglutinative
+    type MorphemeFunction = (); // Non-agglutinative
     const ISO_LANG: IsoLang = IsoLang::Fra;
 
     const MORPHOLOGY_PIVOTS: &'static [PivotField<Self::Morphology>] = &[
