@@ -5,7 +5,7 @@ use serde::de::DeserializeOwned;
 use crate::aggregable::Aggregable;
 use crate::aggregable::digest::{AggregationSink, record_aggregable};
 use crate::component::{Aggregating, AggregationError, AnalysisComponent, ComponentContext};
-use crate::domain::ExtractedFeature;
+use crate::domain::TokenAnalysis;
 use crate::traits::LinguisticDefinition;
 
 // ─── MorphSection ─────────────────────────────────────────────────────────────
@@ -18,9 +18,9 @@ use crate::traits::LinguisticDefinition;
 #[serde(bound(deserialize = "M: serde::de::DeserializeOwned"))]
 pub struct MorphSection<M> {
     #[serde(default = "Vec::new")]
-    pub target_features: Vec<ExtractedFeature<M>>,
+    pub target_features: Vec<TokenAnalysis<M>>,
     #[serde(default = "Vec::new")]
-    pub context_features: Vec<ExtractedFeature<M>>,
+    pub context_features: Vec<TokenAnalysis<M>>,
 }
 
 // ─── MorphologyAnalysis ───────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
 
     fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
         let r#gen = schemars::SchemaGenerator::default();
-        let feature_schema = r#gen.into_root_schema_for::<Vec<ExtractedFeature<L::Morphology>>>();
+        let feature_schema = r#gen.into_root_schema_for::<Vec<TokenAnalysis<L::Morphology>>>();
         let feature_value = serde_json::to_value(&feature_schema).unwrap();
 
         let mut fragment = serde_json::json!({
