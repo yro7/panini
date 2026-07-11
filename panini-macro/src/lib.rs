@@ -1,7 +1,7 @@
 mod aggregable_fields;
 mod closed_values;
-mod morpheme_function_catalog;
 mod helpers;
+mod morpheme_function_catalog;
 mod morphology_info;
 mod panini_result;
 

@@ -181,9 +181,7 @@ pub enum BinaryVoice {
 /// wire contract for `part_of_speech` / `pos_filter` and matches `pos_label()`.
 /// It is deliberately distinct from the `#[serde(tag = "pos", rename_all =
 /// "snake_case")]` channel used *inside* morphology JSON.
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema)]
 pub enum Upos {
     /// Adjective (ADJ).
     Adjective,

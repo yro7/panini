@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use panini_core::morpheme::{Agglutinative, MorphemeDefinition, WordSegmentation};
 use panini_core::traits::{
-    BinaryNumber, IsoLang, LinguisticDefinition, MorphologyInfo, Person, Script, TypologicalFeature,
-    Upos,
+    BinaryNumber, IsoLang, LinguisticDefinition, MorphologyInfo, Person, Script,
+    TypologicalFeature, Upos,
 };
 
 // ─── Existing Turkish grammatical enums ──────────────────────────────────────
