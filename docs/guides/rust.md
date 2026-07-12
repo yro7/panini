@@ -76,11 +76,11 @@ To dynamically select components to run, use `extract_with_components`.
 
 ```rust
 use panini_engine::extractor::extract_with_components;
-use panini_core::components::{MorphologyAnalysis, LeipzigAlignment};
+use panini_core::components::{MorphologyAnalysis, LeipzigGloss};
 
 let components = vec![
     &MorphologyAnalysis as &dyn AnalysisComponent<Polish>,
-    &LeipzigAlignment as &dyn AnalysisComponent<Polish>,
+    &LeipzigGloss as &dyn AnalysisComponent<Polish>,
 ];
 
 let res = extract_with_components(
@@ -136,8 +136,8 @@ pub struct MyAnalysis<L: LinguisticDefinition> {
     #[component(MorphologyAnalysis)]
     pub morphology: MorphologyResult<L::Morphology>,
     
-    #[component(LeipzigAlignment)]
-    pub leipzig: Option<LeipzigAlignmentResult>,
+    #[component(LeipzigGloss)]
+    pub leipzig: Option<LeipzigGlossResult>,
 }
 
 // Extraction becomes a single typesafe call:

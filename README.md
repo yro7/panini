@@ -77,7 +77,7 @@ let result = registry::extract_erased_with_components(
 | `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap)                | All languages                 |
 | `morpheme_segmentation`   | `MorphemeSegmentation`   | Morpheme-by-morpheme segmentation with morpheme function labels                              | Agglutinative languages only* |
 | `multiword_expressions`   | `MultiwordExpressions`   | Extracts idioms, collocations, and phrasal expressions                                          | All languages                 |
-| `leipzig_alignment`       | `LeipzigAlignment`       | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
+| `leipzig_alignment`       | `LeipzigGloss`           | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
 
 *Agglutinative languages are marked with a "Agglutinative" trait implementation in the framework. You can define the implementation for any language, even for low-agglutination languages like french, etc.
 

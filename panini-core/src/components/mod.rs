@@ -4,7 +4,7 @@ pub mod morphology;
 pub mod multiword;
 pub mod pedagogical;
 
-pub use leipzig::LeipzigAlignment;
+pub use leipzig::LeipzigGloss;
 pub use morpheme_segmentation::MorphemeSegmentation;
 pub use morphology::MorphologyAnalysis;
 pub use multiword::MultiwordExpressions;
