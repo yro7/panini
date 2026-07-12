@@ -58,7 +58,11 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                suffix to a pronoun), `Phrasal` for idioms aligned as a whole because word-by-word \
                links would mislead. Discontinuous units go in one link (e.g. French `ne…pas`).\n\
              - A segment with no counterpart in the other sentence appears in no link at all — \
-               never force a correspondence.",
+               never force a correspondence.\n\
+             - `literal_translation`: a word-by-word literal rendering of the source sentence in \
+               {ui_lang}, exposing its structure the way \"pomme de terre\" is literally \"apple \
+               of earth\". Follow the source's own word order and morphology, not {ui_lang} \
+               idiom. Null when it would read the same as `target.text`.",
             ui_lang = ctx.learner_ui_language
         )
     }
