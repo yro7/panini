@@ -1,4 +1,5 @@
 pub mod aggregable;
+pub mod alignment;
 pub mod component;
 pub mod components;
 pub mod domain;
@@ -16,6 +17,9 @@ pub use aggregable::digest_output::{
     DigestDimension, DigestDimensionKind, DigestGroup, DigestOptions, DigestValue,
 };
 pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor, FieldKind};
+pub use alignment::{
+    AlignedSegment, AlignedSentence, AlignedTranslation, AlignmentLink, CharSpan, LinkKind,
+};
 pub use component::{
     Aggregating, AggregationError, AnalysisComponent, ComponentContext, ComponentRequires,
     ExtractionResult, ExtractionResultError, LanguageLevel,
