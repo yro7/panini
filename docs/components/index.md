@@ -63,7 +63,7 @@ let result = registry::extract_erased_with_components(
 | `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for the learner. |
 | `morpheme_segmentation` | `MorphemeSegmentation` | Morpheme segmentation (Agglutinative languages). |
 | `multiword_expressions` | `MultiwordExpressions` | Detection of idioms and multi-word expressions. |
-| `leipzig_alignment` | `LeipzigAlignment` | Interlinear glossing (Leipzig Rules). |
+| `leipzig_alignment` | `LeipzigGloss` | Interlinear glossing (Leipzig Rules). |
 
 ---
 

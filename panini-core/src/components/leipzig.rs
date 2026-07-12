@@ -3,19 +3,22 @@ use std::fmt::Debug;
 use crate::component::{AnalysisComponent, ComponentContext};
 use crate::traits::LinguisticDefinition;
 
-/// Produces a Leipzig-style interlinear morpheme-by-morpheme gloss
+/// Produces a Leipzig gloss: an interlinear morpheme-by-morpheme gloss
 /// following the Leipzig Glossing Rules conventions.
 #[derive(Debug, Clone, Default)]
-pub struct LeipzigAlignment;
+pub struct LeipzigGloss;
 
-impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for LeipzigAlignment {}
+impl<L: LinguisticDefinition> crate::component::ComponentRequires<L> for LeipzigGloss {}
 
-impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigAlignment {
+impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigGloss {
     fn name(&self) -> &'static str {
-        "Leipzig Alignment"
+        "Leipzig Gloss"
     }
 
     fn schema_key(&self) -> &'static str {
+        // Wire-locked: this key is persisted in stored extraction results and
+        // read by external consumers, so it keeps the legacy name even though
+        // the component is now `LeipzigGloss`.
         "leipzig_alignment"
     }
 

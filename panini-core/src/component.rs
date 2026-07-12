@@ -186,7 +186,7 @@ pub enum AggregationError {
 ///
 /// Components opt in by overriding `as_aggregating` on `AnalysisComponent` to
 /// return `Some(self)`. Non-aggregable components (`PedagogicalExplanation`,
-/// `LeipzigAlignment`, etc.) do nothing.
+/// `LeipzigGloss`, etc.) do nothing.
 pub trait Aggregating<L: LinguisticDefinition>: AnalysisComponent<L> {
     /// Project this component's JSON section into aggregation contributions.
     ///

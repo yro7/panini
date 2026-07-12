@@ -8,7 +8,7 @@ use rig::completion::CompletionModel;
 
 use panini_core::component::{AnalysisComponent, ExtractionResult};
 use panini_core::components::{
-    LeipzigAlignment, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
+    LeipzigGloss, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
     PedagogicalExplanation,
 };
 use panini_engine::{
@@ -52,7 +52,7 @@ where
     let morphology = MorphologyAnalysis;
     let multiword = MultiwordExpressions;
     let morpheme_seg = MorphemeSegmentation;
-    let leipzig = LeipzigAlignment;
+    let leipzig = LeipzigGloss;
 
     let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
         ("pedagogical_explanation", &pedagogical),
@@ -110,7 +110,7 @@ where
     let morphology = MorphologyAnalysis;
     let multiword = MultiwordExpressions;
     let morpheme_seg = MorphemeSegmentation;
-    let leipzig = LeipzigAlignment;
+    let leipzig = LeipzigGloss;
 
     let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
         ("pedagogical_explanation", &pedagogical),

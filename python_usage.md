@@ -79,7 +79,7 @@ print("Pedagogical Explanation:")
 print(result['pedagogical_explanation'])
 
 # Accessing Leipzig glossing
-print("\nLeipzig Alignment:")
+print("\nLeipzig Gloss:")
 for word in result['leipzig_alignment']['words']:
     print(f"{word['source']} -> {word['gloss']}")
 ```
