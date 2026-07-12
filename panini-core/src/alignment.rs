@@ -102,6 +102,12 @@ pub struct AlignedTranslation {
     pub source: AlignedSentence,
     /// The translation, in the learner's UI language.
     pub target: AlignedSentence,
+    /// Word-by-word literal rendering of the source sentence in the target
+    /// language, exposing the source's structure the way "pomme de terre" is
+    /// literally "apple of earth". Null when it would read the same as
+    /// `target.text`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub literal_translation: Option<String>,
     /// Many-to-many correspondences between source and target segments.
     pub links: Vec<AlignmentLink>,
 }
@@ -433,6 +439,7 @@ mod tests {
                     seg(5, 4, "s", Some("PL")),
                 ],
             },
+            literal_translation: Some("dans mes maisons je-reste".to_string()),
             links: vec![
                 link(&[0], &[4], LinkKind::Lexical),
                 link(&[1], &[5], LinkKind::Grammatical),
@@ -635,5 +642,23 @@ mod tests {
         let out = serde_json::to_value(&a).expect("should serialize");
         assert_eq!(out["source"]["segments"][1]["span"]["start"], 2);
         assert_eq!(out["source"]["segments"][1]["span"]["end"], 9);
+
+        // LLM output predating (or omitting) `literal_translation` defaults to
+        // None and the key stays absent on re-serialization.
+        assert!(a.literal_translation.is_none());
+        assert!(out.get("literal_translation").is_none());
+    }
+
+    #[test]
+    fn literal_translation_round_trips() {
+        let a = demo();
+        let out = serde_json::to_value(&a).expect("should serialize");
+        assert_eq!(out["literal_translation"], "dans mes maisons je-reste");
+
+        let back: AlignedTranslation = serde_json::from_value(out).expect("should deserialize");
+        assert_eq!(
+            back.literal_translation.as_deref(),
+            Some("dans mes maisons je-reste")
+        );
     }
 }
