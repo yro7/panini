@@ -89,7 +89,7 @@ let res = extract_with_components(
 ```
 
 **Resulting Structure:**
-The `res` object will contain both the `morphology` and `leipzig_alignment` fields, populated with data validated against the respective component schemas.
+The `res` object will contain both the `morphology` and `leipzig_gloss` fields, populated with data validated against the respective component schemas.
 
 ---
 

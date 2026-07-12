@@ -92,7 +92,7 @@ result = extract(
 | `pedagogical_explanation` | HTML explanation for language learners                        |
 | `multiword_expressions`   | Idioms, collocations, phrasal verbs                           |
 | `morpheme_segmentation`   | Morpheme-by-morpheme breakdown (agglutinative languages only) |
-| `leipzig_alignment`       | Leipzig-style interlinear glossing                            |
+| `leipzig_gloss`       | Leipzig-style interlinear glossing                            |
 
 ## Custom Prompts
 

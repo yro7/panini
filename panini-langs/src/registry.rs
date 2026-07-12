@@ -60,7 +60,7 @@ where
         ("morphology", &morphology),
         ("multiword_expressions", &multiword),
         ("morpheme_segmentation", &morpheme_seg),
-        ("leipzig_alignment", &leipzig),
+        ("leipzig_gloss", &leipzig),
         ("translation_alignment", &translation),
     ];
 
@@ -120,7 +120,7 @@ where
         ("morphology", &morphology),
         ("multiword_expressions", &multiword),
         ("morpheme_segmentation", &morpheme_seg),
-        ("leipzig_alignment", &leipzig),
+        ("leipzig_gloss", &leipzig),
         ("translation_alignment", &translation),
     ];
 
@@ -292,5 +292,13 @@ mod tests {
         // Both sides of a link are schema-required to be non-empty.
         let link_source = &schema["$defs"]["AlignmentLink"]["properties"]["source"];
         assert_eq!(link_source["minItems"], 1, "schema: {schema}");
+
+        // The gloss description doubles as the extraction spec: it must
+        // announce the closed Leipzig vocabulary the validator enforces.
+        let gloss_desc = segment_props["gloss"]["description"]
+            .as_str()
+            .expect("gloss description");
+        assert!(gloss_desc.contains("Leipzig"), "desc: {gloss_desc}");
+        assert!(gloss_desc.contains("rejected"), "desc: {gloss_desc}");
     }
 }

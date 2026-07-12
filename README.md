@@ -28,7 +28,7 @@ Pāṇini is a linguistic feature extraction framework: describe your language's
     - [`pedagogical_explanation`](#pedagogical_explanation)
     - [`morpheme_segmentation`](#morpheme_segmentation)
     - [`multiword_expressions`](#multiword_expressions)
-    - [`leipzig_alignment`](#leipzig_alignment)
+    - [`leipzig_gloss`](#leipzig_gloss)
 - [Usage](#usage)
   - [As a library (Rust API)](#as-a-library-rust-api)
   - [As a standalone CLI](#as-a-standalone-cli)
@@ -51,7 +51,7 @@ By default, all compatible components are run. You can restrict the selection wi
 
 ```bash
 # Run only morphology and Leipzig glossing
-panini extract --components morphology,leipzig_alignment \
+panini extract --components morphology,leipzig_gloss \
   --text "Gila abur-u-n ferma güğüna amuq'-da-č." \
   --target "amuq'-da-č"
 
@@ -77,7 +77,7 @@ let result = registry::extract_erased_with_components(
 | `pedagogical_explanation` | `PedagogicalExplanation` | Structured HTML explanation for learners (translations, analysis, grammar recap)                | All languages                 |
 | `morpheme_segmentation`   | `MorphemeSegmentation`   | Morpheme-by-morpheme segmentation with morpheme function labels                              | Agglutinative languages only* |
 | `multiword_expressions`   | `MultiwordExpressions`   | Extracts idioms, collocations, and phrasal expressions                                          | All languages                 |
-| `leipzig_alignment`       | `LeipzigGloss`           | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
+| `leipzig_gloss`       | `LeipzigGloss`           | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
 | `translation_alignment`   | `TranslationAlignment`   | Aligns the sentence with its translation: many-to-many segment links, morpheme grain when needed | All languages                 |
 
 *Agglutinative languages are marked with a "Agglutinative" trait implementation in the framework. You can define the implementation for any language, even for low-agglutination languages like french, etc.
@@ -152,13 +152,13 @@ Polish — `"Dał nogę przed policją."`
 }
 ```
 
-#### `leipzig_alignment`
+#### `leipzig_gloss`
 
 Lezgian — `"Gila abur-u-n ferma hamišaluǧ güǧüna amuq'-da-č."`
 
 ```json
 {
-  "leipzig_alignment": {
+  "leipzig_gloss": {
     "original_script": "Gila abur-u-n ferma hamišaluǧ güǧüna amuq'-da-č.",
     "words": [
       { "source": "Gila",           "gloss": "now" },
@@ -254,7 +254,7 @@ panini extract \
 # Select specific components
 panini extract --config panini.toml \
   --text "Dał kotowi mleko." --target kotowi \
-  --components morphology,leipzig_alignment
+  --components morphology,leipzig_gloss
 
 # List supported languages
 panini languages
@@ -355,7 +355,7 @@ See `panini-langs/src/polish.rs` or `panini-langs/src/turkish.rs` as references.
 
 ## Adding an analysis component
 
-To add a new component (e.g. `leipzig_alignment`), touch 3 files:
+To add a new component (e.g. `leipzig_gloss`), touch 3 files:
 
 **1. Create the component** in `panini-core/src/components/<name>.rs`:
 

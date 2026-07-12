@@ -16,10 +16,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigGloss {
     }
 
     fn schema_key(&self) -> &'static str {
-        // Wire-locked: this key is persisted in stored extraction results and
-        // read by external consumers, so it keeps the legacy name even though
-        // the component is now `LeipzigGloss`.
-        "leipzig_alignment"
+        "leipzig_gloss"
     }
 
     fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
