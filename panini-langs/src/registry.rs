@@ -9,7 +9,7 @@ use rig::completion::CompletionModel;
 use panini_core::component::{AnalysisComponent, ExtractionResult};
 use panini_core::components::{
     LeipzigGloss, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
-    PedagogicalExplanation,
+    PedagogicalExplanation, TranslationAlignment,
 };
 use panini_engine::{
     ExtractionOptions, ExtractionRequest, extract_with_components, extract_with_components_executor,
@@ -53,6 +53,7 @@ where
     let multiword = MultiwordExpressions;
     let morpheme_seg = MorphemeSegmentation;
     let leipzig = LeipzigGloss;
+    let translation = TranslationAlignment;
 
     let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
         ("pedagogical_explanation", &pedagogical),
@@ -60,6 +61,7 @@ where
         ("multiword_expressions", &multiword),
         ("morpheme_segmentation", &morpheme_seg),
         ("leipzig_alignment", &leipzig),
+        ("translation_alignment", &translation),
     ];
 
     let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
@@ -111,6 +113,7 @@ where
     let multiword = MultiwordExpressions;
     let morpheme_seg = MorphemeSegmentation;
     let leipzig = LeipzigGloss;
+    let translation = TranslationAlignment;
 
     let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
         ("pedagogical_explanation", &pedagogical),
@@ -118,6 +121,7 @@ where
         ("multiword_expressions", &multiword),
         ("morpheme_segmentation", &morpheme_seg),
         ("leipzig_alignment", &leipzig),
+        ("translation_alignment", &translation),
     ];
 
     let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
@@ -253,17 +257,40 @@ mod tests {
         let ped = PedagogicalExplanation;
         let morph = MorphologyAnalysis;
         let multi = MultiwordExpressions;
+        let translation = TranslationAlignment;
 
         assert!(ped.is_compatible(&Turkish));
         assert!(morph.is_compatible(&Turkish));
         assert!(multi.is_compatible(&Turkish));
+        assert!(translation.is_compatible(&Turkish));
 
         assert!(ped.is_compatible(&Polish));
         assert!(morph.is_compatible(&Polish));
         assert!(multi.is_compatible(&Polish));
+        assert!(translation.is_compatible(&Polish));
 
         assert!(ped.is_compatible(&Arabic));
         assert!(morph.is_compatible(&Arabic));
         assert!(multi.is_compatible(&Arabic));
+        assert!(translation.is_compatible(&Arabic));
+    }
+
+    #[test]
+    fn translation_alignment_schema_has_expected_shape() {
+        let comp = TranslationAlignment;
+        let schema = comp.schema_fragment(&Turkish);
+        let props = schema["properties"].as_object().expect("object schema");
+        assert!(props.contains_key("source"));
+        assert!(props.contains_key("target"));
+        assert!(props.contains_key("links"));
+
+        // `span` is computed in post-processing and must not be requested from the LLM.
+        let segment_props = &schema["$defs"]["AlignedSegment"]["properties"];
+        assert!(segment_props.is_object(), "schema: {schema}");
+        assert!(segment_props.get("span").is_none());
+
+        // Both sides of a link are schema-required to be non-empty.
+        let link_source = &schema["$defs"]["AlignmentLink"]["properties"]["source"];
+        assert_eq!(link_source["minItems"], 1, "schema: {schema}");
     }
 }
