@@ -1121,7 +1121,7 @@
 <h3 id="selecting-components-cli">Selecting Components (CLI)</h3>
 <p>By default, all components compatible with the target language are executed. You can restrict the selection with the <code>--components</code> flag:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Execute only morphology and Leipzig glossing</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>panini<span class="w"> </span>extract<span class="w"> </span>--components<span class="w"> </span>morphology,leipzig_alignment<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>panini<span class="w"> </span>extract<span class="w"> </span>--components<span class="w"> </span>morphology,leipzig_gloss<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--text<span class="w"> </span><span class="s2">&quot;Dał kotowi mleko.&quot;</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--target<span class="w"> </span><span class="s2">&quot;kotowi&quot;</span>
 </span></code></pre></div>
@@ -1164,9 +1164,14 @@
 <td style="text-align: left;">Detection of idioms and multi-word expressions.</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>leipzig_alignment</code></td>
-<td style="text-align: left;"><code>LeipzigAlignment</code></td>
+<td style="text-align: left;"><code>leipzig_gloss</code></td>
+<td style="text-align: left;"><code>LeipzigGloss</code></td>
 <td style="text-align: left;">Interlinear glossing (Leipzig Rules).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>translation_alignment</code></td>
+<td style="text-align: left;"><code>TranslationAlignment</code></td>
+<td style="text-align: left;">Segment-by-segment alignment of the sentence with its translation (many-to-many links, morpheme grain when needed).</td>
 </tr>
 </tbody>
 </table>
