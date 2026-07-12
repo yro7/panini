@@ -39,9 +39,13 @@ pub struct AlignedSegment {
     /// no added hyphens, no normalization. The surfaces of one token
     /// concatenate to the token exactly as written.
     pub surface: String,
-    /// Leipzig-style UPPER CASE category label (PL, LOC, 1SG, PST…) for
-    /// grammatical morphemes and function words; null for content stems and
-    /// punctuation.
+    /// Leipzig-style gloss for grammatical morphemes and function words;
+    /// null for content stems and punctuation. Compose freely from the
+    /// standard Leipzig Glossing Rules abbreviations, joining any number of
+    /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Standard atoms only —
+    /// any other label is rejected. Person and number fuse without a dot
+    /// (1SG, 3PL — never 1.SG), and N prefixes an atom for "non-"
+    /// (NPST = non-past).
     pub gloss: Option<String>,
     /// Where this segment sits in `text`. Filled by `post_process`; absent in
     /// LLM output.
@@ -100,6 +104,53 @@ pub struct AlignedTranslation {
     pub target: AlignedSentence,
     /// Many-to-many correspondences between source and target segments.
     pub links: Vec<AlignmentLink>,
+}
+
+// ─── Gloss vocabulary ─────────────────────────────────────────────────────────
+
+/// The standard abbreviations from the Leipzig Glossing Rules appendix
+/// (Comrie, Haspelmath & Bickel, rev. May 2015). The appendix additionally
+/// defines the bare person digits 1/2/3 and the `N-` "non-" prefix
+/// (NSG non-singular, NPST non-past); [`is_valid_gloss_atom`] accepts those
+/// compositionally rather than by listing.
+pub const LEIPZIG_ATOMS: [&str; 80] = [
+    "A", "ABL", "ABS", "ACC", "ADJ", "ADV", "AGR", "ALL", "ANTIP", "APPL", "ART", "AUX", "BEN",
+    "CAUS", "CLF", "COM", "COMP", "COMPL", "COND", "COP", "CVB", "DAT", "DECL", "DEF", "DEM",
+    "DET", "DIST", "DISTR", "DU", "DUR", "ERG", "EXCL", "F", "FOC", "FUT", "GEN", "IMP", "INCL",
+    "IND", "INDF", "INF", "INS", "INTR", "IPFV", "IRR", "LOC", "M", "N", "NEG", "NMLZ", "NOM",
+    "OBJ", "OBL", "P", "PASS", "PFV", "PL", "POSS", "PRED", "PRF", "PROG", "PROH", "PROX", "PRS",
+    "PST", "PTCP", "PURP", "Q", "QUOT", "RECP", "REFL", "REL", "RES", "S", "SBJ", "SBJV", "SG",
+    "TOP", "TR", "VOC",
+];
+
+/// Frequent non-standard labels mapped to their Leipzig equivalents, so the
+/// rejection message can name the canonical form.
+const GLOSS_SUGGESTIONS: [(&str, &str); 7] = [
+    ("PRES", "PRS"),
+    ("PAST", "PST"),
+    ("PERF", "PRF"),
+    ("INDEF", "INDF"),
+    ("1S", "1SG"),
+    ("2S", "2SG"),
+    ("3S", "3SG"),
+];
+
+/// Person–number compound per Rule 5: a person digit optionally fused with a
+/// number label, no separating dot (1, 3SG, 2DU, 3NSG).
+fn is_person_number(atom: &str) -> bool {
+    matches!(atom.as_bytes().first(), Some(b'1'..=b'3'))
+        && matches!(&atom[1..], "" | "SG" | "PL" | "DU" | "NSG")
+}
+
+/// Whether one dot-separated gloss atom belongs to the accepted vocabulary:
+/// a standard abbreviation, a person–number compound, or `N` + a standard
+/// abbreviation (the appendix's "non-" prefix, e.g. NPST).
+fn is_valid_gloss_atom(atom: &str) -> bool {
+    LEIPZIG_ATOMS.contains(&atom)
+        || is_person_number(atom)
+        || atom
+            .strip_prefix('N')
+            .is_some_and(|rest| LEIPZIG_ATOMS.contains(&rest))
 }
 
 // ─── Invariants ───────────────────────────────────────────────────────────────
@@ -188,6 +239,66 @@ impl AlignedSentence {
 
         spans
     }
+
+    /// Checks every non-null gloss against the accepted Leipzig vocabulary:
+    /// each `.`-separated atom must be a standard abbreviation, a
+    /// person–number compound (1SG), or `N` + a standard abbreviation
+    /// (NPST). Any number of atoms may be composed; only the atoms
+    /// themselves are constrained — atom order is not checked. Violations
+    /// are pushed to `errors` in the same LLM-facing style as
+    /// `locate_segments`.
+    fn check_glosses(&self, side: &str, errors: &mut Vec<String>) {
+        for seg in &self.segments {
+            let Some(gloss) = &seg.gloss else { continue };
+            if gloss.trim().is_empty() {
+                errors.push(format!(
+                    "{side}: segment id {}: empty gloss — use null instead of an empty gloss",
+                    seg.id
+                ));
+                continue;
+            }
+            let mut empty_atom_reported = false;
+            for atom in gloss.split('.') {
+                if atom.is_empty() {
+                    if !empty_atom_reported {
+                        errors.push(format!(
+                            "{side}: segment id {}: gloss '{gloss}' contains an empty atom; \
+                             join atoms with a single '.', no leading or trailing dot",
+                            seg.id
+                        ));
+                        empty_atom_reported = true;
+                    }
+                    continue;
+                }
+                if is_valid_gloss_atom(atom) {
+                    continue;
+                }
+                let upper = atom.to_uppercase();
+                if upper != atom && is_valid_gloss_atom(&upper) {
+                    errors.push(format!(
+                        "{side}: segment id {}: gloss atom '{atom}' — grammatical labels are \
+                         UPPER CASE, write '{upper}'",
+                        seg.id
+                    ));
+                } else if let Some((_, fix)) =
+                    GLOSS_SUGGESTIONS.iter().find(|(bad, _)| *bad == upper)
+                {
+                    errors.push(format!(
+                        "{side}: segment id {}: gloss atom '{atom}' is not a standard Leipzig \
+                         abbreviation — use '{fix}'",
+                        seg.id
+                    ));
+                } else {
+                    errors.push(format!(
+                        "{side}: segment id {}: gloss atom '{atom}' is not a standard Leipzig \
+                         abbreviation; compose glosses only from the Leipzig Glossing Rules \
+                         atoms, joined by '.'",
+                        seg.id
+                    ));
+                }
+            }
+        }
+    }
 }
 
 impl AlignedTranslation {
@@ -223,9 +334,10 @@ impl AlignedTranslation {
     }
 
     /// Validates all structural invariants without mutating anything:
-    /// segment coverage of both texts, id uniqueness, token ordering, and
-    /// link integrity. All violations are collected into one error string so
-    /// the LLM self-correction retry sees every problem at once.
+    /// segment coverage of both texts, id uniqueness, token ordering, gloss
+    /// vocabulary, and link integrity. All violations are collected into one
+    /// error string so the LLM self-correction retry sees every problem at
+    /// once.
     ///
     /// # Errors
     /// Returns the newline-joined list of violations, if any.
@@ -233,6 +345,8 @@ impl AlignedTranslation {
         let mut errors = Vec::new();
         let _ = self.source.locate_segments("source", &mut errors);
         let _ = self.target.locate_segments("target", &mut errors);
+        self.source.check_glosses("source", &mut errors);
+        self.target.check_glosses("target", &mut errors);
         self.check_links(&mut errors);
         if errors.is_empty() {
             Ok(())
@@ -425,6 +539,67 @@ mod tests {
         a.links.push(link(&[5], &[], LinkKind::Grammatical));
         let err = a.validate_structure().unwrap_err();
         assert!(err.contains("at least one segment"), "got: {err}");
+    }
+
+    #[test]
+    fn composed_gloss_atoms_pass() {
+        let mut a = demo();
+        a.source.segments[1].gloss = Some("PST.PFV".to_string());
+        a.source.segments[2].gloss = Some("3PL".to_string());
+        a.source.segments[3].gloss = Some("NPST".to_string());
+        a.source.segments[5].gloss = Some("3".to_string());
+        a.source.segments[6].gloss = Some("NEG.1SG.POSS.COND".to_string());
+        a.validate_structure()
+            .expect("composed standard atoms should pass");
+    }
+
+    #[test]
+    fn nonstandard_gloss_atom_is_rejected_with_suggestion() {
+        let mut a = demo();
+        a.source.segments[1].gloss = Some("PRES".to_string());
+        let err = a.validate_structure().unwrap_err();
+        assert!(
+            err.contains("'PRES'") && err.contains("'PRS'"),
+            "got: {err}"
+        );
+    }
+
+    #[test]
+    fn lowercase_gloss_atom_is_rejected() {
+        let mut a = demo();
+        a.source.segments[1].gloss = Some("pl".to_string());
+        let err = a.validate_structure().unwrap_err();
+        assert!(
+            err.contains("UPPER CASE") && err.contains("'PL'"),
+            "got: {err}"
+        );
+    }
+
+    #[test]
+    fn unknown_gloss_atom_is_rejected() {
+        let mut a = demo();
+        a.target.segments[5].gloss = Some("1SG.WIBBLE".to_string());
+        let err = a.validate_structure().unwrap_err();
+        assert!(
+            err.contains("'WIBBLE'") && err.contains("standard Leipzig"),
+            "got: {err}"
+        );
+    }
+
+    #[test]
+    fn empty_gloss_is_rejected() {
+        let mut a = demo();
+        a.source.segments[1].gloss = Some("  ".to_string());
+        let err = a.validate_structure().unwrap_err();
+        assert!(err.contains("use null"), "got: {err}");
+    }
+
+    #[test]
+    fn empty_gloss_atom_is_rejected() {
+        let mut a = demo();
+        a.source.segments[1].gloss = Some("PST..PFV".to_string());
+        let err = a.validate_structure().unwrap_err();
+        assert!(err.contains("empty atom"), "got: {err}");
     }
 
     #[test]
