@@ -71,7 +71,7 @@ result = panini.extract(
     language="fra",
     text="Il est allé à la plage.",
     targets=["allé"],
-    components=["morphology", "pedagogical_explanation", "leipzig_alignment"]
+    components=["morphology", "pedagogical_explanation", "leipzig_gloss"]
 )
 
 # Rendering the HTML explanation
@@ -80,7 +80,7 @@ print(result['pedagogical_explanation'])
 
 # Accessing Leipzig glossing
 print("\nLeipzig Gloss:")
-for word in result['leipzig_alignment']['words']:
+for word in result['leipzig_gloss']['words']:
     print(f"{word['source']} -> {word['gloss']}")
 ```
 
