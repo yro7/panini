@@ -46,8 +46,13 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                hyphens, no normalization. Punctuation is its own token, left unlinked.\n\
              - `id` is unique per sentence (use the segment's position); `token` is the 0-based \
                token index, strictly increasing.\n\
-             - `gloss`: Leipzig-style UPPER CASE label (PL, LOC, 1SG, PST…) for grammatical \
-               morphemes and function words; null for content stems.\n\
+             - `gloss`: for grammatical morphemes and function words, UPPER CASE standard \
+               Leipzig abbreviations ONLY (e.g. NOM, ACC, GEN, DAT, PL, SG, PST, PRS, FUT, INF, \
+               PTCP, NEG, DEF, INDF, PASS, CAUS, REFL, SBJV, IMP, PROG, PFV, IPFV, COMP, REL, \
+               DEM, COP, AUX, LOC) — non-standard labels are rejected (PRES→PRS, PAST→PST). \
+               Compose as many atoms as needed, joined by `.` (1SG.POSS, PST.PFV); person+number \
+               fuse without a dot (1SG, never 1.SG); `N` prefixes an atom for \"non-\" (NPST). \
+               Use null for content stems and punctuation.\n\
              - `links` are many-to-many: `Lexical` for content↔content, `Grammatical` when a \
                grammatical unit is involved (a case suffix may map to a preposition, a person \
                suffix to a pronoun), `Phrasal` for idioms aligned as a whole because word-by-word \
