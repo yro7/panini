@@ -38,7 +38,7 @@ By default, all components compatible with the target language are executed. You
 
 ```bash
 # Execute only morphology and Leipzig glossing
-panini extract --components morphology,leipzig_alignment \
+panini extract --components morphology,leipzig_gloss \
   --text "Dał kotowi mleko." \
   --target "kotowi"
 ```
