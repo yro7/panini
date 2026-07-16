@@ -15,7 +15,7 @@ pub struct TokenAnalysis<M> {
 /// To be used if the meaning of the expression cannot be guessed purely from translation.
 #[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct MultiwordExpression {
-    /// The base expression, put in a generic form. Examples :  \"robić z igły widły\" instead of \"Robisz z igły widły.\". Or \"faire la tête\" instead of \"tu fais la la tête !\".",
+    /// The base expression, put in a generic form. Examples: "robić z igły widły" instead of "Robisz z igły widły.", or "faire la tête" instead of "tu fais la tête !".
     pub text: String,
     /// The meaning or translation of the expression as a whole.
     pub meaning: String,
