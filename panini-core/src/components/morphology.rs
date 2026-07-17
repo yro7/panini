@@ -100,6 +100,10 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
         crate::text_processing::normalize_pos_tags(raw)
     }
 
+    fn needs_pedagogical_context(&self) -> bool {
+        false
+    }
+
     fn as_aggregating(&self) -> Option<&dyn Aggregating<L>> {
         Some(self)
     }

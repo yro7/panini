@@ -117,29 +117,37 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let extraction_directives = interpolate(&cfg.extraction_directives, &global_ctx)?;
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
 
-    // Learner profile section
-    let wrapped_profile = cfg
-        .learner_profile
-        .build_prompt(ui_lang_name, &request.linguistic_background)?;
-    blocks.push(wrapped_profile);
+    // Pedagogical context blocks (learner profile, skill context, user context)
+    // are only relevant to components that produce learner-facing prose; for
+    // mechanical analyses (morphology, alignment, …) they are noise — the
+    // skill context even carries exercise-generation instructions.
+    let wants_pedagogical_context = components.iter().any(|c| c.needs_pedagogical_context());
 
-    // Skill context section
-    let mut skill_context_content = String::new();
-    let skill_path_str = interpolate(&cfg.skill_context.skill_tree_path, &global_ctx)?;
-    skill_context_content.push_str(&skill_path_str);
+    if wants_pedagogical_context {
+        // Learner profile section
+        let wrapped_profile = cfg
+            .learner_profile
+            .build_prompt(ui_lang_name, &request.linguistic_background)?;
+        blocks.push(wrapped_profile);
 
-    if request.pedagogical_context.is_some() {
-        skill_context_content.push('\n');
-        let ped_focus_str = interpolate(&cfg.skill_context.pedagogical_focus, &global_ctx)?;
-        skill_context_content.push_str(&ped_focus_str);
-    }
+        // Skill context section
+        let mut skill_context_content = String::new();
+        let skill_path_str = interpolate(&cfg.skill_context.skill_tree_path, &global_ctx)?;
+        skill_context_content.push_str(&skill_path_str);
 
-    blocks.push(wrap_tag("skill_context", &skill_context_content));
+        if request.pedagogical_context.is_some() {
+            skill_context_content.push('\n');
+            let ped_focus_str = interpolate(&cfg.skill_context.pedagogical_focus, &global_ctx)?;
+            skill_context_content.push_str(&ped_focus_str);
+        }
 
-    // User context section (if provided)
-    if !context_description.is_empty() {
-        let user_context_str = interpolate(&cfg.user_context, &global_ctx)?;
-        blocks.push(wrap_tag("user_context", &user_context_str));
+        blocks.push(wrap_tag("skill_context", &skill_context_content));
+
+        // User context section (if provided)
+        if !context_description.is_empty() {
+            let user_context_str = interpolate(&cfg.user_context, &global_ctx)?;
+            blocks.push(wrap_tag("user_context", &user_context_str));
+        }
     }
 
     // Component-specific prompt fragments
@@ -298,6 +306,9 @@ mod tests {
         fn prompt_fragment(&self, _lang: &TestLang, _ctx: &ComponentContext) -> String {
             "Do beta.".to_string()
         }
+        fn needs_pedagogical_context(&self) -> bool {
+            false
+        }
     }
 
     // ── Schema composition tests ───────────────────────────────────────────
@@ -375,5 +386,69 @@ mod tests {
         use panini_core::components::PedagogicalExplanation;
         let comp = PedagogicalExplanation;
         assert!(comp.is_compatible(&TestLang));
+    }
+
+    // ── Pedagogical-context gating in compose_prompt ───────────────────────
+
+    fn test_prompts() -> crate::prompts::ExtractorPrompts {
+        crate::prompts::ExtractorPrompts {
+            system_role: "system".to_string(),
+            target_language: "{language}".to_string(),
+            extraction_directives: "{directives}".to_string(),
+            learner_profile: crate::prompts::LearnerProfile {
+                ui_language: "{name}".to_string(),
+                linguistic_background_intro: "Known languages:".to_string(),
+                linguistic_background_entry: "{iso}:{level}".to_string(),
+            },
+            skill_context: crate::prompts::SkillContextPrompts {
+                skill_tree_path: "{path}".to_string(),
+                pedagogical_focus: "{instructions}".to_string(),
+            },
+            user_context: "{context_description}".to_string(),
+            output_instruction: "Return valid JSON.".to_string(),
+        }
+    }
+
+    fn test_request() -> crate::prompts::ExtractionRequest {
+        crate::prompts::ExtractionRequest {
+            content: "content".to_string(),
+            targets: vec![],
+            pedagogical_context: Some("Generate a cloze exercise.".to_string()),
+            skill_path: Some("Basics > Greetings".to_string()),
+            learner_ui_language: "English".to_string(),
+            linguistic_background: vec![],
+            user_prompt: Some("food vocabulary".to_string()),
+        }
+    }
+
+    #[test]
+    fn mechanical_component_prompt_omits_pedagogical_blocks() {
+        // FakeComponentB opts out of pedagogical context.
+        let prompt = compose_prompt(
+            &TestLang,
+            &test_request(),
+            &test_prompts(),
+            &[&FakeComponentB as &dyn AnalysisComponent<TestLang>],
+        )
+        .expect("prompt should compose");
+
+        assert!(!prompt.contains("<skill_context>"));
+        assert!(!prompt.contains("<user_context>"));
+        assert!(!prompt.contains("<learner_profile>"));
+        assert!(prompt.contains("<target_language>"));
+        assert!(prompt.contains("Do beta."));
+    }
+
+    #[test]
+    fn pedagogical_component_prompt_keeps_context_blocks() {
+        // FakeComponentA keeps the default (needs pedagogical context).
+        let a: &dyn AnalysisComponent<TestLang> = &FakeComponentA;
+        let b: &dyn AnalysisComponent<TestLang> = &FakeComponentB;
+        let prompt = compose_prompt(&TestLang, &test_request(), &test_prompts(), &[a, b])
+            .expect("prompt should compose");
+
+        assert!(prompt.contains("<skill_context>"));
+        assert!(prompt.contains("<user_context>"));
+        assert!(prompt.contains("<learner_profile>"));
     }
 }

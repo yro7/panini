@@ -171,6 +171,15 @@ where
         .copied()
         .collect();
 
+    // Nothing compatible → nothing to ask the LLM. Return an empty result
+    // rather than firing a call with an empty schema.
+    if compatible.is_empty() {
+        return Ok(ExtractionResult::new(
+            serde_json::Value::Object(serde_json::Map::new()),
+            Vec::new(),
+        ));
+    }
+
     let requested_keys: Vec<&'static str> = compatible.iter().map(|c| c.schema_key()).collect();
 
     // --- 2. Compose schema once ---
@@ -521,6 +530,47 @@ mod tests {
             user_context: "{context_description}".to_string(),
             output_instruction: "Return valid JSON.".to_string(),
         }
+    }
+
+    #[tokio::test]
+    async fn no_compatible_components_returns_empty_without_llm_call() {
+        use panini_core::components::MorphemeSegmentation;
+
+        // TestLang is not agglutinative, so MorphemeSegmentation filters out.
+        let executor = FakeExecutor::new(vec![]);
+        let request = ExtractionRequest {
+            content: "content".to_string(),
+            targets: vec![],
+            pedagogical_context: None,
+            skill_path: None,
+            learner_ui_language: "English".to_string(),
+            linguistic_background: vec![],
+            user_prompt: None,
+        };
+        let options = ExtractionOptions {
+            temperature: 0.0,
+            max_tokens: 256,
+            extractor_prompts: &test_prompts(),
+            retry: RetryConfig::default(),
+            timeout: Duration::from_secs(5),
+            user_id: "test-user",
+        };
+
+        let result = extract_with_components_executor(
+            &TestLang,
+            &executor,
+            &request,
+            &[&MorphemeSegmentation as &dyn AnalysisComponent<TestLang>],
+            options,
+        )
+        .await
+        .expect("empty component set should short-circuit successfully");
+
+        assert!(result.requested_keys().is_empty());
+        assert!(
+            executor.calls.lock().unwrap().is_empty(),
+            "no LLM call should be made when no component is compatible"
+        );
     }
 
     #[tokio::test]

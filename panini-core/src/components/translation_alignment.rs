@@ -80,4 +80,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
         *section = serde_json::to_value(&alignment).map_err(|e| e.to_string())?;
         Ok(())
     }
+
+    fn needs_pedagogical_context(&self) -> bool {
+        false
+    }
 }
