@@ -284,10 +284,21 @@ mod tests {
         assert!(props.contains_key("target"));
         assert!(props.contains_key("links"));
 
-        // `span` is computed in post-processing and must not be requested from the LLM.
+        // The LLM never produces bookkeeping fields: spans are computed in
+        // post-processing, ids and token indices are derived from position and
+        // the `starts_new_token` flag.
         let segment_props = &schema["$defs"]["AlignedSegment"]["properties"];
         assert!(segment_props.is_object(), "schema: {schema}");
         assert!(segment_props.get("span").is_none());
+        assert!(segment_props.get("id").is_none());
+        assert!(segment_props.get("token").is_none());
+        assert!(segment_props.get("starts_new_token").is_some());
+
+        // Links reference segments by surface (+ occurrence when repeated),
+        // never by id.
+        let ref_props = &schema["$defs"]["SegmentRef"]["properties"];
+        assert!(ref_props.get("surface").is_some(), "schema: {schema}");
+        assert!(ref_props.get("occurrence").is_some(), "schema: {schema}");
 
         // Both sides of a link are schema-required to be non-empty.
         let link_source = &schema["$defs"]["AlignmentLink"]["properties"]["source"];
