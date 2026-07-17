@@ -207,6 +207,7 @@ pub enum ArabicMorphology {
     Adjective {
         lemma: String,
         root: String,
+        /// only for derived words
         #[serde(skip_serializing_if = "Option::is_none")]
         pattern: Option<String>,
         gender: BinaryGender,
@@ -232,6 +233,7 @@ pub enum ArabicMorphology {
     Noun {
         lemma: String,
         root: String,
+        /// only for derived words
         #[serde(skip_serializing_if = "Option::is_none")]
         pattern: Option<String>,
         gender: BinaryGender,
@@ -253,7 +255,9 @@ pub enum ArabicMorphology {
     Pronoun {
         lemma: String,
         pronoun_type: ArabicPronounType,
-        attachment_type: ArabicAttachmentType,
+        /// only for attached pronouns
+        #[serde(skip_serializing_if = "Option::is_none")]
+        attachment_type: Option<ArabicAttachmentType>,
         person: Person,
         number: TernaryNumber,
         gender: BinaryGender,
@@ -261,13 +265,7 @@ pub enum ArabicMorphology {
     ProperNoun {
         lemma: String,
     },
-    Punctuation {
-        lemma: String,
-    },
     SubordinatingConjunction {
-        lemma: String,
-    },
-    Symbol {
         lemma: String,
     },
     Verb {

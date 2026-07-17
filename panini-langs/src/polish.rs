@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use panini_core::traits::{
-    IsoLang, LinguisticDefinition, Script, SlavicAspect, TypologicalFeature, Upos,
+    IsoLang, LinguisticDefinition, Person, Script, SlavicAspect, TypologicalFeature, Upos,
 };
 
 #[derive(
@@ -80,6 +80,24 @@ pub enum PolishTense {
 #[derive(
     Debug,
     Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum PolishNumber {
+    Singular,
+    Plural,
+}
+
+#[derive(
+    Debug,
+    Clone,
     PartialEq,
     Eq,
     Hash,
@@ -91,54 +109,91 @@ pub enum PolishTense {
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum PolishMorphology {
-    /// Adjective (ADJ)
+    /// Adjective
     Adjective {
         lemma: String,
         gender: PolishGender,
+        number: PolishNumber,
         case: PolishCase,
     },
-    /// Adposition (ADP)
+    /// Adposition
     Adposition {
         lemma: String,
         /// The grammatical case this adposition governs.
         case: PolishCase,
     },
-    /// Adverb (ADV)
+    /// Adverb
     Adverb { lemma: String },
-    /// Coordinating conjunction (CCONJ)
+    /// Coordinating conjunction
     CoordinatingConjunction { lemma: String },
-    /// Determiner (DET)
+    /// Determiner
     Determiner { lemma: String },
-    /// Interjection (INTJ)
+    /// Interjection
     Interjection { lemma: String },
-    /// Noun (NOUN)
+    /// Noun
     Noun {
         lemma: String,
         gender: PolishGender,
+        number: PolishNumber,
         case: PolishCase,
     },
-    /// Numeral (NUM)
+    /// Numeral
     Numeral { lemma: String },
-    /// Particle (PART)
+    /// Particle
     Particle { lemma: String },
-    /// Pronoun (PRON)
-    Pronoun { lemma: String, case: PolishCase },
-    /// Proper noun (PROPN)
+    /// Pronoun
+    Pronoun {
+        lemma: String,
+        number: PolishNumber,
+        case: PolishCase,
+    },
+    /// Proper noun
     ProperNoun { lemma: String },
-    /// Punctuation (PUNCT)
-    Punctuation { lemma: String },
-    /// Subordinating conjunction (SCONJ)
+    /// Subordinating conjunction
     SubordinatingConjunction { lemma: String },
-    /// Symbol (SYM)
-    Symbol { lemma: String },
-    /// Verb (VERB)
+    /// Verb
     Verb {
         lemma: String,
-        tense: PolishTense,
+        /// Grammatical person; omit for infinitives.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        person: Option<Person>,
+        /// Grammatical number; omit for infinitives.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        number: Option<PolishNumber>,
+        /// Tense; omit for infinitives and imperatives.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        tense: Option<PolishTense>,
         aspect: SlavicAspect,
     },
-    /// Other (X) for unanalyzable tokens
+    /// Other, for unanalyzable tokens
     Other { lemma: String },
+}
+
+impl PolishMorphology {
+    /// Extracts the tense value for the tense pivot.
+    ///
+    /// `tense` is `Option` on the verb (absent for infinitives/imperatives), so the
+    /// `MorphologyInfo` derive skips it for pivot generation. This hand-written
+    /// handle keeps `PIVOT_TENSE` available for lexicon faceting, yielding `None`
+    /// when no tense was extracted.
+    fn __pivot_tense(&self) -> Option<String> {
+        match self {
+            Self::Verb { tense, .. } => tense
+                .as_ref()
+                .map(|t| panini_core::aggregable::ClosedValues::variant_str(t).to_string()),
+            _ => None,
+        }
+    }
+
+    /// Typed pivot handle for verb tense. Defined manually because `tense` is
+    /// optional (see [`PolishMorphology::__pivot_tense`]).
+    pub const PIVOT_TENSE: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "tense",
+            "Tense",
+            <PolishTense as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_tense,
+        );
 }
 
 pub struct Polish;
@@ -177,6 +232,8 @@ impl LinguisticDefinition for Polish {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "Do not forget to specify 'cases' when extracting the features."
+        "Always specify 'case' and 'number' for nouns, adjectives and pronouns.\n\
+         For verbs, provide 'person', 'number' and 'tense' only for finite forms; \
+         omit all three for infinitives, and omit 'tense' for imperatives."
     }
 }

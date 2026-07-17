@@ -143,10 +143,28 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     global_ctx.insert("name", ui_lang_name.clone());
     global_ctx.insert("context_description", context_description.to_string());
 
+    // Pedagogical context blocks (learner profile, skill context, user context)
+    // and the explanation-oriented system role are only relevant to components
+    // that produce learner-facing prose; for mechanical analyses (morphology,
+    // alignment, …) they are noise — the skill context even carries
+    // exercise-generation instructions.
+    let wants_pedagogical_context = components.iter().any(|c| c.needs_pedagogical_context());
+
     let mut blocks = Vec::new();
 
-    // System role
-    blocks.push(cfg.system_role.clone());
+    // System role — tailored to what is actually composed. Mechanical axes
+    // (morphology, segmentation, alignment) emit no explanation, so they get a
+    // strict-extractor-only role instead of the explanation-oriented one.
+    let system_role = if wants_pedagogical_context {
+        "You are an expert computational linguist and a strict NLP feature extractor. \
+         Explain the sentence in the learner's language, then extract \
+         language-learning-relevant features from the target-language sentence."
+    } else {
+        "You are an expert computational linguist and a strict NLP feature extractor. \
+         Analyze the sentence in the target language and extract the requested \
+         features, following the JSON schema exactly."
+    };
+    blocks.push(system_role.to_string());
 
     // Target language section
     let language_context = interpolate(&cfg.target_language, &global_ctx)?;
@@ -155,12 +173,6 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     // Extraction directives section
     let extraction_directives = interpolate(&cfg.extraction_directives, &global_ctx)?;
     blocks.push(wrap_tag("extraction_directives", &extraction_directives));
-
-    // Pedagogical context blocks (learner profile, skill context, user context)
-    // are only relevant to components that produce learner-facing prose; for
-    // mechanical analyses (morphology, alignment, …) they are noise — the
-    // skill context even carries exercise-generation instructions.
-    let wants_pedagogical_context = components.iter().any(|c| c.needs_pedagogical_context());
 
     if wants_pedagogical_context {
         // Learner profile section

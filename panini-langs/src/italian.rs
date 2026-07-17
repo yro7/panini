@@ -84,37 +84,37 @@ pub enum ItalianPronounType {
 #[serde(tag = "pos")]
 #[serde(rename_all = "snake_case")]
 pub enum ItalianMorphology {
-    /// Adjective (ADJ)
+    /// Adjective
     Adjective {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// Adposition (ADP)
+    /// Adposition
     Adposition { lemma: String },
-    /// Adverb (ADV)
+    /// Adverb
     Adverb { lemma: String },
-    /// Coordinating conjunction (CCONJ)
+    /// Coordinating conjunction
     CoordinatingConjunction { lemma: String },
-    /// Determiner (DET)
+    /// Determiner
     Determiner {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// Interjection (INTJ)
+    /// Interjection
     Interjection { lemma: String },
-    /// Noun (NOUN)
+    /// Noun
     Noun {
         lemma: String,
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    /// Numeral (NUM)
+    /// Numeral
     Numeral { lemma: String },
-    /// Particle (PART)
+    /// Particle
     Particle { lemma: String },
-    /// Pronoun (PRON)
+    /// Pronoun
     Pronoun {
         lemma: String,
         pronoun_type: ItalianPronounType,
@@ -126,15 +126,15 @@ pub enum ItalianMorphology {
         number: Option<BinaryNumber>,
         clitic: bool,
     },
-    /// Proper noun (PROPN)
+    /// Proper noun
     ProperNoun { lemma: String },
-    /// Punctuation (PUNCT)
+    /// Punctuation
     Punctuation { lemma: String },
-    /// Subordinating conjunction (SCONJ)
+    /// Subordinating conjunction
     SubordinatingConjunction { lemma: String },
-    /// Symbol (SYM)
+    /// Symbol
     Symbol { lemma: String },
-    /// Verb (VERB)
+    /// Verb
     Verb {
         lemma: String,
         tense: ItalianTense,
@@ -146,7 +146,7 @@ pub enum ItalianMorphology {
         #[serde(skip_serializing_if = "Option::is_none")]
         gender: Option<BinaryGender>,
     },
-    /// Other (X) for unanalyzable tokens
+    /// Other, for unanalyzable tokens
     Other { lemma: String },
 }
 
