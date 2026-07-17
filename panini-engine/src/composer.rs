@@ -460,7 +460,10 @@ mod tests {
         });
         let validator = jsonschema::validator_for(&schema).unwrap();
         let errors: Vec<_> = validator.iter_errors(&sample).collect();
-        assert!(errors.is_empty(), "batch schema should validate: {errors:?}");
+        assert!(
+            errors.is_empty(),
+            "batch schema should validate: {errors:?}"
+        );
     }
 
     // ── Pedagogical-context gating in compose_prompt ───────────────────────
