@@ -74,6 +74,17 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
         true
     }
 
+    /// Whether this component's prompt needs the pedagogical context blocks
+    /// (`<learner_profile>`, `<skill_context>`, `<user_context>`).
+    ///
+    /// Mechanical components (morphology, alignment, …) override this to
+    /// `false` so single-axis prompts don't carry generation instructions
+    /// that are noise for their task. The composer includes the blocks if
+    /// any component in the call requests them.
+    fn needs_pedagogical_context(&self) -> bool {
+        true
+    }
+
     /// Returns `Some(self)` for components that produce aggregable data.
     ///
     /// Override to return `Some(self)` in components that implement [`Aggregating<L>`].

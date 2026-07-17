@@ -68,6 +68,10 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphemeSegmentation {
             .contains(&TypologicalFeature::Agglutination)
     }
 
+    fn needs_pedagogical_context(&self) -> bool {
+        false
+    }
+
     fn as_aggregating(&self) -> Option<&dyn Aggregating<L>> {
         Some(self)
     }
