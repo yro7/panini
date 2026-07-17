@@ -33,6 +33,7 @@ mod pivot_tests {
         let morphology = polish::PolishMorphology::Noun {
             lemma: "dom".to_string(),
             gender: polish::PolishGender::MasculineInanimate,
+            number: polish::PolishNumber::Singular,
             case: polish::PolishCase::Nominative,
         };
 
