@@ -78,4 +78,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigGloss {
             ui_lang = ctx.learner_ui_language
         )
     }
+
+    fn needs_pedagogical_context(&self) -> bool {
+        false
+    }
 }

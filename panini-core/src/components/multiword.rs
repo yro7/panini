@@ -31,4 +31,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MultiwordExpressions {
          Use the base/generic form of the expression, not the inflected form as it appears."
             .to_string()
     }
+
+    fn needs_pedagogical_context(&self) -> bool {
+        false
+    }
 }
