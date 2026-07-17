@@ -389,6 +389,267 @@ fn has_duplicates(ids: &[u32]) -> bool {
     ids.iter().any(|id| !seen.insert(id))
 }
 
+// ─── LLM wire format ──────────────────────────────────────────────────────────
+
+/// The alignment shape the LLM produces, before server-side resolution.
+///
+/// Deliberately free of model-maintained counters: autoregressive models are
+/// unreliable at keeping several global numbering systems consistent, so
+/// segments carry a local word-boundary flag instead of absolute token
+/// indices, and links reference segments by surface text instead of numeric
+/// ids. [`AlignedTranslation::resolve`](wire::AlignedTranslation::resolve)
+/// derives ids, token indices and character spans deterministically and
+/// returns the internal [`super::alignment::AlignedTranslation`] — the stored
+/// format is unchanged.
+///
+/// Doc comments on these types double as the JSON-schema descriptions shown
+/// to the LLM — they are the extraction spec, keep them precise.
+pub mod wire {
+    use std::collections::HashMap;
+
+    use serde::{Deserialize, Serialize};
+
+    use super::LinkKind;
+
+    /// One displayable slice of a sentence: a whole word, or one morpheme of it.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedSegment {
+        /// The exact characters of this segment as they appear in the
+        /// sentence — no added hyphens, no normalization. The surfaces of one
+        /// word concatenate to that word exactly as written.
+        pub surface: String,
+        /// True when this segment begins a new word (words are separated by
+        /// whitespace; each punctuation mark is its own word), false when it
+        /// continues the previous word (affix, clitic, fused mark). The first
+        /// segment is always true. Never fuse two whitespace-separated words
+        /// into one word — a multi-word unit is expressed by one link
+        /// spanning several segments, not by merging words.
+        pub starts_new_token: bool,
+        /// Leipzig-style gloss for grammatical morphemes and function words;
+        /// null for content stems and punctuation. Compose freely from the
+        /// standard Leipzig Glossing Rules abbreviations, joining any number of
+        /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Standard atoms only —
+        /// any other label is rejected. Person and number fuse without a dot
+        /// (1SG, 3PL — never 1.SG), and N prefixes an atom for "non-"
+        /// (NPST = non-past).
+        pub gloss: Option<String>,
+    }
+
+    /// One sentence of the pair, split into addressable segments.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedSentence {
+        /// The sentence exactly as displayed, unsegmented.
+        pub text: String,
+        /// All segments in reading order, covering every non-whitespace
+        /// character of `text` exactly once. One segment per word by default;
+        /// several when sub-word units align separately (agglutinative
+        /// affixes, clitics, fused plurals). The stem is a segment too.
+        /// Punctuation is its own word, usually in no link.
+        pub segments: Vec<AlignedSegment>,
+    }
+
+    /// Reference to one segment of a sentence, by its surface text.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct SegmentRef {
+        /// The referenced segment's `surface`, copied exactly as it appears
+        /// in that sentence's `segments` (case-sensitive) — not the whole
+        /// word, not a normalized form.
+        pub surface: String,
+        /// 1-based position among this sentence's segments that have exactly
+        /// this surface, in reading order. Required when the surface appears
+        /// more than once in the sentence; omit when it is unique.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub occurrence: Option<u32>,
+    }
+
+    /// One correspondence between the two sentences. Many-to-many: either side
+    /// may hold several segment references (discontinuous units included). A
+    /// segment with no counterpart appears in no link at all.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignmentLink {
+        /// References to the source-sentence segments in this correspondence.
+        #[schemars(length(min = 1))]
+        pub source: Vec<SegmentRef>,
+        /// References to the target-sentence segments in this correspondence.
+        #[schemars(length(min = 1))]
+        pub target: Vec<SegmentRef>,
+        /// What kind of correspondence this is.
+        pub kind: LinkKind,
+    }
+
+    /// A sentence aligned with its translation, segment by segment.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedTranslation {
+        /// The analyzed sentence, in the language being learned.
+        pub source: AlignedSentence,
+        /// The translation, in the learner's UI language.
+        pub target: AlignedSentence,
+        /// Word-by-word literal rendering of the source sentence in the target
+        /// language, exposing the source's structure the way "pomme de terre" is
+        /// literally "apple of earth". Null when it would read the same as
+        /// `target.text`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub literal_translation: Option<String>,
+        /// Many-to-many correspondences between source and target segments.
+        pub links: Vec<AlignmentLink>,
+    }
+
+    impl AlignedTranslation {
+        /// Validates the wire structure and resolves it into the internal,
+        /// id/token/span-addressed [`super::AlignedTranslation`]: ids are the
+        /// segments' positions, token indices are derived from
+        /// `starts_new_token`, link references are resolved by surface (and
+        /// occurrence where ambiguous), and character spans are located.
+        ///
+        /// # Errors
+        /// Returns the newline-joined list of violations, written for the LLM
+        /// self-correction retry — every problem is reported at once.
+        pub fn resolve(&self) -> Result<super::AlignedTranslation, String> {
+            let mut errors = Vec::new();
+
+            let source = derive_sentence(&self.source, "source", &mut errors);
+            let target = derive_sentence(&self.target, "target", &mut errors);
+
+            let source_index = surface_index(&source);
+            let target_index = surface_index(&target);
+            let mut links = Vec::with_capacity(self.links.len());
+            for (i, link) in self.links.iter().enumerate() {
+                if link.source.is_empty() || link.target.is_empty() {
+                    errors.push(format!(
+                        "link {i}: both sides must reference at least one segment; a unit with \
+                         no counterpart is expressed by leaving its segment out of all links"
+                    ));
+                }
+                let source_ids =
+                    resolve_refs(&link.source, &source_index, "source", i, &mut errors);
+                let target_ids =
+                    resolve_refs(&link.target, &target_index, "target", i, &mut errors);
+                links.push(super::AlignmentLink {
+                    source: source_ids,
+                    target: target_ids,
+                    kind: link.kind,
+                });
+            }
+
+            if !errors.is_empty() {
+                return Err(errors.join("\n"));
+            }
+
+            let mut resolved = super::AlignedTranslation {
+                source,
+                target,
+                literal_translation: self.literal_translation.clone(),
+                links,
+            };
+            resolved.validate_structure()?;
+            resolved.locate_spans()?;
+            Ok(resolved)
+        }
+    }
+
+    /// Assigns ids by position and derives token indices from the
+    /// word-boundary flags. A false flag on the first segment is a violation.
+    fn derive_sentence(
+        sentence: &AlignedSentence,
+        side: &str,
+        errors: &mut Vec<String>,
+    ) -> super::AlignedSentence {
+        let mut token: u32 = 0;
+        let mut segments = Vec::with_capacity(sentence.segments.len());
+        for (i, seg) in sentence.segments.iter().enumerate() {
+            if i == 0 && !seg.starts_new_token {
+                errors.push(format!(
+                    "{side}: the first segment ('{}') must have starts_new_token: true — it \
+                     begins the first word",
+                    seg.surface
+                ));
+            }
+            if i > 0 && seg.starts_new_token {
+                token += 1;
+            }
+            segments.push(super::AlignedSegment {
+                id: i as u32,
+                token,
+                surface: seg.surface.clone(),
+                gloss: seg.gloss.clone(),
+                span: None,
+            });
+        }
+        super::AlignedSentence {
+            text: sentence.text.clone(),
+            segments,
+        }
+    }
+
+    /// Segment ids grouped by exact surface, in reading order.
+    fn surface_index(sentence: &super::AlignedSentence) -> HashMap<&str, Vec<u32>> {
+        let mut index: HashMap<&str, Vec<u32>> = HashMap::new();
+        for seg in &sentence.segments {
+            index.entry(seg.surface.as_str()).or_default().push(seg.id);
+        }
+        index
+    }
+
+    /// Resolves one side of a link to segment ids. Every failure is reported
+    /// with the rule it violates; duplicates are checked on the resolved ids
+    /// so `{surface: "ę"}` twice is caught even without occurrences.
+    fn resolve_refs(
+        refs: &[SegmentRef],
+        index: &HashMap<&str, Vec<u32>>,
+        side: &str,
+        link_index: usize,
+        errors: &mut Vec<String>,
+    ) -> Vec<u32> {
+        let mut resolved = Vec::with_capacity(refs.len());
+        for r in refs {
+            let surface = r.surface.as_str();
+            match index.get(surface) {
+                None => errors.push(format!(
+                    "{side}: link {link_index}: no segment has surface '{surface}' — copy one \
+                     segment's surface exactly (case-sensitive), not the whole word or a \
+                     normalized form"
+                )),
+                Some(ids) if ids.len() == 1 => match r.occurrence {
+                    None | Some(1) => resolved.push(ids[0]),
+                    Some(o) => errors.push(format!(
+                        "{side}: link {link_index}: surface '{surface}' appears only once; \
+                         occurrence {o} is out of range"
+                    )),
+                },
+                Some(ids) => match r.occurrence {
+                    None => errors.push(format!(
+                        "{side}: link {link_index}: surface '{surface}' appears {n} times in \
+                         this sentence's segments; add occurrence (1-{n}, in reading order) to \
+                         say which one is meant",
+                        n = ids.len()
+                    )),
+                    Some(0) => errors.push(format!(
+                        "{side}: link {link_index}: occurrence is 1-based; use 1-{n} for \
+                         surface '{surface}'",
+                        n = ids.len()
+                    )),
+                    Some(o) if (o as usize) <= ids.len() => resolved.push(ids[o as usize - 1]),
+                    Some(o) => errors.push(format!(
+                        "{side}: link {link_index}: occurrence {o} is out of range for surface \
+                         '{surface}' ({n} occurrences)",
+                        n = ids.len()
+                    )),
+                },
+            }
+        }
+        let mut seen = std::collections::HashSet::new();
+        for id in &resolved {
+            if !seen.insert(*id) {
+                errors.push(format!(
+                    "{side}: link {link_index}: duplicate reference to the same segment (id \
+                     {id}) — reference each segment at most once per link side"
+                ));
+            }
+        }
+        resolved
+    }
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -659,6 +920,316 @@ mod tests {
         assert_eq!(
             back.literal_translation.as_deref(),
             Some("dans mes maisons je-reste")
+        );
+    }
+
+    // ── Wire format ──
+
+    fn wseg(surface: &str, starts_new_token: bool, gloss: Option<&str>) -> wire::AlignedSegment {
+        wire::AlignedSegment {
+            surface: surface.to_string(),
+            starts_new_token,
+            gloss: gloss.map(str::to_string),
+        }
+    }
+
+    fn wref(surface: &str, occurrence: Option<u32>) -> wire::SegmentRef {
+        wire::SegmentRef {
+            surface: surface.to_string(),
+            occurrence,
+        }
+    }
+
+    fn wlink(
+        source: Vec<wire::SegmentRef>,
+        target: Vec<wire::SegmentRef>,
+        kind: LinkKind,
+    ) -> wire::AlignmentLink {
+        wire::AlignmentLink {
+            source,
+            target,
+            kind,
+        }
+    }
+
+    /// Turkish → French, same sentence as [`demo`] but in wire form.
+    fn wire_demo() -> wire::AlignedTranslation {
+        wire::AlignedTranslation {
+            source: wire::AlignedSentence {
+                text: "Evlerimde kalıyorum".to_string(),
+                segments: vec![
+                    wseg("Ev", true, None),
+                    wseg("ler", false, Some("PL")),
+                    wseg("im", false, Some("1SG.POSS")),
+                    wseg("de", false, Some("LOC")),
+                    wseg("kal", true, None),
+                    wseg("ıyor", false, Some("PROG")),
+                    wseg("um", false, Some("1SG")),
+                ],
+            },
+            target: wire::AlignedSentence {
+                text: "Je reste dans mes maisons".to_string(),
+                segments: vec![
+                    wseg("Je", true, None),
+                    wseg("reste", true, None),
+                    wseg("dans", true, None),
+                    wseg("mes", true, None),
+                    wseg("maison", true, None),
+                    wseg("s", false, Some("PL")),
+                ],
+            },
+            literal_translation: Some("dans mes maisons je-reste".to_string()),
+            links: vec![
+                wlink(
+                    vec![wref("Ev", None)],
+                    vec![wref("maison", None)],
+                    LinkKind::Lexical,
+                ),
+                wlink(
+                    vec![wref("ler", None)],
+                    vec![wref("s", None)],
+                    LinkKind::Grammatical,
+                ),
+                wlink(
+                    vec![wref("im", None)],
+                    vec![wref("mes", None)],
+                    LinkKind::Grammatical,
+                ),
+                wlink(
+                    vec![wref("de", None)],
+                    vec![wref("dans", None)],
+                    LinkKind::Grammatical,
+                ),
+                wlink(
+                    vec![wref("kal", None)],
+                    vec![wref("reste", None)],
+                    LinkKind::Lexical,
+                ),
+                wlink(
+                    vec![wref("um", None)],
+                    vec![wref("Je", None)],
+                    LinkKind::Grammatical,
+                ),
+            ],
+        }
+    }
+
+    #[test]
+    fn wire_demo_resolves_to_internal_form() {
+        let resolved = wire_demo().resolve().expect("wire demo should resolve");
+
+        let ids: Vec<u32> = resolved.source.segments.iter().map(|s| s.id).collect();
+        assert_eq!(ids, vec![0, 1, 2, 3, 4, 5, 6]);
+        let tokens: Vec<u32> = resolved.source.segments.iter().map(|s| s.token).collect();
+        assert_eq!(tokens, vec![0, 0, 0, 0, 1, 1, 1]);
+        assert_eq!(
+            resolved.source.segments[1].span,
+            Some(CharSpan { start: 2, end: 5 }) // ler
+        );
+
+        // "um" → "Je": last source segment to first target segment.
+        let last = resolved.links.last().expect("links preserved");
+        assert_eq!(last.source, vec![6]);
+        assert_eq!(last.target, vec![0]);
+
+        // The resolved form is the exact internal demo, spans aside.
+        let mut expected = demo();
+        expected.locate_spans().expect("demo should locate");
+        assert_eq!(resolved, expected);
+    }
+
+    /// "Lubię kawę." segmented at morpheme level: the ending 'ę' appears twice,
+    /// so refs to it must carry `occurrence`.
+    fn wire_repeated() -> wire::AlignedTranslation {
+        wire::AlignedTranslation {
+            source: wire::AlignedSentence {
+                text: "Lubię kawę.".to_string(),
+                segments: vec![
+                    wseg("Lubi", true, None),
+                    wseg("ę", false, Some("1SG")),
+                    wseg("kaw", true, None),
+                    wseg("ę", false, Some("ACC")),
+                    wseg(".", true, None),
+                ],
+            },
+            target: wire::AlignedSentence {
+                text: "I like coffee.".to_string(),
+                segments: vec![
+                    wseg("I", true, None),
+                    wseg("like", true, None),
+                    wseg("coffee", true, None),
+                    wseg(".", true, None),
+                ],
+            },
+            literal_translation: None,
+            links: vec![
+                wlink(
+                    vec![wref("Lubi", None)],
+                    vec![wref("like", None)],
+                    LinkKind::Lexical,
+                ),
+                wlink(
+                    vec![wref("ę", Some(1))],
+                    vec![wref("I", None)],
+                    LinkKind::Grammatical,
+                ),
+                wlink(
+                    vec![wref("kaw", None)],
+                    vec![wref("coffee", None)],
+                    LinkKind::Lexical,
+                ),
+            ],
+        }
+    }
+
+    #[test]
+    fn repeated_surface_resolves_via_occurrence() {
+        let resolved = wire_repeated().resolve().expect("should resolve");
+        assert_eq!(resolved.links[1].source, vec![1]); // first 'ę'
+
+        let mut second = wire_repeated();
+        second.links[1].source = vec![wref("ę", Some(2))];
+        let resolved = second.resolve().expect("second occurrence should resolve");
+        assert_eq!(resolved.links[1].source, vec![3]); // 'ę' of "kawę"
+    }
+
+    #[test]
+    fn repeated_surface_without_occurrence_is_rejected() {
+        let mut a = wire_repeated();
+        a.links[1].source = vec![wref("ę", None)];
+        let err = a.resolve().unwrap_err();
+        assert!(
+            err.contains("appears 2 times") && err.contains("occurrence"),
+            "got: {err}"
+        );
+    }
+
+    #[test]
+    fn occurrence_out_of_range_is_rejected() {
+        let mut a = wire_repeated();
+        a.links[1].source = vec![wref("ę", Some(3))];
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("out of range"), "got: {err}");
+
+        let mut zero = wire_repeated();
+        zero.links[1].source = vec![wref("ę", Some(0))];
+        let err = zero.resolve().unwrap_err();
+        assert!(err.contains("1-based"), "got: {err}");
+    }
+
+    #[test]
+    fn occurrence_on_unique_surface() {
+        let mut a = wire_repeated();
+        a.links[0].source = vec![wref("Lubi", Some(1))]; // redundant but coherent
+        a.resolve()
+            .expect("occurrence 1 on a unique surface is fine");
+
+        let mut bad = wire_repeated();
+        bad.links[0].source = vec![wref("Lubi", Some(2))];
+        let err = bad.resolve().unwrap_err();
+        assert!(err.contains("appears only once"), "got: {err}");
+    }
+
+    #[test]
+    fn unknown_ref_surface_is_rejected() {
+        let mut a = wire_repeated();
+        a.links[0].target = vec![wref("likes", None)];
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("no segment has surface 'likes'"), "got: {err}");
+    }
+
+    #[test]
+    fn duplicate_refs_in_one_link_side_are_rejected() {
+        let mut a = wire_repeated();
+        a.links[0].source = vec![wref("Lubi", None), wref("Lubi", Some(1))];
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("duplicate reference"), "got: {err}");
+    }
+
+    #[test]
+    fn first_segment_must_start_a_token() {
+        let mut a = wire_repeated();
+        a.source.segments[0].starts_new_token = false;
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("first segment"), "got: {err}");
+    }
+
+    #[test]
+    fn fused_words_fail_coverage() {
+        // "are" + "reading" claimed as one word: contiguity check must fire on
+        // the whitespace between them.
+        let a = wire::AlignedTranslation {
+            source: wire::AlignedSentence {
+                text: "Czytamy.".to_string(),
+                segments: vec![wseg("Czytamy", true, None), wseg(".", true, None)],
+            },
+            target: wire::AlignedSentence {
+                text: "We are reading.".to_string(),
+                segments: vec![
+                    wseg("We", true, None),
+                    wseg("are", true, None),
+                    wseg("reading", false, None), // wrongly fused into "are"'s word
+                    wseg(".", true, None),
+                ],
+            },
+            literal_translation: None,
+            links: vec![],
+        };
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("expected segment 'reading'"), "got: {err}");
+    }
+
+    #[test]
+    fn empty_wire_link_side_is_rejected() {
+        let mut a = wire_repeated();
+        a.links
+            .push(wlink(vec![wref("kaw", None)], vec![], LinkKind::Lexical));
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("at least one segment"), "got: {err}");
+    }
+
+    #[test]
+    fn wire_gloss_violations_are_reported() {
+        let mut a = wire_repeated();
+        a.source.segments[1].gloss = Some("PRES".to_string());
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("'PRS'"), "got: {err}");
+    }
+
+    #[test]
+    fn wire_llm_json_resolves() {
+        let json = serde_json::json!({
+            "source": {
+                "text": "Lubię kawę.",
+                "segments": [
+                    { "surface": "Lubi", "starts_new_token": true, "gloss": null },
+                    { "surface": "ę", "starts_new_token": false, "gloss": "1SG" },
+                    { "surface": "kaw", "starts_new_token": true, "gloss": null },
+                    { "surface": "ę", "starts_new_token": false, "gloss": "ACC" },
+                    { "surface": ".", "starts_new_token": true, "gloss": null }
+                ]
+            },
+            "target": {
+                "text": "I like coffee.",
+                "segments": [
+                    { "surface": "I", "starts_new_token": true, "gloss": null },
+                    { "surface": "like", "starts_new_token": true, "gloss": null },
+                    { "surface": "coffee", "starts_new_token": true, "gloss": null },
+                    { "surface": ".", "starts_new_token": true, "gloss": null }
+                ]
+            },
+            "literal_translation": null,
+            "links": [
+                { "source": [{ "surface": "ę", "occurrence": 2 }], "target": [{ "surface": "coffee" }], "kind": "Grammatical" }
+            ]
+        });
+        let a: wire::AlignedTranslation =
+            serde_json::from_value(json).expect("LLM-shaped wire JSON should deserialize");
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links[0].source, vec![3]);
+        assert_eq!(
+            resolved.source.segments[3].span,
+            Some(CharSpan { start: 9, end: 10 })
         );
     }
 }
