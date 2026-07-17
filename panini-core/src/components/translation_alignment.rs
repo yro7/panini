@@ -50,15 +50,17 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                as one word — a multi-word unit is expressed by one link spanning several \
                segments, not by merging words.\n\
              - `gloss`: for grammatical morphemes and function words, UPPER CASE standard \
-               Leipzig abbreviations ONLY (e.g. NOM, ACC, GEN, DAT, PL, SG, PST, PRS, FUT, INF, \
+               Leipzig abbreviations (e.g. NOM, ACC, GEN, DAT, PL, SG, PST, PRS, FUT, INF, \
                PTCP, NEG, DEF, INDF, PASS, CAUS, REFL, SBJV, IMP, PROG, PFV, IPFV, COMP, REL, \
-               DEM, COP, AUX, LOC) — non-standard labels are rejected (PRES→PRS, PAST→PST). \
-               Compose as many atoms as needed, joined by `.` (1SG.POSS, PST.PFV); person+number \
-               fuse without a dot (1SG, never 1.SG); `N` prefixes an atom for \"non-\" (NPST). \
-               Use null for content stems and punctuation.\n\
-             - `links` are many-to-many and reference segments by their exact `surface` text \
-               (case-sensitive). When the same surface appears more than once among a sentence's \
-               segments, add `occurrence` (1-based, in reading order) to say which one is meant. \
+               DEM, COP, AUX, LOC). Compose as many atoms as needed, joined by `.` (1SG.POSS, \
+               PST.PFV); person+number fuse without a dot (1SG, never 1.SG); `N` prefixes an \
+               atom for \"non-\" (NPST). Use null for content stems and punctuation — do not \
+               gloss a content word with its meaning. The gloss is a best-effort tooltip: \
+               stray labels are cleaned up rather than rejected, but staying within these \
+               atoms keeps it intact.\n\
+             - `links` are many-to-many and reference segments by their `surface` text. When \
+               the same surface appears more than once among a sentence's segments, add \
+               `occurrence` (1-based, in reading order) to say which one is meant. \
                `Lexical` for content↔content, `Grammatical` when a grammatical unit is involved \
                (a case suffix may map to a preposition, a person suffix to a pronoun), `Phrasal` \
                for idioms aligned as a whole because word-by-word links would mislead. \
