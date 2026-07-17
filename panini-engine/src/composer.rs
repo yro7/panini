@@ -48,6 +48,45 @@ pub fn compose_schema<L: LinguisticDefinition>(
     schema
 }
 
+/// Compose the JSON Schema for a batched extraction: a `cards` array whose
+/// items are the per-card composed schema.
+///
+/// `$defs` are hoisted from the per-card schema to the document root so that
+/// `#/$defs/...` references keep resolving. The expected card count is stated
+/// in the description only — `minItems`/`maxItems` are deliberately not
+/// emitted (strict structured-output modes reject them); the extractor
+/// enforces the count after parsing.
+pub fn compose_batch_schema<L: LinguisticDefinition>(
+    lang: &L,
+    components: &[&dyn AnalysisComponent<L>],
+    card_count: usize,
+) -> serde_json::Value {
+    let mut per_card = compose_schema(lang, components);
+    let defs = per_card.as_object_mut().and_then(|obj| obj.remove("$defs"));
+
+    let mut schema = serde_json::json!({
+        "type": "object",
+        "properties": {
+            "cards": {
+                "type": "array",
+                "description": format!(
+                    "Exactly {card_count} entries: cards[i] is the analysis of CARD i \
+                     from the user message, in the same order."
+                ),
+                "items": per_card,
+            }
+        },
+        "required": ["cards"],
+        "additionalProperties": false
+    });
+
+    if let Some(defs) = defs {
+        schema["$defs"] = defs;
+    }
+
+    schema
+}
+
 fn strip_schema_metadata(value: &mut serde_json::Value) {
     match value {
         serde_json::Value::Object(obj) => {
@@ -386,6 +425,42 @@ mod tests {
         use panini_core::components::PedagogicalExplanation;
         let comp = PedagogicalExplanation;
         assert!(comp.is_compatible(&TestLang));
+    }
+
+    // ── Batch schema composition ───────────────────────────────────────────
+
+    #[test]
+    fn batch_schema_wraps_per_card_schema_and_hoists_defs() {
+        use panini_core::components::MorphologyAnalysis;
+        let a: &dyn AnalysisComponent<TestLang> = &FakeComponentA;
+        let m: &dyn AnalysisComponent<TestLang> = &MorphologyAnalysis;
+        let schema = compose_batch_schema(&TestLang, &[a, m], 3);
+
+        // The per-card object sits under cards.items, without its own $defs.
+        let items = &schema["properties"]["cards"]["items"];
+        assert_eq!(items["properties"]["alpha"]["type"], "string");
+        assert!(items.get("$defs").is_none());
+        // Morphology's $defs are hoisted to the document root so that
+        // `#/$defs/...` refs resolve.
+        assert!(schema["$defs"].is_object());
+        // The exact count lives in the description, not in minItems/maxItems
+        // (rejected by strict structured-output modes).
+        assert!(
+            schema["properties"]["cards"]["description"]
+                .as_str()
+                .unwrap()
+                .contains("Exactly 3")
+        );
+        assert!(schema["properties"]["cards"].get("minItems").is_none());
+
+        let sample = serde_json::json!({
+            "cards": [
+                { "alpha": "x", "morphology": { "target_features": [], "context_features": [] } }
+            ]
+        });
+        let validator = jsonschema::validator_for(&schema).unwrap();
+        let errors: Vec<_> = validator.iter_errors(&sample).collect();
+        assert!(errors.is_empty(), "batch schema should validate: {errors:?}");
     }
 
     // ── Pedagogical-context gating in compose_prompt ───────────────────────

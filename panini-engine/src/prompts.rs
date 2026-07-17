@@ -121,6 +121,49 @@ pub struct ExtractionRequest {
     pub user_prompt: Option<String>,
 }
 
+/// One card of a batched extraction request.
+#[derive(Debug, Clone)]
+pub struct ExtractionItem {
+    /// The text/card JSON to extract features from.
+    pub content: String,
+    /// Target words to focus extraction on.
+    pub targets: Vec<String>,
+}
+
+/// A batched extraction request: shared pedagogical context plus N cards
+/// analyzed by one LLM call per component subset.
+#[derive(Debug, Clone)]
+pub struct BatchExtractionRequest {
+    pub items: Vec<ExtractionItem>,
+    /// Optional pedagogical context (replaces skill node instructions).
+    pub pedagogical_context: Option<String>,
+    /// Optional skill/topic path for context.
+    pub skill_path: Option<String>,
+    /// Learner's UI language (for pedagogical explanation).
+    pub learner_ui_language: String,
+    /// Learner's linguistic background.
+    pub linguistic_background: Vec<LanguageLevel>,
+    /// Optional user-provided context.
+    pub user_prompt: Option<String>,
+}
+
+impl BatchExtractionRequest {
+    /// The shared context as a single-card request shape, for prompt
+    /// composition. Per-card `content`/`targets` stay empty — they live in
+    /// the batched user message, one entry per card.
+    pub(crate) fn shared_context(&self) -> ExtractionRequest {
+        ExtractionRequest {
+            content: String::new(),
+            targets: Vec::new(),
+            pedagogical_context: self.pedagogical_context.clone(),
+            skill_path: self.skill_path.clone(),
+            learner_ui_language: self.learner_ui_language.clone(),
+            linguistic_background: self.linguistic_background.clone(),
+            user_prompt: self.user_prompt.clone(),
+        }
+    }
+}
+
 // ----- Helper Functions -----
 
 /// Wraps content in XML tags
