@@ -129,13 +129,86 @@ pub const LEIPZIG_ATOMS: [&str; 80] = [
     "TOP", "TR", "VOC",
 ];
 
-/// Frequent non-standard labels mapped to their Leipzig equivalents, so the
-/// rejection message can name the canonical form.
-const GLOSS_SUGGESTIONS: [(&str, &str); 7] = [
+/// Common non-standard labels mapped to their Leipzig equivalent. Models
+/// frequently pick the right category but the wrong name (`SINGULAR` for `SG`,
+/// `CONTINUOUS` for `PROG`); [`normalize_gloss`] rewrites these so the concept
+/// survives instead of being dropped. Keys are compared upper-cased.
+const GLOSS_ALIASES: &[(&str, &str)] = &[
+    // number
+    ("SINGULAR", "SG"),
+    ("PLURAL", "PL"),
+    ("DUAL", "DU"),
+    // gender
+    ("MASCULINE", "M"),
+    ("MASC", "M"),
+    ("FEMININE", "F"),
+    ("FEM", "F"),
+    ("NEUTER", "N"),
+    ("NEUT", "N"),
+    // case
+    ("NOMINATIVE", "NOM"),
+    ("ACCUSATIVE", "ACC"),
+    ("GENITIVE", "GEN"),
+    ("DATIVE", "DAT"),
+    ("INSTRUMENTAL", "INS"),
+    ("LOCATIVE", "LOC"),
+    ("VOCATIVE", "VOC"),
+    ("ABLATIVE", "ABL"),
+    ("ALLATIVE", "ALL"),
+    ("COMITATIVE", "COM"),
+    ("ERGATIVE", "ERG"),
+    ("ABSOLUTIVE", "ABS"),
+    ("OBLIQUE", "OBL"),
+    ("PREPOSITIONAL", "LOC"),
+    // tense
+    ("PRESENT", "PRS"),
     ("PRES", "PRS"),
     ("PAST", "PST"),
+    ("FUTURE", "FUT"),
+    // aspect
+    ("PERFECTIVE", "PFV"),
+    ("IMPERFECTIVE", "IPFV"),
+    ("PROGRESSIVE", "PROG"),
+    ("CONTINUOUS", "PROG"),
+    ("CONT", "PROG"),
+    ("HABITUAL", "IPFV"),
+    ("PERFECT", "PRF"),
     ("PERF", "PRF"),
+    ("DURATIVE", "DUR"),
+    // mood / voice
+    ("SUBJUNCTIVE", "SBJV"),
+    ("IMPERATIVE", "IMP"),
+    ("CONDITIONAL", "COND"),
+    ("INDICATIVE", "IND"),
+    ("IRREALIS", "IRR"),
+    ("PASSIVE", "PASS"),
+    ("CAUSATIVE", "CAUS"),
+    ("REFLEXIVE", "REFL"),
+    ("RECIPROCAL", "RECP"),
+    // definiteness / finiteness
+    ("DEFINITE", "DEF"),
+    ("INDEFINITE", "INDF"),
     ("INDEF", "INDF"),
+    ("INFINITIVE", "INF"),
+    ("PARTICIPLE", "PTCP"),
+    ("CONVERB", "CVB"),
+    // pronominal / other
+    ("NEGATION", "NEG"),
+    ("NEGATIVE", "NEG"),
+    ("DEMONSTRATIVE", "DEM"),
+    ("RELATIVE", "REL"),
+    ("DETERMINER", "DET"),
+    ("ARTICLE", "ART"),
+    ("AUXILIARY", "AUX"),
+    ("COPULA", "COP"),
+    ("POSSESSIVE", "POSS"),
+    ("COMPARATIVE", "COMP"),
+    ("PROXIMAL", "PROX"),
+    ("DISTAL", "DIST"),
+    // person (person-number compounds like 3SG are handled compositionally)
+    ("FIRST", "1"),
+    ("SECOND", "2"),
+    ("THIRD", "3"),
     ("1S", "1SG"),
     ("2S", "2SG"),
     ("3S", "3SG"),
@@ -157,6 +230,38 @@ fn is_valid_gloss_atom(atom: &str) -> bool {
         || atom
             .strip_prefix('N')
             .is_some_and(|rest| LEIPZIG_ATOMS.contains(&rest))
+}
+
+/// Best-effort cleanup of one gloss string. The gloss only powers a hover
+/// tooltip in the UI, so it is never a hard validation failure — instead each
+/// `.`-separated atom is upper-cased, mapped through [`GLOSS_ALIASES`], and
+/// kept only if it is then a valid Leipzig atom. Unrecognized atoms are
+/// dropped (a content stem the model wrongly glossed with an English lemma
+/// becomes `None`, `give.PST.3SG.M` becomes `PST.3SG.M`). Returns `None` when
+/// nothing recognizable survives, so every stored gloss is valid Leipzig by
+/// construction.
+pub fn normalize_gloss(gloss: Option<&str>) -> Option<String> {
+    let raw = gloss?;
+    let mut atoms = Vec::new();
+    for atom in raw.split('.') {
+        let atom = atom.trim();
+        if atom.is_empty() {
+            continue;
+        }
+        let upper = atom.to_uppercase();
+        let mapped = GLOSS_ALIASES
+            .iter()
+            .find(|(from, _)| *from == upper)
+            .map_or(upper.as_str(), |(_, to)| *to);
+        if is_valid_gloss_atom(mapped) {
+            atoms.push(mapped.to_string());
+        }
+    }
+    if atoms.is_empty() {
+        None
+    } else {
+        Some(atoms.join("."))
+    }
 }
 
 // ─── Invariants ───────────────────────────────────────────────────────────────
@@ -246,65 +351,6 @@ impl AlignedSentence {
         spans
     }
 
-    /// Checks every non-null gloss against the accepted Leipzig vocabulary:
-    /// each `.`-separated atom must be a standard abbreviation, a
-    /// person–number compound (1SG), or `N` + a standard abbreviation
-    /// (NPST). Any number of atoms may be composed; only the atoms
-    /// themselves are constrained — atom order is not checked. Violations
-    /// are pushed to `errors` in the same LLM-facing style as
-    /// `locate_segments`.
-    fn check_glosses(&self, side: &str, errors: &mut Vec<String>) {
-        for seg in &self.segments {
-            let Some(gloss) = &seg.gloss else { continue };
-            if gloss.trim().is_empty() {
-                errors.push(format!(
-                    "{side}: segment id {}: empty gloss — use null instead of an empty gloss",
-                    seg.id
-                ));
-                continue;
-            }
-            let mut empty_atom_reported = false;
-            for atom in gloss.split('.') {
-                if atom.is_empty() {
-                    if !empty_atom_reported {
-                        errors.push(format!(
-                            "{side}: segment id {}: gloss '{gloss}' contains an empty atom; \
-                             join atoms with a single '.', no leading or trailing dot",
-                            seg.id
-                        ));
-                        empty_atom_reported = true;
-                    }
-                    continue;
-                }
-                if is_valid_gloss_atom(atom) {
-                    continue;
-                }
-                let upper = atom.to_uppercase();
-                if upper != atom && is_valid_gloss_atom(&upper) {
-                    errors.push(format!(
-                        "{side}: segment id {}: gloss atom '{atom}' — grammatical labels are \
-                         UPPER CASE, write '{upper}'",
-                        seg.id
-                    ));
-                } else if let Some((_, fix)) =
-                    GLOSS_SUGGESTIONS.iter().find(|(bad, _)| *bad == upper)
-                {
-                    errors.push(format!(
-                        "{side}: segment id {}: gloss atom '{atom}' is not a standard Leipzig \
-                         abbreviation — use '{fix}'",
-                        seg.id
-                    ));
-                } else {
-                    errors.push(format!(
-                        "{side}: segment id {}: gloss atom '{atom}' is not a standard Leipzig \
-                         abbreviation; compose glosses only from the Leipzig Glossing Rules \
-                         atoms, joined by '.'",
-                        seg.id
-                    ));
-                }
-            }
-        }
-    }
 }
 
 impl AlignedTranslation {
@@ -340,10 +386,11 @@ impl AlignedTranslation {
     }
 
     /// Validates all structural invariants without mutating anything:
-    /// segment coverage of both texts, id uniqueness, token ordering, gloss
-    /// vocabulary, and link integrity. All violations are collected into one
-    /// error string so the LLM self-correction retry sees every problem at
-    /// once.
+    /// segment coverage of both texts, id uniqueness, token ordering, and link
+    /// integrity. Glosses are NOT validated here — they only power a hover
+    /// tooltip, so they are cleaned best-effort by [`normalize_gloss`] rather
+    /// than blocking extraction. All violations are collected into one error
+    /// string so the LLM self-correction retry sees every problem at once.
     ///
     /// # Errors
     /// Returns the newline-joined list of violations, if any.
@@ -351,8 +398,6 @@ impl AlignedTranslation {
         let mut errors = Vec::new();
         let _ = self.source.locate_segments("source", &mut errors);
         let _ = self.target.locate_segments("target", &mut errors);
-        self.source.check_glosses("source", &mut errors);
-        self.target.check_glosses("target", &mut errors);
         self.check_links(&mut errors);
         if errors.is_empty() {
             Ok(())
@@ -405,8 +450,6 @@ fn has_duplicates(ids: &[u32]) -> bool {
 /// Doc comments on these types double as the JSON-schema descriptions shown
 /// to the LLM — they are the extraction spec, keep them precise.
 pub mod wire {
-    use std::collections::HashMap;
-
     use serde::{Deserialize, Serialize};
 
     use super::LinkKind;
@@ -428,10 +471,12 @@ pub mod wire {
         /// Leipzig-style gloss for grammatical morphemes and function words;
         /// null for content stems and punctuation. Compose freely from the
         /// standard Leipzig Glossing Rules abbreviations, joining any number of
-        /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Standard atoms only —
-        /// any other label is rejected. Person and number fuse without a dot
-        /// (1SG, 3PL — never 1.SG), and N prefixes an atom for "non-"
-        /// (NPST = non-past).
+        /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Person and number fuse
+        /// without a dot (1SG, 3PL — never 1.SG), and N prefixes an atom for
+        /// "non-" (NPST = non-past). This field is best-effort: it feeds a
+        /// tooltip, so unrecognized labels are normalized where possible and
+        /// otherwise dropped rather than rejected — but staying within the
+        /// standard atoms keeps the gloss intact.
         pub gloss: Option<String>,
     }
 
@@ -510,8 +555,6 @@ pub mod wire {
             let source = derive_sentence(&self.source, "source", &mut errors);
             let target = derive_sentence(&self.target, "target", &mut errors);
 
-            let source_index = surface_index(&source);
-            let target_index = surface_index(&target);
             let mut links = Vec::with_capacity(self.links.len());
             for (i, link) in self.links.iter().enumerate() {
                 if link.source.is_empty() || link.target.is_empty() {
@@ -521,9 +564,9 @@ pub mod wire {
                     ));
                 }
                 let source_ids =
-                    resolve_refs(&link.source, &source_index, "source", i, &mut errors);
+                    resolve_refs(&link.source, &source.segments, "source", i, &mut errors);
                 let target_ids =
-                    resolve_refs(&link.target, &target_index, "target", i, &mut errors);
+                    resolve_refs(&link.target, &target.segments, "target", i, &mut errors);
                 links.push(super::AlignmentLink {
                     source: source_ids,
                     target: target_ids,
@@ -571,7 +614,7 @@ pub mod wire {
                 id: i as u32,
                 token,
                 surface: seg.surface.clone(),
-                gloss: seg.gloss.clone(),
+                gloss: super::normalize_gloss(seg.gloss.as_deref()),
                 span: None,
             });
         }
@@ -581,21 +624,35 @@ pub mod wire {
         }
     }
 
-    /// Segment ids grouped by exact surface, in reading order.
-    fn surface_index(sentence: &super::AlignedSentence) -> HashMap<&str, Vec<u32>> {
-        let mut index: HashMap<&str, Vec<u32>> = HashMap::new();
-        for seg in &sentence.segments {
-            index.entry(seg.surface.as_str()).or_default().push(seg.id);
-        }
-        index
+    /// Segment ids whose surface matches `surface`, in reading order. With
+    /// `fold_case`, matching is case-insensitive (Unicode lowercase) — used as
+    /// a fallback so the model's natural, capitalization-blind occurrence
+    /// counting ("the third 'the'", counting a sentence-initial "The" too)
+    /// resolves instead of being rejected.
+    fn ids_matching(segments: &[super::AlignedSegment], surface: &str, fold_case: bool) -> Vec<u32> {
+        segments
+            .iter()
+            .filter(|s| {
+                if fold_case {
+                    s.surface.to_lowercase() == surface.to_lowercase()
+                } else {
+                    s.surface == surface
+                }
+            })
+            .map(|s| s.id)
+            .collect()
     }
 
-    /// Resolves one side of a link to segment ids. Every failure is reported
+    /// Resolves one side of a link to segment ids. Segments are matched by
+    /// exact surface first; when the exact bucket does not hold the requested
+    /// occurrence (or the surface is absent verbatim), a case-insensitive
+    /// bucket is tried — this forgives sentence-initial capitalization without
+    /// giving up the precision of an exact copy. Every failure is reported
     /// with the rule it violates; duplicates are checked on the resolved ids
     /// so `{surface: "ę"}` twice is caught even without occurrences.
     fn resolve_refs(
         refs: &[SegmentRef],
-        index: &HashMap<&str, Vec<u32>>,
+        segments: &[super::AlignedSegment],
         side: &str,
         link_index: usize,
         errors: &mut Vec<String>,
@@ -603,36 +660,45 @@ pub mod wire {
         let mut resolved = Vec::with_capacity(refs.len());
         for r in refs {
             let surface = r.surface.as_str();
-            match index.get(surface) {
-                None => errors.push(format!(
+            let exact = ids_matching(segments, surface, false);
+            let folded = ids_matching(segments, surface, true);
+
+            // Prefer the exact bucket; fall back to the case-insensitive one
+            // when the surface is absent verbatim, or the occurrence overflows
+            // exact but fits folded (the sentence-initial "The"/"the" case).
+            let ids: &[u32] = match r.occurrence {
+                _ if exact.is_empty() => &folded,
+                Some(o) if (o as usize) > exact.len() && (o as usize) <= folded.len() => &folded,
+                _ => &exact,
+            };
+
+            match ids.len() {
+                0 => errors.push(format!(
                     "{side}: link {link_index}: no segment has surface '{surface}' — copy one \
-                     segment's surface exactly (case-sensitive), not the whole word or a \
+                     segment's surface as it appears in that sentence, not the whole word or a \
                      normalized form"
                 )),
-                Some(ids) if ids.len() == 1 => match r.occurrence {
+                1 => match r.occurrence {
                     None | Some(1) => resolved.push(ids[0]),
                     Some(o) => errors.push(format!(
                         "{side}: link {link_index}: surface '{surface}' appears only once; \
                          occurrence {o} is out of range"
                     )),
                 },
-                Some(ids) => match r.occurrence {
+                n => match r.occurrence {
                     None => errors.push(format!(
                         "{side}: link {link_index}: surface '{surface}' appears {n} times in \
                          this sentence's segments; add occurrence (1-{n}, in reading order) to \
-                         say which one is meant",
-                        n = ids.len()
+                         say which one is meant"
                     )),
                     Some(0) => errors.push(format!(
                         "{side}: link {link_index}: occurrence is 1-based; use 1-{n} for \
-                         surface '{surface}'",
-                        n = ids.len()
+                         surface '{surface}'"
                     )),
-                    Some(o) if (o as usize) <= ids.len() => resolved.push(ids[o as usize - 1]),
+                    Some(o) if (o as usize) <= n => resolved.push(ids[o as usize - 1]),
                     Some(o) => errors.push(format!(
                         "{side}: link {link_index}: occurrence {o} is out of range for surface \
-                         '{surface}' ({n} occurrences)",
-                        n = ids.len()
+                         '{surface}' ({n} occurrences)"
                     )),
                 },
             }
@@ -810,64 +876,48 @@ mod tests {
     }
 
     #[test]
-    fn composed_gloss_atoms_pass() {
+    fn composed_gloss_atoms_survive_normalization() {
+        // Valid composed atoms pass through normalize_gloss unchanged, and
+        // never block validation (glosses are best-effort).
+        for g in ["PST.PFV", "3PL", "NPST", "3", "NEG.1SG.POSS.COND"] {
+            assert_eq!(normalize_gloss(Some(g)).as_deref(), Some(g));
+        }
         let mut a = demo();
-        a.source.segments[1].gloss = Some("PST.PFV".to_string());
-        a.source.segments[2].gloss = Some("3PL".to_string());
-        a.source.segments[3].gloss = Some("NPST".to_string());
-        a.source.segments[5].gloss = Some("3".to_string());
         a.source.segments[6].gloss = Some("NEG.1SG.POSS.COND".to_string());
         a.validate_structure()
-            .expect("composed standard atoms should pass");
+            .expect("glosses never block validation");
     }
 
     #[test]
-    fn nonstandard_gloss_atom_is_rejected_with_suggestion() {
-        let mut a = demo();
-        a.source.segments[1].gloss = Some("PRES".to_string());
-        let err = a.validate_structure().unwrap_err();
-        assert!(
-            err.contains("'PRES'") && err.contains("'PRS'"),
-            "got: {err}"
+    fn normalize_maps_known_aliases() {
+        // Right concept, wrong name — the concept survives.
+        assert_eq!(normalize_gloss(Some("SINGULAR")).as_deref(), Some("SG"));
+        assert_eq!(
+            normalize_gloss(Some("singular.masculine")).as_deref(),
+            Some("SG.M")
         );
+        assert_eq!(normalize_gloss(Some("CONTINUOUS")).as_deref(), Some("PROG"));
+        assert_eq!(normalize_gloss(Some("PRES")).as_deref(), Some("PRS"));
     }
 
     #[test]
-    fn lowercase_gloss_atom_is_rejected() {
-        let mut a = demo();
-        a.source.segments[1].gloss = Some("pl".to_string());
-        let err = a.validate_structure().unwrap_err();
-        assert!(
-            err.contains("UPPER CASE") && err.contains("'PL'"),
-            "got: {err}"
+    fn normalize_lowercases_and_drops_unknown_atoms() {
+        // Lowercase standard atoms are recovered; unknown atoms (English
+        // lemmas the model wrongly glossed a content word with) are dropped.
+        assert_eq!(normalize_gloss(Some("pl")).as_deref(), Some("PL"));
+        assert_eq!(
+            normalize_gloss(Some("give.PST.3SG.M")).as_deref(),
+            Some("PST.3SG.M")
         );
+        assert_eq!(normalize_gloss(Some("1SG.WIBBLE")).as_deref(), Some("1SG"));
     }
 
     #[test]
-    fn unknown_gloss_atom_is_rejected() {
-        let mut a = demo();
-        a.target.segments[5].gloss = Some("1SG.WIBBLE".to_string());
-        let err = a.validate_structure().unwrap_err();
-        assert!(
-            err.contains("'WIBBLE'") && err.contains("standard Leipzig"),
-            "got: {err}"
-        );
-    }
-
-    #[test]
-    fn empty_gloss_is_rejected() {
-        let mut a = demo();
-        a.source.segments[1].gloss = Some("  ".to_string());
-        let err = a.validate_structure().unwrap_err();
-        assert!(err.contains("use null"), "got: {err}");
-    }
-
-    #[test]
-    fn empty_gloss_atom_is_rejected() {
-        let mut a = demo();
-        a.source.segments[1].gloss = Some("PST..PFV".to_string());
-        let err = a.validate_structure().unwrap_err();
-        assert!(err.contains("empty atom"), "got: {err}");
+    fn normalize_empties_collapse_to_none() {
+        assert_eq!(normalize_gloss(Some("  ")), None);
+        assert_eq!(normalize_gloss(Some("PST..PFV")).as_deref(), Some("PST.PFV"));
+        assert_eq!(normalize_gloss(Some("dog")), None); // content stem → null
+        assert_eq!(normalize_gloss(None), None);
     }
 
     #[test]
@@ -1189,11 +1239,52 @@ mod tests {
     }
 
     #[test]
-    fn wire_gloss_violations_are_reported() {
+    fn wire_glosses_are_normalized_not_rejected() {
+        // A non-standard but recognizable gloss is normalized (PRES→PRS), and
+        // a content-word lemma gloss is dropped — neither blocks resolution.
         let mut a = wire_repeated();
         a.source.segments[1].gloss = Some("PRES".to_string());
-        let err = a.resolve().unwrap_err();
-        assert!(err.contains("'PRS'"), "got: {err}");
+        a.source.segments[0].gloss = Some("like".to_string());
+        let resolved = a.resolve().expect("best-effort gloss never rejects");
+        assert_eq!(resolved.source.segments[1].gloss.as_deref(), Some("PRS"));
+        assert_eq!(resolved.source.segments[0].gloss, None);
+    }
+
+    #[test]
+    fn wire_case_insensitive_occurrence_fallback() {
+        // The model counts "the" three times (The + the + the); the exact
+        // lowercase bucket has only two, so occurrence 3 must fall back to the
+        // case-insensitive bucket and resolve to the last "the".
+        let a = wire::AlignedTranslation {
+            source: wire::AlignedSentence {
+                text: "Pies.".to_string(),
+                segments: vec![wseg("Pies", true, None), wseg(".", true, None)],
+            },
+            target: wire::AlignedSentence {
+                text: "The dog and the cat and the bird.".to_string(),
+                segments: vec![
+                    wseg("The", true, Some("DEF")),
+                    wseg("dog", true, None),
+                    wseg("and", true, None),
+                    wseg("the", true, Some("DEF")),
+                    wseg("cat", true, None),
+                    wseg("and", true, None),
+                    wseg("the", true, Some("DEF")),
+                    wseg("bird", true, None),
+                    wseg(".", true, None),
+                ],
+            },
+            literal_translation: None,
+            links: vec![wlink(
+                vec![wref("Pies", None)],
+                vec![wref("the", Some(3))],
+                LinkKind::Lexical,
+            )],
+        };
+        let resolved = a.resolve().expect("case-insensitive fallback should resolve");
+        // "The"(0), "the"(3), "the"(6): occurrence 3 counted case-insensitively
+        // is the segment at id 6.
+        assert_eq!(resolved.links[0].target, vec![6]);
     }
 
     #[test]
