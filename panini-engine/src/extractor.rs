@@ -873,8 +873,9 @@ mod tests {
 
     #[tokio::test]
     async fn batch_extraction_returns_one_result_per_card_in_order() {
-        let executor =
-            FakeExecutor::new(vec![r#"{"cards": [{"alpha": "first"}, {"alpha": "second"}]}"#]);
+        let executor = FakeExecutor::new(vec![
+            r#"{"cards": [{"alpha": "first"}, {"alpha": "second"}]}"#,
+        ]);
         let prompts = test_prompts();
 
         let results = extract_batch_with_components_executor(
@@ -888,8 +889,16 @@ mod tests {
         .expect("batch extraction should succeed");
 
         assert_eq!(results.len(), 2);
-        let first: String = results[0].as_ref().expect("card 0 ok").get("alpha").unwrap();
-        let second: String = results[1].as_ref().expect("card 1 ok").get("alpha").unwrap();
+        let first: String = results[0]
+            .as_ref()
+            .expect("card 0 ok")
+            .get("alpha")
+            .unwrap();
+        let second: String = results[1]
+            .as_ref()
+            .expect("card 1 ok")
+            .get("alpha")
+            .unwrap();
         assert_eq!((first.as_str(), second.as_str()), ("first", "second"));
 
         // Both cards travelled in ONE LLM call, with both CARD blocks present.
