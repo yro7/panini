@@ -1,4 +1,4 @@
-use crate::helpers::{classify, is_option_type, FieldClass};
+use crate::helpers::{classify, is_option_type, option_inner_type, FieldClass};
 use heck::{ToShoutySnakeCase, ToSnakeCase};
 use proc_macro::TokenStream;
 use quote::quote;
@@ -99,9 +99,31 @@ pub fn derive(input: TokenStream) -> TokenStream {
             .map(|f| (f, classify(&f.ty)))
             .collect();
 
+        // Every named field, classified by its effective (Option-unwrapped) type,
+        // with a flag marking optional fields. Used for `observations()` so that
+        // an optional feature that IS present (e.g. a finite verb's tense) still
+        // contributes to the digest — pivots/descriptors keep using the
+        // non-optional `aggregable` list, since optional fields are not pivotable.
+        let observable: Vec<ObservableField> = fields
+            .iter()
+            .map(|f| match option_inner_type(&f.ty) {
+                Some(inner) => ObservableField {
+                    field: f,
+                    class: classify(inner),
+                    is_option: true,
+                },
+                None => ObservableField {
+                    field: f,
+                    class: classify(&f.ty),
+                    is_option: false,
+                },
+            })
+            .collect();
+
         variant_infos.push(VariantInfo {
             ident: &v.ident,
             aggregable,
+            observable,
         });
     }
 
@@ -211,6 +233,15 @@ fn generate_catalog_impl(
 struct VariantInfo<'a> {
     ident: &'a syn::Ident,
     aggregable: Vec<(&'a syn::Field, FieldClass)>,
+    observable: Vec<ObservableField<'a>>,
+}
+
+/// A named field as seen by `observations()`: classified by its effective
+/// (Option-unwrapped) type, remembering whether it was optional.
+struct ObservableField<'a> {
+    field: &'a syn::Field,
+    class: FieldClass,
+    is_option: bool,
 }
 
 struct PivotFieldInfo<'a> {
@@ -540,19 +571,41 @@ fn generate_aggregable_impl(
         .map(|info| {
             let ident = info.ident;
             let field_idents: Vec<_> = info
-                .aggregable
+                .observable
                 .iter()
-                .map(|(f, _)| f.ident.as_ref().unwrap())
+                .map(|obs| obs.field.ident.as_ref().unwrap())
                 .collect();
 
-            let obs_entries = info.aggregable.iter().map(|(f, class)| {
-                let field_ident = f.ident.as_ref().unwrap();
+            // Optional fields contribute an observation only when present, so the
+            // digest never records a value for an absent feature (e.g. an
+            // infinitive's tense).
+            let push_stmts = info.observable.iter().map(|obs| {
+                let field_ident = obs.field.ident.as_ref().unwrap();
                 let field_name = field_ident.to_string();
-                match class {
-                    FieldClass::String => quote! { (#field_name.to_string(), #field_ident.clone()) },
-                    FieldClass::Bool => quote! { (#field_name.to_string(), #field_ident.to_string()) },
-                    FieldClass::Closed => quote! {
-                        (#field_name.to_string(), panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string())
+                match (obs.is_option, obs.class) {
+                    (false, FieldClass::String) => quote! {
+                        __obs.push((#field_name.to_string(), #field_ident.clone()));
+                    },
+                    (false, FieldClass::Bool) => quote! {
+                        __obs.push((#field_name.to_string(), #field_ident.to_string()));
+                    },
+                    (false, FieldClass::Closed) => quote! {
+                        __obs.push((#field_name.to_string(), panini_core::aggregable::ClosedValues::variant_str(#field_ident).to_string()));
+                    },
+                    (true, FieldClass::String) => quote! {
+                        if let Some(__v) = #field_ident {
+                            __obs.push((#field_name.to_string(), __v.clone()));
+                        }
+                    },
+                    (true, FieldClass::Bool) => quote! {
+                        if let Some(__v) = #field_ident {
+                            __obs.push((#field_name.to_string(), __v.to_string()));
+                        }
+                    },
+                    (true, FieldClass::Closed) => quote! {
+                        if let Some(__v) = #field_ident {
+                            __obs.push((#field_name.to_string(), panini_core::aggregable::ClosedValues::variant_str(__v).to_string()));
+                        }
                     },
                 }
             });
@@ -564,7 +617,11 @@ fn generate_aggregable_impl(
             };
 
             quote! {
-                #pattern => vec![vec![#(#obs_entries,)*]],
+                #pattern => {
+                    let mut __obs: Vec<(String, String)> = Vec::new();
+                    #(#push_stmts)*
+                    vec![__obs]
+                }
             }
         })
         .collect();
@@ -627,6 +684,8 @@ mod tests {
                 VariantInfo {
                     ident: &variant.ident,
                     aggregable,
+                    // Not exercised by `generate_pivot_fields`.
+                    observable: Vec::new(),
                 }
             })
             .collect();

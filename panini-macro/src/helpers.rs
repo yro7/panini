@@ -72,6 +72,24 @@ pub fn is_option_type(ty: &Type) -> bool {
     last_segment_ident(ty).is_some_and(|i| i == "Option")
 }
 
+/// For `Option<T>`, returns the inner `T`; otherwise `None`.
+pub fn option_inner_type(ty: &Type) -> Option<&Type> {
+    let Type::Path(type_path) = ty else {
+        return None;
+    };
+    let seg = type_path.path.segments.last()?;
+    if seg.ident != "Option" {
+        return None;
+    }
+    let syn::PathArguments::AngleBracketed(args) = &seg.arguments else {
+        return None;
+    };
+    args.args.iter().find_map(|arg| match arg {
+        syn::GenericArgument::Type(inner) => Some(inner),
+        _ => None,
+    })
+}
+
 /// Coarse classification of a field type used by the aggregable codegen.
 ///
 /// `Option` is **not** handled here — callers filter those out first.
