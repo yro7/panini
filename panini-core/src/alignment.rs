@@ -350,7 +350,6 @@ impl AlignedSentence {
 
         spans
     }
-
 }
 
 impl AlignedTranslation {
@@ -629,7 +628,11 @@ pub mod wire {
     /// a fallback so the model's natural, capitalization-blind occurrence
     /// counting ("the third 'the'", counting a sentence-initial "The" too)
     /// resolves instead of being rejected.
-    fn ids_matching(segments: &[super::AlignedSegment], surface: &str, fold_case: bool) -> Vec<u32> {
+    fn ids_matching(
+        segments: &[super::AlignedSegment],
+        surface: &str,
+        fold_case: bool,
+    ) -> Vec<u32> {
         segments
             .iter()
             .filter(|s| {
@@ -915,7 +918,10 @@ mod tests {
     #[test]
     fn normalize_empties_collapse_to_none() {
         assert_eq!(normalize_gloss(Some("  ")), None);
-        assert_eq!(normalize_gloss(Some("PST..PFV")).as_deref(), Some("PST.PFV"));
+        assert_eq!(
+            normalize_gloss(Some("PST..PFV")).as_deref(),
+            Some("PST.PFV")
+        );
         assert_eq!(normalize_gloss(Some("dog")), None); // content stem → null
         assert_eq!(normalize_gloss(None), None);
     }
@@ -1281,7 +1287,9 @@ mod tests {
                 LinkKind::Lexical,
             )],
         };
-        let resolved = a.resolve().expect("case-insensitive fallback should resolve");
+        let resolved = a
+            .resolve()
+            .expect("case-insensitive fallback should resolve");
         // "The"(0), "the"(3), "the"(6): occurrence 3 counted case-insensitively
         // is the segment at id 6.
         assert_eq!(resolved.links[0].target, vec![6]);
