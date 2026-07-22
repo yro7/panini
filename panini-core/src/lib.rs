@@ -17,9 +17,7 @@ pub use aggregable::digest_output::{
     DigestDimension, DigestDimensionKind, DigestGroup, DigestOptions, DigestValue,
 };
 pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor, FieldKind};
-pub use alignment::{
-    AlignedSegment, AlignedSentence, AlignedTranslation, AlignmentLink, CharSpan, LinkKind,
-};
+pub use alignment::{AlignedSegment, AlignedSentence, AlignedTranslation, AlignmentLink, CharSpan};
 pub use component::{
     Aggregating, AggregationError, AnalysisComponent, ComponentContext, ComponentRequires,
     ExtractionResult, ExtractionResultError, LanguageLevel,
