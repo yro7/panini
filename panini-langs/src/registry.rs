@@ -304,12 +304,30 @@ mod tests {
         let link_source = &schema["$defs"]["AlignmentLink"]["properties"]["source"];
         assert_eq!(link_source["minItems"], 1, "schema: {schema}");
 
-        // The gloss description doubles as the extraction spec: it must
-        // announce the closed Leipzig vocabulary the validator enforces.
-        let gloss_desc = segment_props["gloss"]["description"]
+        // Presentation-only fields were dropped from the wire format: the LLM
+        // produces neither glosses nor link kinds.
+        assert!(segment_props.get("gloss").is_none());
+        let link_props = &schema["$defs"]["AlignmentLink"]["properties"];
+        assert!(link_props.get("kind").is_none());
+
+        // The source sentence's `text` is never requested from the LLM: it's
+        // just the original input echoed back, so it's reconstructed
+        // server-side from `source.segments` instead. `target.text` (the
+        // generated translation) is genuinely new information and stays
+        // required.
+        let source_ref = schema["properties"]["source"]["$ref"]
             .as_str()
-            .expect("gloss description");
-        assert!(gloss_desc.contains("Leipzig"), "desc: {gloss_desc}");
-        assert!(gloss_desc.contains("rejected"), "desc: {gloss_desc}");
+            .expect("source should $ref a schema def");
+        assert!(source_ref.ends_with("/SourceSentence"), "schema: {schema}");
+        let source_props = &schema["$defs"]["SourceSentence"]["properties"];
+        assert!(source_props.get("text").is_none(), "schema: {schema}");
+        assert!(source_props.get("segments").is_some(), "schema: {schema}");
+
+        let target_ref = schema["properties"]["target"]["$ref"]
+            .as_str()
+            .expect("target should $ref a schema def");
+        assert!(target_ref.ends_with("/AlignedSentence"), "schema: {schema}");
+        let target_props = &schema["$defs"]["AlignedSentence"]["properties"];
+        assert!(target_props.get("text").is_some(), "schema: {schema}");
     }
 }
