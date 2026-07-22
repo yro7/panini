@@ -34,9 +34,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
 
     fn prompt_fragment(&self, _lang: &L, ctx: &ComponentContext) -> String {
         format!(
-            "Translate the sentence into {ui_lang} and align the two sentences segment by segment:\n\
-             - `source.text` is the original sentence verbatim; `target.text` is an idiomatic \
-               {ui_lang} translation.\n\
+            "Translate the sentence into {ui_lang}; `target.text` is that idiomatic translation. \
+             Align the two sentences segment by segment:\n\
              - Split BOTH sentences into segments, in reading order. Default to one segment per \
                word; split a word into several segments (stem, affixes, clitics, fused plural \
                marks) whenever a sub-word unit corresponds to a separate unit in the other \
@@ -49,21 +48,9 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                when it continues the previous word. NEVER mark two whitespace-separated words \
                as one word — a multi-word unit is expressed by one link spanning several \
                segments, not by merging words.\n\
-             - `gloss`: for grammatical morphemes and function words, UPPER CASE standard \
-               Leipzig abbreviations (e.g. NOM, ACC, GEN, DAT, PL, SG, PST, PRS, FUT, INF, \
-               PTCP, NEG, DEF, INDF, PASS, CAUS, REFL, SBJV, IMP, PROG, PFV, IPFV, COMP, REL, \
-               DEM, COP, AUX, LOC). Compose as many atoms as needed, joined by `.` (1SG.POSS, \
-               PST.PFV); person+number fuse without a dot (1SG, never 1.SG); `N` prefixes an \
-               atom for \"non-\" (NPST). Use null for content stems and punctuation — do not \
-               gloss a content word with its meaning. The gloss is a best-effort tooltip: \
-               stray labels are cleaned up rather than rejected, but staying within these \
-               atoms keeps it intact.\n\
              - `links` are many-to-many and reference segments by their `surface` text. When \
                the same surface appears more than once among a sentence's segments, add \
                `occurrence` (1-based, in reading order) to say which one is meant. \
-               `Lexical` for content↔content, `Grammatical` when a grammatical unit is involved \
-               (a case suffix may map to a preposition, a person suffix to a pronoun), `Phrasal` \
-               for idioms aligned as a whole because word-by-word links would mislead. \
                Discontinuous units go in one link (e.g. French `ne…pas`).\n\
              - Link ONLY segments that genuinely correspond in meaning or function — pairing \
                segments because they sit at the same position is wrong. A segment with no \

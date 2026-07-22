@@ -39,14 +39,6 @@ pub struct AlignedSegment {
     /// no added hyphens, no normalization. The surfaces of one token
     /// concatenate to the token exactly as written.
     pub surface: String,
-    /// Leipzig-style gloss for grammatical morphemes and function words;
-    /// null for content stems and punctuation. Compose freely from the
-    /// standard Leipzig Glossing Rules abbreviations, joining any number of
-    /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Standard atoms only —
-    /// any other label is rejected. Person and number fuse without a dot
-    /// (1SG, 3PL — never 1.SG), and N prefixes an atom for "non-"
-    /// (NPST = non-past).
-    pub gloss: Option<String>,
     /// Where this segment sits in `text`. Filled by `post_process`; absent in
     /// LLM output.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -67,19 +59,6 @@ pub struct AlignedSentence {
     pub segments: Vec<AlignedSegment>,
 }
 
-/// The nature of one correspondence between segments.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
-pub enum LinkKind {
-    /// Content-to-content correspondence (stem ↔ content word).
-    Lexical,
-    /// Grammatical correspondence: affix, function word, or agreement — a
-    /// case suffix may map to a preposition, a person suffix to a pronoun.
-    Grammatical,
-    /// Whole-expression correspondence for idioms and multiword expressions
-    /// whose word-by-word links would mislead.
-    Phrasal,
-}
-
 /// One correspondence between the two sentences. Many-to-many: either side
 /// may hold several segment ids (discontinuous units included). A segment
 /// with no counterpart appears in no link at all.
@@ -91,8 +70,6 @@ pub struct AlignmentLink {
     /// Ids of the target-sentence segments in this correspondence.
     #[schemars(length(min = 1))]
     pub target: Vec<u32>,
-    /// What kind of correspondence this is.
-    pub kind: LinkKind,
 }
 
 /// A sentence aligned with its translation, segment by segment.
@@ -110,158 +87,6 @@ pub struct AlignedTranslation {
     pub literal_translation: Option<String>,
     /// Many-to-many correspondences between source and target segments.
     pub links: Vec<AlignmentLink>,
-}
-
-// ─── Gloss vocabulary ─────────────────────────────────────────────────────────
-
-/// The standard abbreviations from the Leipzig Glossing Rules appendix
-/// (Comrie, Haspelmath & Bickel, rev. May 2015). The appendix additionally
-/// defines the bare person digits 1/2/3 and the `N-` "non-" prefix
-/// (NSG non-singular, NPST non-past); [`is_valid_gloss_atom`] accepts those
-/// compositionally rather than by listing.
-pub const LEIPZIG_ATOMS: [&str; 80] = [
-    "A", "ABL", "ABS", "ACC", "ADJ", "ADV", "AGR", "ALL", "ANTIP", "APPL", "ART", "AUX", "BEN",
-    "CAUS", "CLF", "COM", "COMP", "COMPL", "COND", "COP", "CVB", "DAT", "DECL", "DEF", "DEM",
-    "DET", "DIST", "DISTR", "DU", "DUR", "ERG", "EXCL", "F", "FOC", "FUT", "GEN", "IMP", "INCL",
-    "IND", "INDF", "INF", "INS", "INTR", "IPFV", "IRR", "LOC", "M", "N", "NEG", "NMLZ", "NOM",
-    "OBJ", "OBL", "P", "PASS", "PFV", "PL", "POSS", "PRED", "PRF", "PROG", "PROH", "PROX", "PRS",
-    "PST", "PTCP", "PURP", "Q", "QUOT", "RECP", "REFL", "REL", "RES", "S", "SBJ", "SBJV", "SG",
-    "TOP", "TR", "VOC",
-];
-
-/// Common non-standard labels mapped to their Leipzig equivalent. Models
-/// frequently pick the right category but the wrong name (`SINGULAR` for `SG`,
-/// `CONTINUOUS` for `PROG`); [`normalize_gloss`] rewrites these so the concept
-/// survives instead of being dropped. Keys are compared upper-cased.
-const GLOSS_ALIASES: &[(&str, &str)] = &[
-    // number
-    ("SINGULAR", "SG"),
-    ("PLURAL", "PL"),
-    ("DUAL", "DU"),
-    // gender
-    ("MASCULINE", "M"),
-    ("MASC", "M"),
-    ("FEMININE", "F"),
-    ("FEM", "F"),
-    ("NEUTER", "N"),
-    ("NEUT", "N"),
-    // case
-    ("NOMINATIVE", "NOM"),
-    ("ACCUSATIVE", "ACC"),
-    ("GENITIVE", "GEN"),
-    ("DATIVE", "DAT"),
-    ("INSTRUMENTAL", "INS"),
-    ("LOCATIVE", "LOC"),
-    ("VOCATIVE", "VOC"),
-    ("ABLATIVE", "ABL"),
-    ("ALLATIVE", "ALL"),
-    ("COMITATIVE", "COM"),
-    ("ERGATIVE", "ERG"),
-    ("ABSOLUTIVE", "ABS"),
-    ("OBLIQUE", "OBL"),
-    ("PREPOSITIONAL", "LOC"),
-    // tense
-    ("PRESENT", "PRS"),
-    ("PRES", "PRS"),
-    ("PAST", "PST"),
-    ("FUTURE", "FUT"),
-    // aspect
-    ("PERFECTIVE", "PFV"),
-    ("IMPERFECTIVE", "IPFV"),
-    ("PROGRESSIVE", "PROG"),
-    ("CONTINUOUS", "PROG"),
-    ("CONT", "PROG"),
-    ("HABITUAL", "IPFV"),
-    ("PERFECT", "PRF"),
-    ("PERF", "PRF"),
-    ("DURATIVE", "DUR"),
-    // mood / voice
-    ("SUBJUNCTIVE", "SBJV"),
-    ("IMPERATIVE", "IMP"),
-    ("CONDITIONAL", "COND"),
-    ("INDICATIVE", "IND"),
-    ("IRREALIS", "IRR"),
-    ("PASSIVE", "PASS"),
-    ("CAUSATIVE", "CAUS"),
-    ("REFLEXIVE", "REFL"),
-    ("RECIPROCAL", "RECP"),
-    // definiteness / finiteness
-    ("DEFINITE", "DEF"),
-    ("INDEFINITE", "INDF"),
-    ("INDEF", "INDF"),
-    ("INFINITIVE", "INF"),
-    ("PARTICIPLE", "PTCP"),
-    ("CONVERB", "CVB"),
-    // pronominal / other
-    ("NEGATION", "NEG"),
-    ("NEGATIVE", "NEG"),
-    ("DEMONSTRATIVE", "DEM"),
-    ("RELATIVE", "REL"),
-    ("DETERMINER", "DET"),
-    ("ARTICLE", "ART"),
-    ("AUXILIARY", "AUX"),
-    ("COPULA", "COP"),
-    ("POSSESSIVE", "POSS"),
-    ("COMPARATIVE", "COMP"),
-    ("PROXIMAL", "PROX"),
-    ("DISTAL", "DIST"),
-    // person (person-number compounds like 3SG are handled compositionally)
-    ("FIRST", "1"),
-    ("SECOND", "2"),
-    ("THIRD", "3"),
-    ("1S", "1SG"),
-    ("2S", "2SG"),
-    ("3S", "3SG"),
-];
-
-/// Person–number compound per Rule 5: a person digit optionally fused with a
-/// number label, no separating dot (1, 3SG, 2DU, 3NSG).
-fn is_person_number(atom: &str) -> bool {
-    matches!(atom.as_bytes().first(), Some(b'1'..=b'3'))
-        && matches!(&atom[1..], "" | "SG" | "PL" | "DU" | "NSG")
-}
-
-/// Whether one dot-separated gloss atom belongs to the accepted vocabulary:
-/// a standard abbreviation, a person–number compound, or `N` + a standard
-/// abbreviation (the appendix's "non-" prefix, e.g. NPST).
-fn is_valid_gloss_atom(atom: &str) -> bool {
-    LEIPZIG_ATOMS.contains(&atom)
-        || is_person_number(atom)
-        || atom
-            .strip_prefix('N')
-            .is_some_and(|rest| LEIPZIG_ATOMS.contains(&rest))
-}
-
-/// Best-effort cleanup of one gloss string. The gloss only powers a hover
-/// tooltip in the UI, so it is never a hard validation failure — instead each
-/// `.`-separated atom is upper-cased, mapped through [`GLOSS_ALIASES`], and
-/// kept only if it is then a valid Leipzig atom. Unrecognized atoms are
-/// dropped (a content stem the model wrongly glossed with an English lemma
-/// becomes `None`, `give.PST.3SG.M` becomes `PST.3SG.M`). Returns `None` when
-/// nothing recognizable survives, so every stored gloss is valid Leipzig by
-/// construction.
-pub fn normalize_gloss(gloss: Option<&str>) -> Option<String> {
-    let raw = gloss?;
-    let mut atoms = Vec::new();
-    for atom in raw.split('.') {
-        let atom = atom.trim();
-        if atom.is_empty() {
-            continue;
-        }
-        let upper = atom.to_uppercase();
-        let mapped = GLOSS_ALIASES
-            .iter()
-            .find(|(from, _)| *from == upper)
-            .map_or(upper.as_str(), |(_, to)| *to);
-        if is_valid_gloss_atom(mapped) {
-            atoms.push(mapped.to_string());
-        }
-    }
-    if atoms.is_empty() {
-        None
-    } else {
-        Some(atoms.join("."))
-    }
 }
 
 // ─── Invariants ───────────────────────────────────────────────────────────────
@@ -386,9 +211,7 @@ impl AlignedTranslation {
 
     /// Validates all structural invariants without mutating anything:
     /// segment coverage of both texts, id uniqueness, token ordering, and link
-    /// integrity. Glosses are NOT validated here — they only power a hover
-    /// tooltip, so they are cleaned best-effort by [`normalize_gloss`] rather
-    /// than blocking extraction. All violations are collected into one error
+    /// integrity. All violations are collected into one error
     /// string so the LLM self-correction retry sees every problem at once.
     ///
     /// # Errors
@@ -451,8 +274,6 @@ fn has_duplicates(ids: &[u32]) -> bool {
 pub mod wire {
     use serde::{Deserialize, Serialize};
 
-    use super::LinkKind;
-
     /// One displayable slice of a sentence: a whole word, or one morpheme of it.
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
     pub struct AlignedSegment {
@@ -467,19 +288,9 @@ pub mod wire {
         /// into one word — a multi-word unit is expressed by one link
         /// spanning several segments, not by merging words.
         pub starts_new_token: bool,
-        /// Leipzig-style gloss for grammatical morphemes and function words;
-        /// null for content stems and punctuation. Compose freely from the
-        /// standard Leipzig Glossing Rules abbreviations, joining any number of
-        /// atoms with '.' (PL, LOC, 1SG.POSS, PST.PFV). Person and number fuse
-        /// without a dot (1SG, 3PL — never 1.SG), and N prefixes an atom for
-        /// "non-" (NPST = non-past). This field is best-effort: it feeds a
-        /// tooltip, so unrecognized labels are normalized where possible and
-        /// otherwise dropped rather than rejected — but staying within the
-        /// standard atoms keeps the gloss intact.
-        pub gloss: Option<String>,
     }
 
-    /// One sentence of the pair, split into addressable segments.
+    /// The translation, split into addressable segments.
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
     pub struct AlignedSentence {
         /// The sentence exactly as displayed, unsegmented.
@@ -489,6 +300,22 @@ pub mod wire {
         /// several when sub-word units align separately (agglutinative
         /// affixes, clitics, fused plurals). The stem is a segment too.
         /// Punctuation is its own word, usually in no link.
+        pub segments: Vec<AlignedSegment>,
+    }
+
+    /// The source sentence of the pair, split into addressable segments. Has
+    /// no `text` field: the source sentence is already known to the model
+    /// from the input it was given, and its segments cover every
+    /// non-whitespace character of it exactly once, so `text` is
+    /// reconstructed server-side from the segments instead of being
+    /// re-emitted.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct SourceSentence {
+        /// All segments in reading order, covering every non-whitespace
+        /// character of the source sentence exactly once. One segment per
+        /// word by default; several when sub-word units align separately
+        /// (agglutinative affixes, clitics, fused plurals). The stem is a
+        /// segment too. Punctuation is its own word, usually in no link.
         pub segments: Vec<AlignedSegment>,
     }
 
@@ -517,15 +344,13 @@ pub mod wire {
         /// References to the target-sentence segments in this correspondence.
         #[schemars(length(min = 1))]
         pub target: Vec<SegmentRef>,
-        /// What kind of correspondence this is.
-        pub kind: LinkKind,
     }
 
     /// A sentence aligned with its translation, segment by segment.
     #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
     pub struct AlignedTranslation {
         /// The analyzed sentence, in the language being learned.
-        pub source: AlignedSentence,
+        pub source: SourceSentence,
         /// The translation, in the learner's UI language.
         pub target: AlignedSentence,
         /// Word-by-word literal rendering of the source sentence in the target
@@ -551,8 +376,13 @@ pub mod wire {
         pub fn resolve(&self) -> Result<super::AlignedTranslation, String> {
             let mut errors = Vec::new();
 
-            let source = derive_sentence(&self.source, "source", &mut errors);
-            let target = derive_sentence(&self.target, "target", &mut errors);
+            let source = derive_source_sentence(&self.source, &mut errors);
+            let target = derive_sentence(
+                &self.target.text,
+                &self.target.segments,
+                "target",
+                &mut errors,
+            );
 
             let mut links = Vec::with_capacity(self.links.len());
             for (i, link) in self.links.iter().enumerate() {
@@ -569,7 +399,6 @@ pub mod wire {
                 links.push(super::AlignmentLink {
                     source: source_ids,
                     target: target_ids,
-                    kind: link.kind,
                 });
             }
 
@@ -592,13 +421,14 @@ pub mod wire {
     /// Assigns ids by position and derives token indices from the
     /// word-boundary flags. A false flag on the first segment is a violation.
     fn derive_sentence(
-        sentence: &AlignedSentence,
+        text: &str,
+        wire_segments: &[AlignedSegment],
         side: &str,
         errors: &mut Vec<String>,
     ) -> super::AlignedSentence {
         let mut token: u32 = 0;
-        let mut segments = Vec::with_capacity(sentence.segments.len());
-        for (i, seg) in sentence.segments.iter().enumerate() {
+        let mut segments = Vec::with_capacity(wire_segments.len());
+        for (i, seg) in wire_segments.iter().enumerate() {
             if i == 0 && !seg.starts_new_token {
                 errors.push(format!(
                     "{side}: the first segment ('{}') must have starts_new_token: true — it \
@@ -613,14 +443,59 @@ pub mod wire {
                 id: i as u32,
                 token,
                 surface: seg.surface.clone(),
-                gloss: super::normalize_gloss(seg.gloss.as_deref()),
                 span: None,
             });
         }
         super::AlignedSentence {
-            text: sentence.text.clone(),
+            text: text.to_string(),
             segments,
         }
+    }
+
+    /// Reconstructs the source sentence's `text` from its segments alone —
+    /// the source sentence is not re-emitted by the LLM — then derives ids
+    /// and token indices exactly as [`derive_sentence`] does for the target.
+    /// Segments cover every non-whitespace character of the source sentence
+    /// exactly once, so concatenating them with one space before every
+    /// segment whose `starts_new_token` is `true` (the first segment
+    /// excepted) reconstructs `text` exactly — except closing punctuation
+    /// (`.`, `,`, `;`, `:`, `!`, `?`, closing brackets/quotes, …), which is
+    /// its own word (per the segmentation rules) but never preceded by
+    /// whitespace in the original sentence.
+    fn derive_source_sentence(
+        sentence: &SourceSentence,
+        errors: &mut Vec<String>,
+    ) -> super::AlignedSentence {
+        let mut text = String::new();
+        for (i, seg) in sentence.segments.iter().enumerate() {
+            if i > 0 && seg.starts_new_token && !attaches_without_leading_space(&seg.surface) {
+                text.push(' ');
+            }
+            text.push_str(&seg.surface);
+        }
+        derive_sentence(&text, &sentence.segments, "source", errors)
+    }
+
+    /// Whether a punctuation-only segment attaches directly to the previous
+    /// word with no space in between, as is the norm for closing punctuation
+    /// across the supported languages.
+    fn attaches_without_leading_space(surface: &str) -> bool {
+        matches!(
+            surface,
+            "." | ","
+                | ";"
+                | ":"
+                | "!"
+                | "?"
+                | ")"
+                | "]"
+                | "}"
+                | "'"
+                | "\u{2019}"
+                | "\""
+                | "\u{201D}"
+                | "\u{2026}"
+        )
     }
 
     /// Segment ids whose surface matches `surface`, in reading order. With
@@ -725,21 +600,19 @@ pub mod wire {
 mod tests {
     use super::*;
 
-    fn seg(id: u32, token: u32, surface: &str, gloss: Option<&str>) -> AlignedSegment {
+    fn seg(id: u32, token: u32, surface: &str) -> AlignedSegment {
         AlignedSegment {
             id,
             token,
             surface: surface.to_string(),
-            gloss: gloss.map(str::to_string),
             span: None,
         }
     }
 
-    fn link(source: &[u32], target: &[u32], kind: LinkKind) -> AlignmentLink {
+    fn link(source: &[u32], target: &[u32]) -> AlignmentLink {
         AlignmentLink {
             source: source.to_vec(),
             target: target.to_vec(),
-            kind,
         }
     }
 
@@ -749,34 +622,34 @@ mod tests {
             source: AlignedSentence {
                 text: "Evlerimde kalıyorum".to_string(),
                 segments: vec![
-                    seg(0, 0, "Ev", None),
-                    seg(1, 0, "ler", Some("PL")),
-                    seg(2, 0, "im", Some("1SG.POSS")),
-                    seg(3, 0, "de", Some("LOC")),
-                    seg(4, 1, "kal", None),
-                    seg(5, 1, "ıyor", Some("PROG")),
-                    seg(6, 1, "um", Some("1SG")),
+                    seg(0, 0, "Ev"),
+                    seg(1, 0, "ler"),
+                    seg(2, 0, "im"),
+                    seg(3, 0, "de"),
+                    seg(4, 1, "kal"),
+                    seg(5, 1, "ıyor"),
+                    seg(6, 1, "um"),
                 ],
             },
             target: AlignedSentence {
                 text: "Je reste dans mes maisons".to_string(),
                 segments: vec![
-                    seg(0, 0, "Je", None),
-                    seg(1, 1, "reste", None),
-                    seg(2, 2, "dans", None),
-                    seg(3, 3, "mes", None),
-                    seg(4, 4, "maison", None),
-                    seg(5, 4, "s", Some("PL")),
+                    seg(0, 0, "Je"),
+                    seg(1, 1, "reste"),
+                    seg(2, 2, "dans"),
+                    seg(3, 3, "mes"),
+                    seg(4, 4, "maison"),
+                    seg(5, 4, "s"),
                 ],
             },
             literal_translation: Some("dans mes maisons je-reste".to_string()),
             links: vec![
-                link(&[0], &[4], LinkKind::Lexical),
-                link(&[1], &[5], LinkKind::Grammatical),
-                link(&[2], &[3], LinkKind::Grammatical),
-                link(&[3], &[2], LinkKind::Grammatical),
-                link(&[4], &[1], LinkKind::Lexical),
-                link(&[6], &[0], LinkKind::Grammatical),
+                link(&[0], &[4]),
+                link(&[1], &[5]),
+                link(&[2], &[3]),
+                link(&[3], &[2]),
+                link(&[4], &[1]),
+                link(&[6], &[0]),
             ],
         }
     }
@@ -814,7 +687,7 @@ mod tests {
     fn punctuation_is_its_own_token() {
         let mut a = demo();
         a.source.text.push('.');
-        a.source.segments.push(seg(7, 2, ".", None));
+        a.source.segments.push(seg(7, 2, "."));
         a.locate_spans().expect("punctuation token should locate");
         assert_eq!(
             a.source.segments.last().unwrap().span,
@@ -873,61 +746,15 @@ mod tests {
     #[test]
     fn empty_link_side_is_rejected() {
         let mut a = demo();
-        a.links.push(link(&[5], &[], LinkKind::Grammatical));
+        a.links.push(link(&[5], &[]));
         let err = a.validate_structure().unwrap_err();
         assert!(err.contains("at least one segment"), "got: {err}");
     }
 
     #[test]
-    fn composed_gloss_atoms_survive_normalization() {
-        // Valid composed atoms pass through normalize_gloss unchanged, and
-        // never block validation (glosses are best-effort).
-        for g in ["PST.PFV", "3PL", "NPST", "3", "NEG.1SG.POSS.COND"] {
-            assert_eq!(normalize_gloss(Some(g)).as_deref(), Some(g));
-        }
-        let mut a = demo();
-        a.source.segments[6].gloss = Some("NEG.1SG.POSS.COND".to_string());
-        a.validate_structure()
-            .expect("glosses never block validation");
-    }
-
-    #[test]
-    fn normalize_maps_known_aliases() {
-        // Right concept, wrong name — the concept survives.
-        assert_eq!(normalize_gloss(Some("SINGULAR")).as_deref(), Some("SG"));
-        assert_eq!(
-            normalize_gloss(Some("singular.masculine")).as_deref(),
-            Some("SG.M")
-        );
-        assert_eq!(normalize_gloss(Some("CONTINUOUS")).as_deref(), Some("PROG"));
-        assert_eq!(normalize_gloss(Some("PRES")).as_deref(), Some("PRS"));
-    }
-
-    #[test]
-    fn normalize_lowercases_and_drops_unknown_atoms() {
-        // Lowercase standard atoms are recovered; unknown atoms (English
-        // lemmas the model wrongly glossed a content word with) are dropped.
-        assert_eq!(normalize_gloss(Some("pl")).as_deref(), Some("PL"));
-        assert_eq!(
-            normalize_gloss(Some("give.PST.3SG.M")).as_deref(),
-            Some("PST.3SG.M")
-        );
-        assert_eq!(normalize_gloss(Some("1SG.WIBBLE")).as_deref(), Some("1SG"));
-    }
-
-    #[test]
-    fn normalize_empties_collapse_to_none() {
-        assert_eq!(normalize_gloss(Some("  ")), None);
-        assert_eq!(
-            normalize_gloss(Some("PST..PFV")).as_deref(),
-            Some("PST.PFV")
-        );
-        assert_eq!(normalize_gloss(Some("dog")), None); // content stem → null
-        assert_eq!(normalize_gloss(None), None);
-    }
-
-    #[test]
-    fn llm_json_without_spans_round_trips() {
+    fn legacy_json_with_gloss_and_kind_round_trips() {
+        // Persisted rows predating the gloss/kind removal still carry those
+        // fields; serde must ignore them and the row must keep deserializing.
         let json = serde_json::json!({
             "source": {
                 "text": "Evlerimde kalıyorum",
@@ -981,11 +808,10 @@ mod tests {
 
     // ── Wire format ──
 
-    fn wseg(surface: &str, starts_new_token: bool, gloss: Option<&str>) -> wire::AlignedSegment {
+    fn wseg(surface: &str, starts_new_token: bool) -> wire::AlignedSegment {
         wire::AlignedSegment {
             surface: surface.to_string(),
             starts_new_token,
-            gloss: gloss.map(str::to_string),
         }
     }
 
@@ -996,76 +822,43 @@ mod tests {
         }
     }
 
-    fn wlink(
-        source: Vec<wire::SegmentRef>,
-        target: Vec<wire::SegmentRef>,
-        kind: LinkKind,
-    ) -> wire::AlignmentLink {
-        wire::AlignmentLink {
-            source,
-            target,
-            kind,
-        }
+    fn wlink(source: Vec<wire::SegmentRef>, target: Vec<wire::SegmentRef>) -> wire::AlignmentLink {
+        wire::AlignmentLink { source, target }
     }
 
     /// Turkish → French, same sentence as [`demo`] but in wire form.
     fn wire_demo() -> wire::AlignedTranslation {
         wire::AlignedTranslation {
-            source: wire::AlignedSentence {
-                text: "Evlerimde kalıyorum".to_string(),
+            source: wire::SourceSentence {
                 segments: vec![
-                    wseg("Ev", true, None),
-                    wseg("ler", false, Some("PL")),
-                    wseg("im", false, Some("1SG.POSS")),
-                    wseg("de", false, Some("LOC")),
-                    wseg("kal", true, None),
-                    wseg("ıyor", false, Some("PROG")),
-                    wseg("um", false, Some("1SG")),
+                    wseg("Ev", true),
+                    wseg("ler", false),
+                    wseg("im", false),
+                    wseg("de", false),
+                    wseg("kal", true),
+                    wseg("ıyor", false),
+                    wseg("um", false),
                 ],
             },
             target: wire::AlignedSentence {
                 text: "Je reste dans mes maisons".to_string(),
                 segments: vec![
-                    wseg("Je", true, None),
-                    wseg("reste", true, None),
-                    wseg("dans", true, None),
-                    wseg("mes", true, None),
-                    wseg("maison", true, None),
-                    wseg("s", false, Some("PL")),
+                    wseg("Je", true),
+                    wseg("reste", true),
+                    wseg("dans", true),
+                    wseg("mes", true),
+                    wseg("maison", true),
+                    wseg("s", false),
                 ],
             },
             literal_translation: Some("dans mes maisons je-reste".to_string()),
             links: vec![
-                wlink(
-                    vec![wref("Ev", None)],
-                    vec![wref("maison", None)],
-                    LinkKind::Lexical,
-                ),
-                wlink(
-                    vec![wref("ler", None)],
-                    vec![wref("s", None)],
-                    LinkKind::Grammatical,
-                ),
-                wlink(
-                    vec![wref("im", None)],
-                    vec![wref("mes", None)],
-                    LinkKind::Grammatical,
-                ),
-                wlink(
-                    vec![wref("de", None)],
-                    vec![wref("dans", None)],
-                    LinkKind::Grammatical,
-                ),
-                wlink(
-                    vec![wref("kal", None)],
-                    vec![wref("reste", None)],
-                    LinkKind::Lexical,
-                ),
-                wlink(
-                    vec![wref("um", None)],
-                    vec![wref("Je", None)],
-                    LinkKind::Grammatical,
-                ),
+                wlink(vec![wref("Ev", None)], vec![wref("maison", None)]),
+                wlink(vec![wref("ler", None)], vec![wref("s", None)]),
+                wlink(vec![wref("im", None)], vec![wref("mes", None)]),
+                wlink(vec![wref("de", None)], vec![wref("dans", None)]),
+                wlink(vec![wref("kal", None)], vec![wref("reste", None)]),
+                wlink(vec![wref("um", None)], vec![wref("Je", None)]),
             ],
         }
     }
@@ -1098,42 +891,29 @@ mod tests {
     /// so refs to it must carry `occurrence`.
     fn wire_repeated() -> wire::AlignedTranslation {
         wire::AlignedTranslation {
-            source: wire::AlignedSentence {
-                text: "Lubię kawę.".to_string(),
+            source: wire::SourceSentence {
                 segments: vec![
-                    wseg("Lubi", true, None),
-                    wseg("ę", false, Some("1SG")),
-                    wseg("kaw", true, None),
-                    wseg("ę", false, Some("ACC")),
-                    wseg(".", true, None),
+                    wseg("Lubi", true),
+                    wseg("ę", false),
+                    wseg("kaw", true),
+                    wseg("ę", false),
+                    wseg(".", true),
                 ],
             },
             target: wire::AlignedSentence {
                 text: "I like coffee.".to_string(),
                 segments: vec![
-                    wseg("I", true, None),
-                    wseg("like", true, None),
-                    wseg("coffee", true, None),
-                    wseg(".", true, None),
+                    wseg("I", true),
+                    wseg("like", true),
+                    wseg("coffee", true),
+                    wseg(".", true),
                 ],
             },
             literal_translation: None,
             links: vec![
-                wlink(
-                    vec![wref("Lubi", None)],
-                    vec![wref("like", None)],
-                    LinkKind::Lexical,
-                ),
-                wlink(
-                    vec![wref("ę", Some(1))],
-                    vec![wref("I", None)],
-                    LinkKind::Grammatical,
-                ),
-                wlink(
-                    vec![wref("kaw", None)],
-                    vec![wref("coffee", None)],
-                    LinkKind::Lexical,
-                ),
+                wlink(vec![wref("Lubi", None)], vec![wref("like", None)]),
+                wlink(vec![wref("ę", Some(1))], vec![wref("I", None)]),
+                wlink(vec![wref("kaw", None)], vec![wref("coffee", None)]),
             ],
         }
     }
@@ -1215,17 +995,16 @@ mod tests {
         // "are" + "reading" claimed as one word: contiguity check must fire on
         // the whitespace between them.
         let a = wire::AlignedTranslation {
-            source: wire::AlignedSentence {
-                text: "Czytamy.".to_string(),
-                segments: vec![wseg("Czytamy", true, None), wseg(".", true, None)],
+            source: wire::SourceSentence {
+                segments: vec![wseg("Czytamy", true), wseg(".", true)],
             },
             target: wire::AlignedSentence {
                 text: "We are reading.".to_string(),
                 segments: vec![
-                    wseg("We", true, None),
-                    wseg("are", true, None),
-                    wseg("reading", false, None), // wrongly fused into "are"'s word
-                    wseg(".", true, None),
+                    wseg("We", true),
+                    wseg("are", true),
+                    wseg("reading", false), // wrongly fused into "are"'s word
+                    wseg(".", true),
                 ],
             },
             literal_translation: None,
@@ -1238,22 +1017,9 @@ mod tests {
     #[test]
     fn empty_wire_link_side_is_rejected() {
         let mut a = wire_repeated();
-        a.links
-            .push(wlink(vec![wref("kaw", None)], vec![], LinkKind::Lexical));
+        a.links.push(wlink(vec![wref("kaw", None)], vec![]));
         let err = a.resolve().unwrap_err();
         assert!(err.contains("at least one segment"), "got: {err}");
-    }
-
-    #[test]
-    fn wire_glosses_are_normalized_not_rejected() {
-        // A non-standard but recognizable gloss is normalized (PRES→PRS), and
-        // a content-word lemma gloss is dropped — neither blocks resolution.
-        let mut a = wire_repeated();
-        a.source.segments[1].gloss = Some("PRES".to_string());
-        a.source.segments[0].gloss = Some("like".to_string());
-        let resolved = a.resolve().expect("best-effort gloss never rejects");
-        assert_eq!(resolved.source.segments[1].gloss.as_deref(), Some("PRS"));
-        assert_eq!(resolved.source.segments[0].gloss, None);
     }
 
     #[test]
@@ -1262,30 +1028,25 @@ mod tests {
         // lowercase bucket has only two, so occurrence 3 must fall back to the
         // case-insensitive bucket and resolve to the last "the".
         let a = wire::AlignedTranslation {
-            source: wire::AlignedSentence {
-                text: "Pies.".to_string(),
-                segments: vec![wseg("Pies", true, None), wseg(".", true, None)],
+            source: wire::SourceSentence {
+                segments: vec![wseg("Pies", true), wseg(".", true)],
             },
             target: wire::AlignedSentence {
                 text: "The dog and the cat and the bird.".to_string(),
                 segments: vec![
-                    wseg("The", true, Some("DEF")),
-                    wseg("dog", true, None),
-                    wseg("and", true, None),
-                    wseg("the", true, Some("DEF")),
-                    wseg("cat", true, None),
-                    wseg("and", true, None),
-                    wseg("the", true, Some("DEF")),
-                    wseg("bird", true, None),
-                    wseg(".", true, None),
+                    wseg("The", true),
+                    wseg("dog", true),
+                    wseg("and", true),
+                    wseg("the", true),
+                    wseg("cat", true),
+                    wseg("and", true),
+                    wseg("the", true),
+                    wseg("bird", true),
+                    wseg(".", true),
                 ],
             },
             literal_translation: None,
-            links: vec![wlink(
-                vec![wref("Pies", None)],
-                vec![wref("the", Some(3))],
-                LinkKind::Lexical,
-            )],
+            links: vec![wlink(vec![wref("Pies", None)], vec![wref("the", Some(3))])],
         };
         let resolved = a
             .resolve()
@@ -1299,27 +1060,26 @@ mod tests {
     fn wire_llm_json_resolves() {
         let json = serde_json::json!({
             "source": {
-                "text": "Lubię kawę.",
                 "segments": [
-                    { "surface": "Lubi", "starts_new_token": true, "gloss": null },
-                    { "surface": "ę", "starts_new_token": false, "gloss": "1SG" },
-                    { "surface": "kaw", "starts_new_token": true, "gloss": null },
-                    { "surface": "ę", "starts_new_token": false, "gloss": "ACC" },
-                    { "surface": ".", "starts_new_token": true, "gloss": null }
+                    { "surface": "Lubi", "starts_new_token": true },
+                    { "surface": "ę", "starts_new_token": false },
+                    { "surface": "kaw", "starts_new_token": true },
+                    { "surface": "ę", "starts_new_token": false },
+                    { "surface": ".", "starts_new_token": true }
                 ]
             },
             "target": {
                 "text": "I like coffee.",
                 "segments": [
-                    { "surface": "I", "starts_new_token": true, "gloss": null },
-                    { "surface": "like", "starts_new_token": true, "gloss": null },
-                    { "surface": "coffee", "starts_new_token": true, "gloss": null },
-                    { "surface": ".", "starts_new_token": true, "gloss": null }
+                    { "surface": "I", "starts_new_token": true },
+                    { "surface": "like", "starts_new_token": true },
+                    { "surface": "coffee", "starts_new_token": true },
+                    { "surface": ".", "starts_new_token": true }
                 ]
             },
             "literal_translation": null,
             "links": [
-                { "source": [{ "surface": "ę", "occurrence": 2 }], "target": [{ "surface": "coffee" }], "kind": "Grammatical" }
+                { "source": [{ "surface": "ę", "occurrence": 2 }], "target": [{ "surface": "coffee" }] }
             ]
         });
         let a: wire::AlignedTranslation =
