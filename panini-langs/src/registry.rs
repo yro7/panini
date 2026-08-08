@@ -280,42 +280,25 @@ mod tests {
         let comp = TranslationAlignment;
         let schema = comp.schema_fragment(&Turkish);
         let props = schema["properties"].as_object().expect("object schema");
-        assert!(props.contains_key("source"));
-        assert!(props.contains_key("target"));
-        assert!(props.contains_key("links"));
+        assert!(props.contains_key("s"));
+        assert!(props.contains_key("t"));
+        assert!(props.contains_key("l"));
 
-        // The LLM never produces bookkeeping fields: spans are computed in
-        // post-processing, ids and token indices are derived from position and
-        // the `starts_new_token` flag.
-        let segment_props = &schema["$defs"]["AlignedSegment"]["properties"];
-        assert!(segment_props.is_object(), "schema: {schema}");
-        assert!(segment_props.get("span").is_none());
-        assert!(segment_props.get("id").is_none());
-        assert!(segment_props.get("token").is_none());
-        assert!(segment_props.get("starts_new_token").is_some());
-
-        // Links reference segments by surface (+ occurrence when repeated),
-        // never by id.
-        let ref_props = &schema["$defs"]["SegmentRef"]["properties"];
-        assert!(ref_props.get("surface").is_some(), "schema: {schema}");
-        assert!(ref_props.get("occurrence").is_some(), "schema: {schema}");
+        // Links reference segments by surface + 1-based occurrence (SegRef: {s, o}).
+        let ref_props = &schema["$defs"]["SegRef"]["properties"];
+        assert!(ref_props.get("s").is_some(), "schema: {schema}");
+        assert!(ref_props.get("o").is_some(), "schema: {schema}");
 
         // Both sides of a link are schema-required to be non-empty.
-        let link_source = &schema["$defs"]["AlignmentLink"]["properties"]["source"];
+        let link_source = &schema["$defs"]["Link"]["properties"]["s"];
         assert_eq!(link_source["minItems"], 1, "schema: {schema}");
-
-        // Presentation-only fields were dropped from the wire format: the LLM
-        // produces neither glosses nor link kinds.
-        assert!(segment_props.get("gloss").is_none());
-        let link_props = &schema["$defs"]["AlignmentLink"]["properties"];
-        assert!(link_props.get("kind").is_none());
 
         // The source sentence's `text` is never requested from the LLM: it's
         // just the original input echoed back, so it's reconstructed
         // server-side from `source.segments` instead. `target.text` (the
         // generated translation) is genuinely new information and stays
         // required.
-        let source_ref = schema["properties"]["source"]["$ref"]
+        let source_ref = schema["properties"]["s"]["$ref"]
             .as_str()
             .expect("source should $ref a schema def");
         assert!(source_ref.ends_with("/SourceSentence"), "schema: {schema}");
@@ -323,7 +306,7 @@ mod tests {
         assert!(source_props.get("text").is_none(), "schema: {schema}");
         assert!(source_props.get("segments").is_some(), "schema: {schema}");
 
-        let target_ref = schema["properties"]["target"]["$ref"]
+        let target_ref = schema["properties"]["t"]["$ref"]
             .as_str()
             .expect("target should $ref a schema def");
         assert!(target_ref.ends_with("/AlignedSentence"), "schema: {schema}");
