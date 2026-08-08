@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::alignment::wire;
+use crate::alignment::wire_v3;
 use crate::component::{AnalysisComponent, ComponentContext};
 use crate::traits::LinguisticDefinition;
 
@@ -9,9 +9,8 @@ use crate::traits::LinguisticDefinition;
 /// Both sentences are split into addressable segments — whole tokens, or
 /// single morphemes where a sub-word unit corresponds to a separate unit in
 /// the other language — joined by many-to-many [`crate::alignment::AlignmentLink`]s.
-/// This is the bilingual counterpart of the monolingual Leipzig gloss: the
-/// gloss aligns a sentence with its analysis, this component aligns it with
-/// its translation.
+/// Uses the compact [`wire_v3`] format for efficient LLM extraction with
+/// uniform `{s, o}` segment references.
 #[derive(Debug, Clone, Default)]
 pub struct TranslationAlignment;
 
@@ -28,50 +27,52 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
 
     fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
         let r#gen = schemars::SchemaGenerator::default();
-        let schema = r#gen.into_root_schema_for::<wire::AlignedTranslation>();
+        let schema = r#gen.into_root_schema_for::<wire_v3::AlignedTranslation>();
         serde_json::to_value(&schema).unwrap()
     }
 
     fn prompt_fragment(&self, _lang: &L, ctx: &ComponentContext) -> String {
         format!(
-            "Translate the sentence into {ui_lang}; `target.text` is that idiomatic translation. \
+            "Translate the sentence into {ui_lang}; `t.x` is that idiomatic translation. \
              Align the two sentences segment by segment:\n\
-             - Split BOTH sentences into segments, in reading order. Default to one segment per \
-               word; split a word into several segments (stem, affixes, clitics, fused plural \
-               marks) whenever a sub-word unit corresponds to a separate unit in the other \
-               sentence — mandatory for agglutinative morphology. The stem is a segment too.\n\
-             - Segments must cover every non-whitespace character exactly once: the `surface` \
-               strings of one word concatenate to that word exactly as written — no added \
-               hyphens, no normalization. Punctuation is its own word, left unlinked.\n\
-             - `starts_new_token` is true when the segment begins a new word (words are \
-               separated by whitespace; each punctuation mark counts as its own word), false \
-               when it continues the previous word. NEVER mark two whitespace-separated words \
-               as one word — a multi-word unit is expressed by one link spanning several \
-               segments, not by merging words.\n\
-             - `links` are many-to-many and reference segments by their `surface` text. When \
-               the same surface appears more than once among a sentence's segments, add \
-               `occurrence` (1-based, in reading order) to say which one is meant. \
-               Discontinuous units go in one link (e.g. French `ne…pas`).\n\
+             - Split BOTH sentences into words (`s` for the source sentence, `t.w` for the \
+               translation), in reading order. Each word is an ARRAY of segment strings. A \
+               whole word is a one-element array like [\"plaży\"]; split a word into several \
+               segments (stem, affixes, clitics, fused plural marks) whenever a sub-word unit \
+               corresponds to a separate unit in the other sentence — mandatory for \
+               agglutinative morphology, e.g. [\"Ev\", \"ler\", \"im\", \"de\"]. The stem is a \
+               segment too.\n\
+             - The segments of one word concatenate to that word exactly as written — no added \
+               hyphens, no normalization, NEVER any whitespace inside a segment. Each \
+               punctuation mark is its own one-element word, left unlinked. NEVER merge two \
+               whitespace-separated words into one array — a multi-word unit is expressed by \
+               one link spanning several segments, not by merging words.\n\
+             - `l` holds the links; they are many-to-many and reference segments as \
+               {{\"s\": text, \"o\": occurrence}} where `s` is the segment's exact text and \
+               `o` is the 1-based position among segments with that same text in reading \
+               order. Use `o`: 1 when the surface is unique. \
+               Discontinuous units go in one link (e.g. French `ne…pas` → one link with two \
+               source references).\n\
              - Link ONLY segments that genuinely correspond in meaning or function — pairing \
                segments because they sit at the same position is wrong. A segment with no \
                counterpart in the other sentence appears in no link at all — never force a \
                correspondence.\n\
-             - `literal_translation`: a word-by-word literal rendering of the source sentence in \
-               {ui_lang}, exposing its structure the way \"pomme de terre\" is literally \"apple \
-               of earth\". Follow the source's own word order and morphology, not {ui_lang} \
-               idiom. Null when it would read the same as `target.text`.",
+             - `lit`: a word-by-word literal rendering of the source sentence in {ui_lang}, \
+               exposing its structure the way \"pomme de terre\" is literally \"apple of \
+               earth\". Follow the source's own word order and morphology, not {ui_lang} \
+               idiom. Null when it would read the same as `t.x`.",
             ui_lang = ctx.learner_ui_language
         )
     }
 
     fn validate(&self, _lang: &L, section: &serde_json::Value) -> Result<(), String> {
-        let alignment: wire::AlignedTranslation =
+        let alignment: wire_v3::AlignedTranslation =
             serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
         alignment.resolve().map(|_| ())
     }
 
     fn post_process(&self, _lang: &L, section: &mut serde_json::Value) -> Result<(), String> {
-        let alignment: wire::AlignedTranslation =
+        let alignment: wire_v3::AlignedTranslation =
             serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
         let resolved = alignment.resolve()?;
         *section = serde_json::to_value(&resolved).map_err(|e| e.to_string())?;
