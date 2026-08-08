@@ -293,24 +293,20 @@ mod tests {
         let link_source = &schema["$defs"]["Link"]["properties"]["s"];
         assert_eq!(link_source["minItems"], 1, "schema: {schema}");
 
-        // The source sentence's `text` is never requested from the LLM: it's
-        // just the original input echoed back, so it's reconstructed
-        // server-side from `source.segments` instead. `target.text` (the
-        // generated translation) is genuinely new information and stays
-        // required.
-        let source_ref = schema["properties"]["s"]["$ref"]
+        // In wire_v3, `s` is a 2D array of strings (words → segment strings),
+        // `t` $refs TargetSentence (x: string, w: 2D array of strings),
+        // and `l` is an array of Links.
+        let s_type = schema["properties"]["s"]["type"]
             .as_str()
-            .expect("source should $ref a schema def");
-        assert!(source_ref.ends_with("/SourceSentence"), "schema: {schema}");
-        let source_props = &schema["$defs"]["SourceSentence"]["properties"];
-        assert!(source_props.get("text").is_none(), "schema: {schema}");
-        assert!(source_props.get("segments").is_some(), "schema: {schema}");
+            .expect("s should be an array");
+        assert_eq!(s_type, "array", "schema: {schema}");
 
         let target_ref = schema["properties"]["t"]["$ref"]
             .as_str()
-            .expect("target should $ref a schema def");
-        assert!(target_ref.ends_with("/AlignedSentence"), "schema: {schema}");
-        let target_props = &schema["$defs"]["AlignedSentence"]["properties"];
-        assert!(target_props.get("text").is_some(), "schema: {schema}");
+            .expect("t should $ref a schema def");
+        assert!(target_ref.ends_with("/TargetSentence"), "schema: {schema}");
+        let target_props = &schema["$defs"]["TargetSentence"]["properties"];
+        assert!(target_props.get("x").is_some(), "schema: {schema}");
+        assert!(target_props.get("w").is_some(), "schema: {schema}");
     }
 }
