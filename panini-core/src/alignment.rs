@@ -770,10 +770,12 @@ pub mod wire_v2 {
         words
             .iter()
             .flat_map(|word| {
-                word.iter().enumerate().map(|(i, surface)| wire::AlignedSegment {
-                    surface: surface.clone(),
-                    starts_new_token: i == 0,
-                })
+                word.iter()
+                    .enumerate()
+                    .map(|(i, surface)| wire::AlignedSegment {
+                        surface: surface.clone(),
+                        starts_new_token: i == 0,
+                    })
             })
             .collect()
     }
