@@ -794,6 +794,181 @@ pub mod wire_v2 {
     }
 }
 
+// ─── LLM wire format v3 (uniform refs) ────────────────────────────────────────
+
+/// Same compact word structure as [`wire_v2`] — sentences as arrays of words,
+/// words as arrays of segment strings — but with **uniform** segment
+/// references: every ref is `{"s": text, "o": occurrence}`, even when the
+/// surface is unique (in that case `o` is always 1).
+///
+/// Rationale: [`wire_v2`]'s `SegRef` is an untagged enum — `"ę"` when unique,
+/// `{"s": "ę", "o": 1}` when ambiguous. The LLM must decide *during
+/// generation* which form to emit, based on whether the segment text is unique
+/// among its sentence's segments. Empirically, this conditional serialization
+/// causes 40% of v2 failures (6/15 probe fixtures): the model emits a plain
+/// string for an ambiguous surface. Making the shape uniform eliminates this
+/// failure mode entirely at a marginal token cost (~4 tokens per unique ref).
+///
+/// [`AlignedTranslation::resolve`](wire_v3::AlignedTranslation::resolve)
+/// lowers to [`wire`] and delegates, sharing all validation and error messages
+/// with v1 and v2.
+pub mod wire_v3 {
+    use serde::{Deserialize, Serialize};
+
+    use super::wire;
+
+    /// Reference to one segment of a sentence, by its surface text and
+    /// occurrence position. Always an object — no conditional string/object
+    /// choice.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct SegRef {
+        /// The referenced segment's text, copied exactly as it appears in
+        /// that sentence's words (case-sensitive) — not the whole word, not
+        /// a normalized form.
+        pub s: String,
+        /// 1-based position among this sentence's segments that have exactly
+        /// this text, counted in reading order. Use 1 when the surface is
+        /// unique.
+        pub o: u32,
+    }
+
+    /// One correspondence between the two sentences. Many-to-many: either
+    /// side may hold several segment references (discontinuous units like
+    /// French "ne … pas" go in ONE link). Link ONLY segments that genuinely
+    /// correspond in meaning or function; a segment with no counterpart in
+    /// the other sentence appears in no link at all — never force a
+    /// correspondence.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct Link {
+        /// References to the source-sentence segments in this correspondence.
+        #[schemars(length(min = 1))]
+        pub s: Vec<SegRef>,
+        /// References to the target-sentence segments in this correspondence.
+        #[schemars(length(min = 1))]
+        pub t: Vec<SegRef>,
+    }
+
+    /// The translation, split into words and segments.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct TargetSentence {
+        /// The translated sentence exactly as displayed, unsegmented.
+        pub x: String,
+        /// The words of `x`, in reading order. Each word is the array of its
+        /// segments: `["plaży"]` for a whole word, `["chc", "ę"]` when
+        /// sub-word units align separately (agglutinative affixes, clitics,
+        /// fused plurals — the stem is a segment too). Segments concatenate
+        /// to the word exactly as written in `x` — never include whitespace,
+        /// never merge two whitespace-separated words into one array. Each
+        /// punctuation mark is its own one-segment word, usually in no link.
+        pub w: Vec<Vec<String>>,
+    }
+
+    /// A sentence aligned with its translation, segment by segment.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedTranslation {
+        /// The words of the source sentence (the sentence being analyzed),
+        /// in reading order. Each word is the array of its segments:
+        /// `["plaży"]` for a whole word, `["d'", "eau"]` when sub-word units
+        /// align separately (agglutinative affixes, clitics, fused plurals —
+        /// the stem is a segment too). Segments concatenate to the word
+        /// exactly as written — no added hyphens, no normalization, never
+        /// any whitespace. Each punctuation mark is its own one-segment
+        /// word. Every non-whitespace character of the source sentence must
+        /// be covered exactly once.
+        pub s: Vec<Vec<String>>,
+        /// The translation, in the learner's UI language.
+        pub t: TargetSentence,
+        /// Word-by-word literal rendering of the source sentence in the
+        /// target language, exposing the source's structure the way "pomme
+        /// de terre" is literally "apple of earth". Follow the source's own
+        /// word order and morphology. Null when it would read the same as
+        /// `t.x`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub lit: Option<String>,
+        /// Many-to-many correspondences between source and target segments.
+        pub l: Vec<Link>,
+    }
+
+    impl AlignedTranslation {
+        /// Validates the compact structure and resolves it into the
+        /// internal, id/token/span-addressed [`super::AlignedTranslation`]
+        /// by lowering to the [`wire`] shape and delegating to
+        /// [`wire::AlignedTranslation::resolve`] — ids, token indices, link
+        /// resolution (occurrence fallback included) and character spans are
+        /// all shared with v1 and v2.
+        ///
+        /// # Errors
+        /// Returns the newline-joined list of violations, written for the
+        /// LLM self-correction retry — every problem is reported at once.
+        pub fn resolve(&self) -> Result<super::AlignedTranslation, String> {
+            let mut errors = Vec::new();
+            check_words(&self.s, "source", &mut errors);
+            check_words(&self.t.w, "target", &mut errors);
+            if !errors.is_empty() {
+                return Err(errors.join("\n"));
+            }
+            self.lower().resolve()
+        }
+
+        /// Lowers the compact shape to the v1 wire shape: the first segment
+        /// of each word starts a token, every other segment continues it.
+        fn lower(&self) -> wire::AlignedTranslation {
+            wire::AlignedTranslation {
+                source: wire::SourceSentence {
+                    segments: lower_words(&self.s),
+                },
+                target: wire::AlignedSentence {
+                    text: self.t.x.clone(),
+                    segments: lower_words(&self.t.w),
+                },
+                literal_translation: self.lit.clone(),
+                links: self
+                    .l
+                    .iter()
+                    .map(|link| wire::AlignmentLink {
+                        source: link.s.iter().map(lower_ref).collect(),
+                        target: link.t.iter().map(lower_ref).collect(),
+                    })
+                    .collect(),
+            }
+        }
+    }
+
+    /// Rejects empty word arrays — they would silently vanish in
+    /// [`lower_words`]' flattening and shift every word boundary after them.
+    fn check_words(words: &[Vec<String>], side: &str, errors: &mut Vec<String>) {
+        for (i, word) in words.iter().enumerate() {
+            if word.is_empty() {
+                errors.push(format!(
+                    "{side}: word {i} is an empty array — each word is a non-empty array of \
+                     segment strings"
+                ));
+            }
+        }
+    }
+
+    fn lower_words(words: &[Vec<String>]) -> Vec<wire::AlignedSegment> {
+        words
+            .iter()
+            .flat_map(|word| {
+                word.iter()
+                    .enumerate()
+                    .map(|(i, surface)| wire::AlignedSegment {
+                        surface: surface.clone(),
+                        starts_new_token: i == 0,
+                    })
+            })
+            .collect()
+    }
+
+    fn lower_ref(r: &SegRef) -> wire::SegmentRef {
+        wire::SegmentRef {
+            surface: r.s.clone(),
+            occurrence: Some(r.o),
+        }
+    }
+}
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 #[cfg(test)]
@@ -1549,5 +1724,183 @@ mod tests {
         let out = serde_json::to_value(&link).expect("should serialize");
         assert_eq!(out["s"][0], serde_json::json!("plaży"));
         assert_eq!(out["t"][0], serde_json::json!({ "s": "la", "o": 2 }));
+    }
+
+    // ── Wire format v3 (uniform refs) ──
+
+    fn v3ref(surface: &str, o: u32) -> wire_v3::SegRef {
+        wire_v3::SegRef {
+            s: surface.to_string(),
+            o,
+        }
+    }
+
+    fn v3link(s: Vec<wire_v3::SegRef>, t: Vec<wire_v3::SegRef>) -> wire_v3::Link {
+        wire_v3::Link { s, t }
+    }
+
+    /// Turkish → French, the exact sentence of [`wire_demo`] in v3 form.
+    fn v3_demo() -> wire_v3::AlignedTranslation {
+        wire_v3::AlignedTranslation {
+            s: vec![w2(&["Ev", "ler", "im", "de"]), w2(&["kal", "ıyor", "um"])],
+            t: wire_v3::TargetSentence {
+                x: "Je reste dans mes maisons".to_string(),
+                w: vec![
+                    w2(&["Je"]),
+                    w2(&["reste"]),
+                    w2(&["dans"]),
+                    w2(&["mes"]),
+                    w2(&["maison", "s"]),
+                ],
+            },
+            lit: Some("dans mes maisons je-reste".to_string()),
+            l: vec![
+                v3link(vec![v3ref("Ev", 1)], vec![v3ref("maison", 1)]),
+                v3link(vec![v3ref("ler", 1)], vec![v3ref("s", 1)]),
+                v3link(vec![v3ref("im", 1)], vec![v3ref("mes", 1)]),
+                v3link(vec![v3ref("de", 1)], vec![v3ref("dans", 1)]),
+                v3link(vec![v3ref("kal", 1)], vec![v3ref("reste", 1)]),
+                v3link(vec![v3ref("um", 1)], vec![v3ref("Je", 1)]),
+            ],
+        }
+    }
+
+    #[test]
+    fn v3_resolves_identically_to_v1_and_v2() {
+        let from_v3 = v3_demo().resolve().expect("v3 demo should resolve");
+        let from_v2 = v2_demo().resolve().expect("v2 demo should resolve");
+        let from_v1 = wire_demo().resolve().expect("v1 demo should resolve");
+        assert_eq!(from_v3, from_v2);
+        assert_eq!(from_v3, from_v1);
+    }
+
+    #[test]
+    fn v3_repeated_surface_resolves_via_occurrence() {
+        // "Lubię kawę" — 'ę' appears twice.
+        let a = wire_v3::AlignedTranslation {
+            s: vec![w2(&["Lubi", "ę"]), w2(&["kaw", "ę"]), w2(&["."])],
+            t: wire_v3::TargetSentence {
+                x: "I like coffee.".to_string(),
+                w: vec![w2(&["I"]), w2(&["like"]), w2(&["coffee"]), w2(&["."])],
+            },
+            lit: None,
+            l: vec![
+                v3link(vec![v3ref("Lubi", 1)], vec![v3ref("like", 1)]),
+                v3link(vec![v3ref("ę", 1)], vec![v3ref("I", 1)]),
+                v3link(vec![v3ref("kaw", 1)], vec![v3ref("coffee", 1)]),
+            ],
+        };
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links[1].source, vec![1]); // first 'ę'
+    }
+
+    #[test]
+    fn v3_mwe_with_repeated_fragmented_surfaces() {
+        // Same pommes de terre + pommes scenario as v2.
+        let a = wire_v3::AlignedTranslation {
+            s: vec![
+                w2(&["Je"]),
+                w2(&["mange"]),
+                w2(&["des"]),
+                w2(&["pomme", "s"]),
+                w2(&["de"]),
+                w2(&["terre"]),
+                w2(&["et"]),
+                w2(&["des"]),
+                w2(&["pomme", "s"]),
+            ],
+            t: wire_v3::TargetSentence {
+                x: "I eat potatoes and apples".to_string(),
+                w: vec![
+                    w2(&["I"]),
+                    w2(&["eat"]),
+                    w2(&["potato", "es"]),
+                    w2(&["and"]),
+                    w2(&["apple", "s"]),
+                ],
+            },
+            lit: Some("I eat some apples of earth and some apples".to_string()),
+            l: vec![
+                v3link(vec![v3ref("Je", 1)], vec![v3ref("I", 1)]),
+                v3link(vec![v3ref("mange", 1)], vec![v3ref("eat", 1)]),
+                v3link(
+                    vec![v3ref("pomme", 1), v3ref("de", 1), v3ref("terre", 1)],
+                    vec![v3ref("potato", 1)],
+                ),
+                v3link(vec![v3ref("s", 1)], vec![v3ref("es", 1)]),
+                v3link(vec![v3ref("et", 1)], vec![v3ref("and", 1)]),
+                v3link(vec![v3ref("pomme", 2)], vec![v3ref("apple", 1)]),
+                v3link(vec![v3ref("s", 2)], vec![v3ref("s", 1)]),
+            ],
+        };
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links[2].source, vec![3, 5, 6]); // pomme + de + terre
+        assert_eq!(resolved.links[5].source, vec![9]); // second pomme
+    }
+
+    #[test]
+    fn v3_empty_word_is_rejected() {
+        let mut a = v3_demo();
+        a.s.push(Vec::new());
+        let err = a.resolve().unwrap_err();
+        assert!(err.contains("word 2 is an empty array"), "got: {err}");
+    }
+
+    #[test]
+    fn v3_segref_serialization_is_always_object() {
+        // Every ref serializes as {"s": ..., "o": ...} — no bare strings.
+        let link = v3link(vec![v3ref("plaży", 1)], vec![v3ref("la", 2)]);
+        let out = serde_json::to_value(&link).expect("should serialize");
+        assert_eq!(out["s"][0], serde_json::json!({ "s": "plaży", "o": 1 }));
+        assert_eq!(out["t"][0], serde_json::json!({ "s": "la", "o": 2 }));
+    }
+
+    #[test]
+    fn v3_llm_json_resolves() {
+        // The shape the model would emit: all refs are {s, o} objects.
+        let json = serde_json::json!({
+            "s": [["Lubi", "ę"], ["kaw", "ę"], ["."]],
+            "t": {
+                "x": "I like coffee.",
+                "w": [["I"], ["like"], ["coffee"], ["."]]
+            },
+            "l": [
+                { "s": [{"s": "Lubi", "o": 1}], "t": [{"s": "like", "o": 1}] },
+                { "s": [{"s": "ę", "o": 1}], "t": [{"s": "I", "o": 1}] },
+                { "s": [{"s": "kaw", "o": 1}], "t": [{"s": "coffee", "o": 1}] }
+            ]
+        });
+        let a: wire_v3::AlignedTranslation =
+            serde_json::from_value(json).expect("LLM-shaped v3 JSON should deserialize");
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links[1].source, vec![1]); // first 'ę'
+        assert!(resolved.literal_translation.is_none());
+        let tokens: Vec<u32> = resolved.source.segments.iter().map(|s| s.token).collect();
+        assert_eq!(tokens, vec![0, 0, 1, 1, 2]);
+    }
+
+    #[test]
+    fn v3_case_insensitive_occurrence_fallback_is_shared() {
+        let a = wire_v3::AlignedTranslation {
+            s: vec![w2(&["Pies"]), w2(&["."])],
+            t: wire_v3::TargetSentence {
+                x: "The dog and the cat and the bird.".to_string(),
+                w: vec![
+                    w2(&["The"]),
+                    w2(&["dog"]),
+                    w2(&["and"]),
+                    w2(&["the"]),
+                    w2(&["cat"]),
+                    w2(&["and"]),
+                    w2(&["the"]),
+                    w2(&["bird"]),
+                    w2(&["."]),
+                ],
+            },
+            lit: None,
+            l: vec![v3link(vec![v3ref("Pies", 1)], vec![v3ref("the", 3)])],
+        };
+        let resolved = a.resolve().expect("fallback should resolve");
+        assert_eq!(resolved.links[0].target, vec![6]);
     }
 }
