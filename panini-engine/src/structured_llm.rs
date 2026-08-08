@@ -132,7 +132,8 @@ where
                 .max_tokens(u64::from(request.max_tokens))
                 .output_schema(request.schema.clone())
                 .additional_params(serde_json::json!({
-                    "user": request.user_id
+                    "user": request.user_id,
+                    "panglotive_call_type": "extraction_morphology"
                 }));
 
             if let Some(retry) = request.retry_context {
