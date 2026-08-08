@@ -202,7 +202,11 @@ async fn call_llm<M: CompletionModel>(
         .completion_request(user_prompt.as_str())
         .preamble(system_prompt)
         .temperature(f64::from(temperature))
-        .max_tokens(8192u64);
+        .max_tokens(8192u64)
+        .additional_params(serde_json::json!({
+            "user": "panini_cli",
+            "panglotive_call_type": "panini_cli"
+        }));
 
     let response = builder.send().await?;
 
