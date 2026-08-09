@@ -22,12 +22,13 @@ use panini_core::traits::{
 )]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishCase {
-    Nominative, // Yalın hâl
-    Accusative, // Belirtme hâli
-    Dative,     // Yönelme hâli
-    Locative,   // Bulunma hâli
-    Ablative,   // Ayrılma hâli
-    Genitive,   // Tamlayan hâli
+    Nominative,   // Yalın hâl
+    Accusative,   // Belirtme hâli
+    Dative,       // Yönelme hâli
+    Locative,     // Bulunma hâli
+    Ablative,     // Ayrılma hâli
+    Genitive,     // Tamlayan hâli
+    Instrumental, // Vasıta hâli (-ile / -la / -le)
 }
 
 #[derive(
@@ -343,6 +344,13 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         base_form: "(n)In",
         functions: &[F::Case {
             value: TurkishCase::Genitive,
+        }],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+    },
+    MorphemeDefinition {
+        base_form: "(y)lA",
+        functions: &[F::Case {
+            value: TurkishCase::Instrumental,
         }],
         applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
     },
@@ -776,7 +784,7 @@ impl LinguisticDefinition for Turkish {
 
     fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: All extracted words must be in their dictionary form (e.g., nouns in nominative singular, verbs in infinitive form).\n\
-         2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive) and number (singular, plural) as used in the sentence.\n\
+         2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive, instrumental) and number (singular, plural) as used in the sentence.\n\
          3. For verbs: provide the tense, mood, voice, person, number, and polarity.\n\
          4. For pronouns: provide the grammatical case, number, and person.\n\
          5. Question Particle 'mi': Extract the question particle 'mi' (and its vowel-harmonized variants) as a separate particle."
