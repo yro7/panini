@@ -69,6 +69,7 @@ pub enum TurkishMood {
     Necessitative, // Gereklilik kipi
     Optative,      // İstek kipi
     Conditional,   // Şart kipi
+    Potential,     // Yeterlilik kipi
 }
 
 #[derive(
@@ -588,7 +589,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     MorphemeDefinition {
         base_form: "(y)Abil",
         functions: &[F::Mood {
-            value: TurkishMood::Optative,
+            value: TurkishMood::Potential,
         }],
         applies_to: &[P::Verb],
     },
