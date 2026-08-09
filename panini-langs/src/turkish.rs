@@ -180,8 +180,24 @@ pub enum TurkishDerivation {
 #[serde(rename_all = "snake_case")]
 pub enum TurkishCopula {
     Epistemic,
-    Interrogative,
     Personal,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum TurkishParticle {
+    Interrogative,
 }
 
 // ─── MorphemeFunction wrapper enum ────────────────────────────────────────
@@ -230,6 +246,9 @@ pub enum TurkishMorphemeFunction {
     },
     Copula {
         value: TurkishCopula,
+    },
+    Particle {
+        value: TurkishParticle,
     },
 }
 
@@ -372,6 +391,9 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             },
             F::Mood {
                 value: TurkishMood::Optative,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Adverbial,
             },
         ],
         applies_to: &[P::Noun, P::Pronoun, P::ProperNoun, P::Verb],
@@ -542,9 +564,14 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(y)mIş",
-        functions: &[F::Tense {
-            value: TurkishTense::Evidential,
-        }],
+        functions: &[
+            F::Tense {
+                value: TurkishTense::Evidential,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Participle,
+            },
+        ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
@@ -556,16 +583,26 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(y)AcAk",
-        functions: &[F::Tense {
-            value: TurkishTense::Future,
-        }],
+        functions: &[
+            F::Tense {
+                value: TurkishTense::Future,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Participle,
+            },
+        ],
         applies_to: &[P::Verb],
     },
     MorphemeDefinition {
         base_form: "(A/I)r",
-        functions: &[F::Tense {
-            value: TurkishTense::Aorist,
-        }],
+        functions: &[
+            F::Tense {
+                value: TurkishTense::Aorist,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Participle,
+            },
+        ],
         applies_to: &[P::Verb],
     },
     MorphemeDefinition {
@@ -583,6 +620,9 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             },
             F::Tense {
                 value: TurkishTense::Aorist,
+            },
+            F::Derivation {
+                value: TurkishDerivation::Participle,
             },
         ],
         applies_to: &[P::Verb],
@@ -666,8 +706,8 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     // === Question Particle / Interrogative Copula ===
     MorphemeDefinition {
         base_form: "mI",
-        functions: &[F::Copula {
-            value: TurkishCopula::Interrogative,
+        functions: &[F::Particle {
+            value: TurkishParticle::Interrogative,
         }],
         applies_to: &[P::Particle, P::Verb, P::Noun, P::Adjective],
     },
@@ -792,6 +832,13 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             value: TurkishDerivation::Participle,
         }],
         applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "CAsInA",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Noun, P::Adjective, P::Verb],
     },
 ];
 
