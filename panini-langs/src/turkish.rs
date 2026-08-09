@@ -67,8 +67,9 @@ pub enum TurkishCase {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum TurkishTense {
-    Past,    // Geçmiş zaman
-    Present, // Şimdiki zaman
+    PastDefinite,
+    Evidential,
+    PresentProgressive,
     Future,  // Gelecek zaman
     Aorist,  // Geniş zaman
 }
@@ -161,6 +162,7 @@ pub enum TurkishDerivation {
     Adverbial,
     Relational,
     Diminutive,
+    Participle,
 }
 
 #[derive(
@@ -266,6 +268,7 @@ impl TurkishMorphemeFunction {
 pub enum TurkishMorphology {
     Adjective {
         lemma: String,
+        person: Option<Person>,
     },
     Adposition {
         lemma: String,
@@ -287,6 +290,7 @@ pub enum TurkishMorphology {
         case: TurkishCase,
         number: BinaryNumber,
         possessive: Option<TurkishPossessive>,
+        person: Option<Person>,
     },
     Numeral {
         lemma: String,
@@ -305,6 +309,7 @@ pub enum TurkishMorphology {
         case: TurkishCase,
         number: BinaryNumber,
         possessive: Option<TurkishPossessive>,
+        person: Option<Person>,
     },
     Punctuation {
         lemma: String,
@@ -317,11 +322,12 @@ pub enum TurkishMorphology {
     },
     Verb {
         lemma: String,
-        tense: TurkishTense,
-        mood: TurkishMood,
-        voice: TurkishVoice,
-        person: Person,
-        number: BinaryNumber,
+        tense: Option<TurkishTense>,
+        compound_tense: Option<TurkishTense>,
+        mood: Option<TurkishMood>,
+        voice: Option<TurkishVoice>,
+        person: Option<Person>,
+        number: Option<BinaryNumber>,
         polarity: TurkishPolarity,
     },
     Other {
@@ -390,7 +396,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
                 number: BinaryNumber::Plural,
             },
         ],
-        applies_to: &[P::Noun, P::Pronoun, P::Verb, P::ProperNoun],
+        applies_to: &[P::Noun, P::Pronoun, P::Verb, P::ProperNoun, P::Adjective],
     },
     // === Possessive & Type II Agreement ===
     MorphemeDefinition {
@@ -525,23 +531,23 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     // === Tense / Aspect ===
     MorphemeDefinition {
-        base_form: "DI",
+        base_form: "(y)DI",
         functions: &[F::Tense {
-            value: TurkishTense::Past,
+            value: TurkishTense::PastDefinite,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
-        base_form: "mIş",
+        base_form: "(y)mIş",
         functions: &[F::Tense {
-            value: TurkishTense::Past,
+            value: TurkishTense::Evidential,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "(I)yor",
         functions: &[F::Tense {
-            value: TurkishTense::Present,
+            value: TurkishTense::PresentProgressive,
         }],
         applies_to: &[P::Verb],
     },
@@ -565,7 +571,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         functions: &[F::Mood {
             value: TurkishMood::Conditional,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "mAlI",
@@ -588,7 +594,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             person: Person::First,
             number: BinaryNumber::Singular,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "sIn",
@@ -596,7 +602,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             person: Person::Second,
             number: BinaryNumber::Singular,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "(y)Iz",
@@ -604,7 +610,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             person: Person::First,
             number: BinaryNumber::Plural,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "(I)k",
@@ -620,7 +626,7 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             person: Person::Second,
             number: BinaryNumber::Plural,
         }],
-        applies_to: &[P::Verb],
+        applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     // === Question Particle / Interrogative Copula ===
     MorphemeDefinition {
@@ -717,6 +723,13 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         }],
         applies_to: &[P::Noun, P::Adjective],
     },
+    MorphemeDefinition {
+        base_form: "(y)An",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Participle,
+        }],
+        applies_to: &[P::Verb],
+    },
 ];
 
 // ─── Agglutinative implementation ────────────────────────────────────────────
@@ -804,8 +817,8 @@ impl LinguisticDefinition for Turkish {
 
     fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: All extracted words must be in their dictionary form (e.g., nouns in nominative singular, verbs in infinitive form).\n\
-         2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive, instrumental), number (singular, plural), and possessive if present (first_singular, second_singular, third_singular, first_plural, second_plural, third_plural).\n\
-         3. For verbs: provide the tense, mood, voice, person, number, and polarity.\n\
+         2. For nouns and proper nouns: provide the grammatical case, number, possessive if present, and person if copula applies.\n\
+         3. For verbs: provide the tense, compound_tense, mood, voice, person, number, and polarity.\n\
          4. For pronouns: provide the grammatical case, number, and person.\n\
          5. Question Particle 'mi': Extract the question particle 'mi' (and its vowel-harmonized variants) as a separate particle."
     }
