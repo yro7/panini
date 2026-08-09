@@ -181,6 +181,7 @@ pub enum TurkishDerivation {
 pub enum TurkishCopula {
     Epistemic,
     Interrogative,
+    Personal,
 }
 
 // ─── MorphemeFunction wrapper enum ────────────────────────────────────────
@@ -365,10 +366,15 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(y)A",
-        functions: &[F::Case {
-            value: TurkishCase::Dative,
-        }],
-        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun],
+        functions: &[
+            F::Case {
+                value: TurkishCase::Dative,
+            },
+            F::Mood {
+                value: TurkishMood::Optative,
+            },
+        ],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun, P::Verb],
     },
     MorphemeDefinition {
         base_form: "(n)In",
@@ -410,8 +416,11 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
                 person: Person::First,
                 number: BinaryNumber::Singular,
             },
+            F::Case {
+                value: TurkishCase::Genitive,
+            },
         ],
-        applies_to: &[P::Noun, P::ProperNoun, P::Verb],
+        applies_to: &[P::Noun, P::Pronoun, P::ProperNoun, P::Verb],
     },
     MorphemeDefinition {
         base_form: "(I)n",
@@ -423,6 +432,12 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             F::Agreement {
                 person: Person::Second,
                 number: BinaryNumber::Singular,
+            },
+            F::Voice {
+                value: TurkishVoice::Reflexive,
+            },
+            F::Voice {
+                value: TurkishVoice::Passive,
             },
         ],
         applies_to: &[P::Noun, P::ProperNoun, P::Verb],
@@ -484,18 +499,6 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         functions: &[F::Voice {
             value: TurkishVoice::Passive,
         }],
-        applies_to: &[P::Verb],
-    },
-    MorphemeDefinition {
-        base_form: "(I)n",
-        functions: &[
-            F::Voice {
-                value: TurkishVoice::Reflexive,
-            },
-            F::Voice {
-                value: TurkishVoice::Passive,
-            },
-        ],
         applies_to: &[P::Verb],
     },
     MorphemeDefinition {
@@ -565,6 +568,25 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         }],
         applies_to: &[P::Verb],
     },
+    MorphemeDefinition {
+        base_form: "z",
+        functions: &[F::Tense {
+            value: TurkishTense::Aorist,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "mAz",
+        functions: &[
+            F::Polarity {
+                value: TurkishPolarity::Negative,
+            },
+            F::Tense {
+                value: TurkishTense::Aorist,
+            },
+        ],
+        applies_to: &[P::Verb],
+    },
     // === Mood ===
     MorphemeDefinition {
         base_form: "(y)sA",
@@ -580,36 +602,44 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         }],
         applies_to: &[P::Verb],
     },
-    MorphemeDefinition {
-        base_form: "(y)A",
-        functions: &[F::Mood {
-            value: TurkishMood::Optative,
-        }],
-        applies_to: &[P::Verb],
-    },
     // === Agreement ===
     MorphemeDefinition {
         base_form: "(y)Im",
-        functions: &[F::Agreement {
-            person: Person::First,
-            number: BinaryNumber::Singular,
-        }],
+        functions: &[
+            F::Agreement {
+                person: Person::First,
+                number: BinaryNumber::Singular,
+            },
+            F::Copula {
+                value: TurkishCopula::Personal,
+            },
+        ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "sIn",
-        functions: &[F::Agreement {
-            person: Person::Second,
-            number: BinaryNumber::Singular,
-        }],
+        functions: &[
+            F::Agreement {
+                person: Person::Second,
+                number: BinaryNumber::Singular,
+            },
+            F::Copula {
+                value: TurkishCopula::Personal,
+            },
+        ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
         base_form: "(y)Iz",
-        functions: &[F::Agreement {
-            person: Person::First,
-            number: BinaryNumber::Plural,
-        }],
+        functions: &[
+            F::Agreement {
+                person: Person::First,
+                number: BinaryNumber::Plural,
+            },
+            F::Copula {
+                value: TurkishCopula::Personal,
+            },
+        ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     MorphemeDefinition {
@@ -622,10 +652,15 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "sInIz",
-        functions: &[F::Agreement {
-            person: Person::Second,
-            number: BinaryNumber::Plural,
-        }],
+        functions: &[
+            F::Agreement {
+                person: Person::Second,
+                number: BinaryNumber::Plural,
+            },
+            F::Copula {
+                value: TurkishCopula::Personal,
+            },
+        ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
     },
     // === Question Particle / Interrogative Copula ===
@@ -711,6 +746,34 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(y)ArAk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(y)IncA",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "DIkçA",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "mAdAn",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "(y)AlI",
         functions: &[F::Derivation {
             value: TurkishDerivation::Adverbial,
         }],
