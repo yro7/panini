@@ -70,8 +70,8 @@ pub enum TurkishTense {
     PastDefinite,
     Evidential,
     PresentProgressive,
-    Future,  // Gelecek zaman
-    Aorist,  // Geniş zaman
+    Future, // Gelecek zaman
+    Aorist, // Geniş zaman
 }
 
 #[derive(
@@ -791,7 +791,6 @@ impl LinguisticDefinition for Turkish {
     const ISO_LANG: IsoLang = IsoLang::Tur;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
         TurkishMorphology::PIVOT_CASE,
-        TurkishMorphology::PIVOT_TENSE,
         TurkishMorphology::PIVOT_POLARITY,
     ];
     const MORPHEME_PIVOTS: &'static [panini_core::pivot::PivotField<Self::MorphemeFunction>] = &[

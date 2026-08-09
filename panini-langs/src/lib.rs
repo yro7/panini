@@ -81,7 +81,7 @@ mod pivot_tests {
             value: turkish::TurkishPolarity::Negative,
         };
         let tense = turkish::TurkishMorphemeFunction::Tense {
-            value: turkish::TurkishTense::Past,
+            value: turkish::TurkishTense::PastDefinite,
         };
 
         assert_eq!(
