@@ -21,6 +21,28 @@ use panini_core::traits::{
     panini_macro::ClosedValues,
 )]
 #[serde(rename_all = "snake_case")]
+pub enum TurkishPossessive {
+    FirstSingular,
+    SecondSingular,
+    ThirdSingular,
+    FirstPlural,
+    SecondPlural,
+    ThirdPlural,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
+#[serde(rename_all = "snake_case")]
 pub enum TurkishCase {
     Nominative,   // Yalın hâl
     Accusative,   // Belirtme hâli
@@ -264,6 +286,7 @@ pub enum TurkishMorphology {
         lemma: String,
         case: TurkishCase,
         number: BinaryNumber,
+        possessive: Option<TurkishPossessive>,
     },
     Numeral {
         lemma: String,
@@ -281,6 +304,7 @@ pub enum TurkishMorphology {
         lemma: String,
         case: TurkishCase,
         number: BinaryNumber,
+        possessive: Option<TurkishPossessive>,
     },
     Punctuation {
         lemma: String,
@@ -755,11 +779,7 @@ impl LinguisticDefinition for Turkish {
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
         TurkishMorphology::PIVOT_CASE,
         TurkishMorphology::PIVOT_TENSE,
-        TurkishMorphology::PIVOT_MOOD,
-        TurkishMorphology::PIVOT_VOICE,
         TurkishMorphology::PIVOT_POLARITY,
-        TurkishMorphology::PIVOT_NUMBER,
-        TurkishMorphology::PIVOT_PERSON,
     ];
     const MORPHEME_PIVOTS: &'static [panini_core::pivot::PivotField<Self::MorphemeFunction>] = &[
         TurkishMorphemeFunction::PIVOT_POLARITY,
@@ -784,7 +804,7 @@ impl LinguisticDefinition for Turkish {
 
     fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: All extracted words must be in their dictionary form (e.g., nouns in nominative singular, verbs in infinitive form).\n\
-         2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive, instrumental) and number (singular, plural) as used in the sentence.\n\
+         2. For nouns and proper nouns: provide the grammatical case (nominative, accusative, dative, locative, ablative, genitive, instrumental), number (singular, plural), and possessive if present (first_singular, second_singular, third_singular, first_plural, second_plural, third_plural).\n\
          3. For verbs: provide the tense, mood, voice, person, number, and polarity.\n\
          4. For pronouns: provide the grammatical case, number, and person.\n\
          5. Question Particle 'mi': Extract the question particle 'mi' (and its vowel-harmonized variants) as a separate particle."
