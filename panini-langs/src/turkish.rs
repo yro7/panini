@@ -153,6 +153,7 @@ pub enum TurkishDerivation {
 #[serde(rename_all = "snake_case")]
 pub enum TurkishCopula {
     Epistemic,
+    Interrogative,
 }
 
 // ─── MorphemeFunction wrapper enum ────────────────────────────────────────
@@ -357,22 +358,34 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         ],
         applies_to: &[P::Noun, P::Pronoun, P::Verb, P::ProperNoun],
     },
-    // === Possessive ===
+    // === Possessive & Type II Agreement ===
     MorphemeDefinition {
         base_form: "(I)m",
-        functions: &[F::Possessive {
-            person: Person::First,
-            number: BinaryNumber::Singular,
-        }],
-        applies_to: &[P::Noun, P::ProperNoun],
+        functions: &[
+            F::Possessive {
+                person: Person::First,
+                number: BinaryNumber::Singular,
+            },
+            F::Agreement {
+                person: Person::First,
+                number: BinaryNumber::Singular,
+            },
+        ],
+        applies_to: &[P::Noun, P::ProperNoun, P::Verb],
     },
     MorphemeDefinition {
         base_form: "(I)n",
-        functions: &[F::Possessive {
-            person: Person::Second,
-            number: BinaryNumber::Singular,
-        }],
-        applies_to: &[P::Noun, P::ProperNoun],
+        functions: &[
+            F::Possessive {
+                person: Person::Second,
+                number: BinaryNumber::Singular,
+            },
+            F::Agreement {
+                person: Person::Second,
+                number: BinaryNumber::Singular,
+            },
+        ],
+        applies_to: &[P::Noun, P::ProperNoun, P::Verb],
     },
     MorphemeDefinition {
         base_form: "(s)I",
@@ -392,11 +405,17 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(I)nIz",
-        functions: &[F::Possessive {
-            person: Person::Second,
-            number: BinaryNumber::Plural,
-        }],
-        applies_to: &[P::Noun, P::ProperNoun],
+        functions: &[
+            F::Possessive {
+                person: Person::Second,
+                number: BinaryNumber::Plural,
+            },
+            F::Agreement {
+                person: Person::Second,
+                number: BinaryNumber::Plural,
+            },
+        ],
+        applies_to: &[P::Noun, P::ProperNoun, P::Verb],
     },
     MorphemeDefinition {
         base_form: "lArI",
@@ -429,9 +448,14 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     },
     MorphemeDefinition {
         base_form: "(I)n",
-        functions: &[F::Voice {
-            value: TurkishVoice::Reflexive,
-        }],
+        functions: &[
+            F::Voice {
+                value: TurkishVoice::Reflexive,
+            },
+            F::Voice {
+                value: TurkishVoice::Passive,
+            },
+        ],
         applies_to: &[P::Verb],
     },
     MorphemeDefinition {
@@ -457,6 +481,13 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             },
         ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
+    },
+    MorphemeDefinition {
+        base_form: "t",
+        functions: &[F::Voice {
+            value: TurkishVoice::Causative,
+        }],
+        applies_to: &[P::Verb],
     },
     // === Tense / Aspect ===
     MorphemeDefinition {
@@ -542,12 +573,28 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         applies_to: &[P::Verb],
     },
     MorphemeDefinition {
+        base_form: "(I)k",
+        functions: &[F::Agreement {
+            person: Person::First,
+            number: BinaryNumber::Plural,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
         base_form: "sInIz",
         functions: &[F::Agreement {
             person: Person::Second,
             number: BinaryNumber::Plural,
         }],
         applies_to: &[P::Verb],
+    },
+    // === Question Particle / Interrogative Copula ===
+    MorphemeDefinition {
+        base_form: "mI",
+        functions: &[F::Copula {
+            value: TurkishCopula::Interrogative,
+        }],
+        applies_to: &[P::Particle, P::Verb, P::Noun, P::Adjective],
     },
     // === Derivation ===
     MorphemeDefinition {
