@@ -136,6 +136,8 @@ pub enum TurkishDerivation {
     Possessional,
     Verbalization,
     Adverbial,
+    Relational,
+    Diminutive,
 }
 
 #[derive(
@@ -661,6 +663,27 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             value: TurkishDerivation::Nominalization,
         }],
         applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "ki",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Relational,
+        }],
+        applies_to: &[P::Noun, P::Adjective, P::Pronoun],
+    },
+    MorphemeDefinition {
+        base_form: "(y)ArAk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "CIk",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Diminutive,
+        }],
+        applies_to: &[P::Noun, P::Adjective],
     },
 ];
 
