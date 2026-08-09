@@ -161,6 +161,23 @@ where
     /// Directives for the LLM explaining how to fill `morpheme_segmentation`.
     fn morpheme_directives(&self) -> String;
 
+    /// Validates the structural integrity of the static morpheme inventory.
+    ///
+    /// # Errors
+    /// Returns an error if any `base_form` appears more than once in the inventory.
+    fn validate_inventory() -> Result<(), String> {
+        let mut seen = std::collections::HashSet::new();
+        for def in Self::morpheme_inventory() {
+            if !seen.insert(def.base_form) {
+                return Err(format!(
+                    "Duplicate morpheme base_form '{}' in morpheme inventory!",
+                    def.base_form
+                ));
+            }
+        }
+        Ok(())
+    }
+
     /// Parse and validate morpheme segmentation from the LLM response.
     ///
     /// # Errors
@@ -170,6 +187,10 @@ where
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<Self::MorphemeFunction>>>,
     ) -> Result<(), String> {
+        if let Err(inv_err) = Self::validate_inventory() {
+            return Err(format!("Invalid language morpheme inventory: {inv_err}"));
+        }
+
         let Some(segs) = segmentation.as_mut() else {
             return Ok(());
         };
