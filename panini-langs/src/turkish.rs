@@ -392,6 +392,11 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             F::Mood {
                 value: TurkishMood::Optative,
             },
+            // Ability stripped of `bil`: the negative potential is -(y)A + -mA
+            // (gel-e-me-m), never -(y)Abil + -mA.
+            F::Mood {
+                value: TurkishMood::Potential,
+            },
             F::Derivation {
                 value: TurkishDerivation::Adverbial,
             },
@@ -554,6 +559,27 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         }],
         applies_to: &[P::Verb],
     },
+    MorphemeDefinition {
+        base_form: "Ir",
+        functions: &[F::Voice {
+            value: TurkishVoice::Causative,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "Ar",
+        functions: &[F::Voice {
+            value: TurkishVoice::Causative,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "It",
+        functions: &[F::Voice {
+            value: TurkishVoice::Causative,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Tense / Aspect ===
     MorphemeDefinition {
         base_form: "(y)DI",
@@ -642,6 +668,15 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         }],
         applies_to: &[P::Verb],
     },
+    // 2nd person plural / polite imperative (gel-in, bekle-y-in); the formal
+    // -(y)InIz is this morpheme followed by `(I)nIz`.
+    MorphemeDefinition {
+        base_form: "(y)In",
+        functions: &[F::Mood {
+            value: TurkishMood::Imperative,
+        }],
+        applies_to: &[P::Verb],
+    },
     // === Agreement ===
     MorphemeDefinition {
         base_form: "(y)Im",
@@ -665,6 +700,10 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             },
             F::Copula {
                 value: TurkishCopula::Personal,
+            },
+            // Homophonous 3rd person imperative: gel-sin, gel-sin-ler.
+            F::Mood {
+                value: TurkishMood::Imperative,
             },
         ],
         applies_to: &[P::Verb, P::Noun, P::Adjective],
@@ -790,6 +829,29 @@ static TURKISH_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
             value: TurkishDerivation::Adverbial,
         }],
         applies_to: &[P::Verb],
+    },
+    // Sequential converb (gel-ip git-ti): carries no tense of its own.
+    MorphemeDefinition {
+        base_form: "(y)Ip",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    MorphemeDefinition {
+        base_form: "mAksIzIn",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Verb],
+    },
+    // Equative / manner -CA: yavaş-ça, ben-ce, Türk-çe, çocuk-ça.
+    MorphemeDefinition {
+        base_form: "CA",
+        functions: &[F::Derivation {
+            value: TurkishDerivation::Adverbial,
+        }],
+        applies_to: &[P::Noun, P::Adjective, P::Adverb, P::Pronoun, P::ProperNoun],
     },
     MorphemeDefinition {
         base_form: "(y)IncA",
