@@ -87,13 +87,23 @@ pub fn compose_batch_schema<L: LinguisticDefinition>(
     schema
 }
 
+/// Drop the schema annotations that strict structured-output modes reject.
+///
+/// Only descends where schemas actually live. The values of `properties` and
+/// `$defs` are keyed by names their author chose, so a field called `title` is
+/// data, not an annotation -- stripping it there would quietly delete the field
+/// from the schema and make every response carrying it fail validation.
 fn strip_schema_metadata(value: &mut serde_json::Value) {
     match value {
         serde_json::Value::Object(obj) => {
             obj.remove("$schema");
             obj.remove("title");
-            for v in obj.values_mut() {
-                strip_schema_metadata(v);
+            for (key, child) in obj.iter_mut() {
+                if key == "properties" || key == "$defs" {
+                    strip_named_schema_map(child);
+                } else {
+                    strip_schema_metadata(child);
+                }
             }
         }
         serde_json::Value::Array(arr) => {
@@ -102,6 +112,15 @@ fn strip_schema_metadata(value: &mut serde_json::Value) {
             }
         }
         _ => {}
+    }
+}
+
+/// Strip a map whose keys are author-chosen names and whose values are schemas.
+fn strip_named_schema_map(value: &mut serde_json::Value) {
+    if let serde_json::Value::Object(entries) = value {
+        for schema in entries.values_mut() {
+            strip_schema_metadata(schema);
+        }
     }
 }
 
@@ -245,7 +264,10 @@ pub fn compose_prompt<L: LinguisticDefinition>(
 mod tests {
     use super::*;
     use panini_core::aggregable::{Aggregable, FieldDescriptor};
-    use panini_core::traits::{IsoLang, MorphologyInfo, Script, TypologicalFeature};
+    use panini_core::traits::{
+        IsoLang, MorphologyCatalog, MorphologyGroupSchema, MorphologyInfo, Script,
+        TypologicalFeature,
+    };
     use serde::{Deserialize, Serialize};
 
     // ── Minimal test language ──────────────────────────────────────────────
@@ -266,6 +288,12 @@ mod tests {
         }
         fn observations(&self) -> Vec<Vec<(String, String)>> {
             vec![vec![]]
+        }
+    }
+
+    impl MorphologyCatalog for TestMorphology {
+        fn group_descriptors() -> Vec<MorphologyGroupSchema> {
+            vec![]
         }
     }
 
@@ -376,6 +404,57 @@ mod tests {
                 .as_array()
                 .unwrap()
                 .contains(&serde_json::json!("alpha"))
+        );
+    }
+
+    /// `title` is a JSON Schema annotation *and* a perfectly ordinary field
+    /// name. Stripping the annotation must not delete the field: a schema that
+    /// silently loses a property rejects every response that includes it, and
+    /// the error blames the model rather than the schema.
+    #[test]
+    fn stripping_annotations_spares_properties_named_title() {
+        #[derive(Debug)]
+        struct RecapComponent;
+        impl<L: LinguisticDefinition> panini_core::component::ComponentRequires<L> for RecapComponent {}
+        impl<L: LinguisticDefinition> AnalysisComponent<L> for RecapComponent {
+            fn name(&self) -> &'static str {
+                "Recap"
+            }
+            fn schema_key(&self) -> &'static str {
+                "recap"
+            }
+            fn schema_fragment(&self, _lang: &L) -> serde_json::Value {
+                serde_json::json!({
+                    "type": "object",
+                    "title": "An annotation that should go",
+                    "properties": {
+                        "title": { "type": "string", "title": "also an annotation" },
+                        "rules": { "type": "array", "items": { "type": "string" } }
+                    }
+                })
+            }
+            fn prompt_fragment(&self, _lang: &L, _ctx: &ComponentContext) -> String {
+                String::new()
+            }
+        }
+
+        let schema = compose_schema(
+            &TestLang,
+            &[&RecapComponent as &dyn AnalysisComponent<TestLang>],
+        );
+        let recap = &schema["properties"]["recap"];
+
+        assert!(
+            recap.get("title").is_none(),
+            "the annotation on the schema itself should be stripped"
+        );
+        assert_eq!(
+            recap["properties"]["title"]["type"], "string",
+            "the property named `title` is data and must survive"
+        );
+        assert!(
+            recap["properties"]["title"].get("title").is_none(),
+            "annotations inside the property's own schema should still be stripped"
         );
     }
 
