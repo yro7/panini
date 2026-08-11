@@ -217,6 +217,7 @@ pub trait LinguisticDefinition {
         + for<'de> Deserialize<'de>
         + schemars::JsonSchema
         + MorphologyInfo
+        + MorphologyCatalog
         + crate::aggregable::Aggregable
         + Send
         + Sync
@@ -235,6 +236,7 @@ pub trait LinguisticDefinition {
         + for<'de> Deserialize<'de>
         + schemars::JsonSchema
         + crate::aggregable::AggregableFields
+        + MorphemeFunctionCatalog
         + Send
         + Sync
         + 'static;
@@ -264,6 +266,19 @@ pub trait LinguisticDefinition {
     /// The English name of the language, auto-derived from `ISO_LANG`.
     fn name(&self) -> &str {
         Self::ISO_LANG.to_name()
+    }
+
+    /// A fingerprint of this definition's value space — every morphology group,
+    /// morpheme function, field name and closed-variant list it can produce.
+    ///
+    /// Derived, never written by hand: it moves the moment the definition gains
+    /// or loses a variant, with nothing for the author of that change to
+    /// remember. See [`crate::lang_digest`] for what a digest can and cannot be
+    /// used for — in short, it detects staleness and never drives a migration.
+    fn lang_digest(&self) -> crate::lang_digest::LanguageDigest {
+        crate::lang_digest::LanguageDigest::compute::<Self::Morphology, Self::MorphemeFunction>(
+            self.iso_code(),
+        )
     }
 
     /// The scripts supported by this language.

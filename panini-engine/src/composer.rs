@@ -245,7 +245,10 @@ pub fn compose_prompt<L: LinguisticDefinition>(
 mod tests {
     use super::*;
     use panini_core::aggregable::{Aggregable, FieldDescriptor};
-    use panini_core::traits::{IsoLang, MorphologyInfo, Script, TypologicalFeature};
+    use panini_core::traits::{
+        IsoLang, MorphologyCatalog, MorphologyGroupSchema, MorphologyInfo, Script,
+        TypologicalFeature,
+    };
     use serde::{Deserialize, Serialize};
 
     // ── Minimal test language ──────────────────────────────────────────────
@@ -266,6 +269,12 @@ mod tests {
         }
         fn observations(&self) -> Vec<Vec<(String, String)>> {
             vec![vec![]]
+        }
+    }
+
+    impl MorphologyCatalog for TestMorphology {
+        fn group_descriptors() -> Vec<MorphologyGroupSchema> {
+            vec![]
         }
     }
 
