@@ -34,6 +34,30 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
     /// The top-level JSON key this component produces (e.g. `"morphology"`).
     fn schema_key(&self) -> &'static str;
 
+    /// The version of this component's **persisted** shape, stamped onto every
+    /// section it produces so readers can dispatch on it.
+    ///
+    /// This versions the section as it looks *after* [`Self::post_process`] —
+    /// what actually reaches storage — not the shape the LLM is asked to emit.
+    /// `TranslationAlignment` and `TranslationAlignmentV2` are the worked
+    /// example: wildly different wire schemas, both resolving to the same
+    /// `AlignedTranslation`, therefore both version 1. Changing how you ask the
+    /// model is not a storage migration.
+    ///
+    /// Bump this whenever the stored JSON changes shape in a way a reader of
+    /// the previous shape would not understand. A bump is a deliberate act: it
+    /// comes with a migration from the previous version, so sections already in
+    /// the database stay readable. Purely additive changes that older readers
+    /// tolerate do not need a bump.
+    ///
+    /// This covers only variation owned by the component's own code. Variation
+    /// coming from the language definition (a morphology enum gaining or losing
+    /// variants) is not expressible as a hand-written integer and is tracked
+    /// separately by the language digest.
+    fn output_version(&self) -> u32 {
+        1
+    }
+
     /// Returns the JSON Schema fragment for this component's output.
     /// This will be placed under `properties[schema_key]` in the composed schema.
     fn schema_fragment(&self, lang: &L) -> serde_json::Value;
