@@ -5,6 +5,8 @@ pub mod multiword;
 pub mod pedagogical;
 pub mod translation_alignment;
 pub mod translation_alignment_v2;
+pub mod translation_alignment_v4;
+pub mod translation_alignment_v6;
 
 pub use leipzig::LeipzigGloss;
 pub use morpheme_segmentation::MorphemeSegmentation;
@@ -13,3 +15,5 @@ pub use multiword::MultiwordExpressions;
 pub use pedagogical::PedagogicalExplanation;
 pub use translation_alignment::TranslationAlignment;
 pub use translation_alignment_v2::TranslationAlignmentV2;
+pub use translation_alignment_v4::TranslationAlignmentV4;
+pub use translation_alignment_v6::TranslationAlignmentV6;

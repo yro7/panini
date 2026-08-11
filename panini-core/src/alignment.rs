@@ -420,7 +420,7 @@ pub mod wire {
 
     /// Assigns ids by position and derives token indices from the
     /// word-boundary flags. A false flag on the first segment is a violation.
-    fn derive_sentence(
+    pub(super) fn derive_sentence(
         text: &str,
         wire_segments: &[AlignedSegment],
         side: &str,
@@ -462,7 +462,7 @@ pub mod wire {
     /// (`.`, `,`, `;`, `:`, `!`, `?`, closing brackets/quotes, …), which is
     /// its own word (per the segmentation rules) but never preceded by
     /// whitespace in the original sentence.
-    fn derive_source_sentence(
+    pub(super) fn derive_source_sentence(
         sentence: &SourceSentence,
         errors: &mut Vec<String>,
     ) -> super::AlignedSentence {
@@ -966,6 +966,224 @@ pub mod wire_v3 {
             surface: r.s.clone(),
             occurrence: Some(r.o),
         }
+    }
+}
+
+/// Fourth wire format: correspondences are carried by the segments themselves,
+/// as group numbers, instead of by a separate table of references.
+///
+/// Every earlier format made a link name the segments it joins — by id (v1
+/// prose), then by surface, then by surface plus occurrence. Naming is where
+/// the models fail: on the v3 corpus, "occurrence out of range" and "no
+/// segment has surface" account for most of the rejected extractions, and the
+/// dominant single error is an occurrence of 2 written for a surface that
+/// occurs once. A group number cannot be misnamed, because it names nothing —
+/// segments carrying the same number correspond, and that is the whole rule.
+///
+/// The consequences are worth stating plainly. Two entire error classes become
+/// inexpressible, and the output is roughly half the size of v3's for the same
+/// alignment, the surfaces no longer being written twice. In exchange, a wrong
+/// number is a silently wrong link rather than a rejected extraction: v3 fails
+/// loudly and earns a self-correction retry, v4 can fail quietly. The shape
+/// checks below are what is left of the loud failures, so they are worth
+/// keeping strict.
+pub mod wire_v4 {
+    use std::collections::BTreeMap;
+
+    use serde::{Deserialize, Serialize};
+
+    use super::wire;
+
+    /// A sentence aligned with its translation, correspondences carried by
+    /// per-segment group numbers.
+    ///
+    /// The four segmentation arrays come in two pairs of identical shape:
+    /// `source_groups[i][j]` is the group of `source[i][j]`. Keeping the
+    /// numbers in their own array rather than pairing each surface with its
+    /// number costs nothing to validate — a shape mismatch is caught exactly —
+    /// and avoids asking the model for tuples, which JSON Schema expresses
+    /// through `prefixItems` and structured-output backends support unevenly.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedTranslation {
+        /// The words of the source sentence (the sentence being analyzed), in
+        /// reading order. Each word is the array of its segments: `["plaży"]`
+        /// for a whole word, `["d'", "eau"]` when sub-word units align
+        /// separately (agglutinative affixes, clitics, fused plurals — the
+        /// stem is a segment too). Segments concatenate to the word exactly as
+        /// written — no added hyphens, no normalization, never any whitespace.
+        /// Each punctuation mark is its own one-segment word. Every
+        /// non-whitespace character of the source sentence must be covered
+        /// exactly once.
+        pub source: Vec<Vec<String>>,
+        /// The group number of every source segment, same shape as `source`.
+        /// Segments sharing a number — on either side — form one
+        /// correspondence, so a discontinuous unit like French `ne … pas` is
+        /// simply two segments carrying the same number. Use 0 for a segment
+        /// with no counterpart in the other sentence; punctuation is usually 0.
+        pub source_groups: Vec<Vec<u32>>,
+        /// The translated sentence exactly as displayed, unsegmented.
+        pub translation: String,
+        /// The words of `translation`, in reading order, segmented under the
+        /// same rules as `source`.
+        pub target: Vec<Vec<String>>,
+        /// The group number of every target segment, same shape as `target`.
+        /// Every non-zero number used here must also appear in
+        /// `source_groups`, and the other way round.
+        pub target_groups: Vec<Vec<u32>>,
+        /// Word-by-word literal rendering of the source sentence in the target
+        /// language, exposing the source's structure the way "pomme de terre"
+        /// is literally "apple of earth". Null when it would read the same as
+        /// `translation`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub literal: Option<String>,
+    }
+
+    impl AlignedTranslation {
+        /// Validates the compact structure and resolves it into the internal,
+        /// id/token/span-addressed [`super::AlignedTranslation`].
+        ///
+        /// Segment ids are flat positions and token indices are word
+        /// positions, exactly as in the other formats; links are read off the
+        /// group numbers rather than resolved from references, which is the
+        /// whole point of the format.
+        ///
+        /// # Errors
+        /// Returns the newline-joined list of violations, written for the LLM
+        /// self-correction retry — every problem is reported at once.
+        pub fn resolve(&self) -> Result<super::AlignedTranslation, String> {
+            let mut errors = Vec::new();
+            check_shape(&self.source, &self.source_groups, "source", &mut errors);
+            check_shape(&self.target, &self.target_groups, "target", &mut errors);
+            if !errors.is_empty() {
+                return Err(errors.join("\n"));
+            }
+
+            let source = wire::derive_source_sentence(
+                &wire::SourceSentence {
+                    segments: lower_words(&self.source),
+                },
+                &mut errors,
+            );
+            let target = wire::derive_sentence(
+                &self.translation,
+                &lower_words(&self.target),
+                "target",
+                &mut errors,
+            );
+
+            let links = build_links(&self.source_groups, &self.target_groups, &mut errors);
+
+            if !errors.is_empty() {
+                return Err(errors.join("\n"));
+            }
+
+            let mut resolved = super::AlignedTranslation {
+                source,
+                target,
+                literal_translation: self.literal.clone(),
+                links,
+            };
+            resolved.validate_structure()?;
+            resolved.locate_spans()?;
+            Ok(resolved)
+        }
+    }
+
+    /// The one structural risk of splitting surfaces and groups into parallel
+    /// arrays: they can drift apart. Caught exactly, per word, so the
+    /// self-correction message can say which word lost its numbers.
+    fn check_shape(
+        words: &[Vec<String>],
+        groups: &[Vec<u32>],
+        side: &str,
+        errors: &mut Vec<String>,
+    ) {
+        if words.len() != groups.len() {
+            errors.push(format!(
+                "{side}: {} words but {} group arrays — {side}_groups must have exactly one \
+                 array per word, in the same order",
+                words.len(),
+                groups.len()
+            ));
+            return;
+        }
+        for (i, (word, group)) in words.iter().zip(groups).enumerate() {
+            if word.is_empty() {
+                errors.push(format!(
+                    "{side}: word {i} is an empty array — each word is a non-empty array of \
+                     segment strings"
+                ));
+            } else if word.len() != group.len() {
+                errors.push(format!(
+                    "{side}: word {i} ({word:?}) has {} segments but {} group numbers — every \
+                     segment carries exactly one number",
+                    word.len(),
+                    group.len()
+                ));
+            }
+        }
+    }
+
+    /// Reads the links off the group numbers. Groups are visited in numeric
+    /// order so the resulting link list is deterministic; group 0 means "no
+    /// counterpart" and is skipped.
+    fn build_links(
+        source_groups: &[Vec<u32>],
+        target_groups: &[Vec<u32>],
+        errors: &mut Vec<String>,
+    ) -> Vec<super::AlignmentLink> {
+        let mut sides: BTreeMap<u32, (Vec<u32>, Vec<u32>)> = BTreeMap::new();
+        for (which, groups) in [(0usize, source_groups), (1usize, target_groups)] {
+            let mut id: u32 = 0;
+            for word in groups {
+                for &group in word {
+                    if group != 0 {
+                        let entry = sides.entry(group).or_default();
+                        if which == 0 {
+                            entry.0.push(id);
+                        } else {
+                            entry.1.push(id);
+                        }
+                    }
+                    id += 1;
+                }
+            }
+        }
+
+        let mut links = Vec::with_capacity(sides.len());
+        for (group, (source, target)) in sides {
+            if source.is_empty() || target.is_empty() {
+                let missing = if source.is_empty() {
+                    "source"
+                } else {
+                    "target"
+                };
+                errors.push(format!(
+                    "group {group} has no segment on the {missing} side — a correspondence needs \
+                     at least one segment in each sentence; a segment with no counterpart takes \
+                     group 0 instead"
+                ));
+                continue;
+            }
+            links.push(super::AlignmentLink { source, target });
+        }
+        links
+    }
+
+    /// Flattens words into segments: the first segment of each word starts a
+    /// token, every other one continues it.
+    fn lower_words(words: &[Vec<String>]) -> Vec<wire::AlignedSegment> {
+        words
+            .iter()
+            .flat_map(|word| {
+                word.iter()
+                    .enumerate()
+                    .map(|(i, surface)| wire::AlignedSegment {
+                        surface: surface.clone(),
+                        starts_new_token: i == 0,
+                    })
+            })
+            .collect()
     }
 }
 
@@ -1902,5 +2120,292 @@ mod tests {
         };
         let resolved = a.resolve().expect("fallback should resolve");
         assert_eq!(resolved.links[0].target, vec![6]);
+    }
+}
+
+#[cfg(test)]
+mod v4_tests {
+    use super::wire_v4;
+
+    /// "Je ne veux pas d'eau" → "Nie chcę wody": the case v3 exists to handle
+    /// and the one this format is meant to make trivial. `ne` and `pas` are
+    /// two words carrying the same number, so the discontinuous negation is a
+    /// single link with no dedicated structure; `d'`/`eau` and `wod`/`y` cross
+    /// each other.
+    fn negation() -> wire_v4::AlignedTranslation {
+        serde_json::from_value(serde_json::json!({
+            "source": [["Je"], ["ne"], ["veux"], ["pas"], ["d'", "eau"]],
+            "source_groups": [[1], [2], [3], [2], [4, 5]],
+            "translation": "Nie chcę wody",
+            "target": [["Nie"], ["chc", "ę"], ["wod", "y"]],
+            "target_groups": [[2], [3, 1], [5, 4]],
+            "literal": "Ja nie chcę nie wody"
+        }))
+        .expect("v4 payload should deserialize")
+    }
+
+    #[test]
+    fn a_discontinuous_unit_is_one_link_because_it_shares_one_number() {
+        let resolved = negation().resolve().expect("should resolve");
+
+        // Source ids: Je 0, ne 1, veux 2, pas 3, d' 4, eau 5.
+        // Target ids: Nie 0, chc 1, ę 2, wod 3, y 4.
+        let group_two = resolved
+            .links
+            .iter()
+            .find(|l| l.source == vec![1, 3])
+            .expect("ne and pas belong to the same link");
+        assert_eq!(group_two.target, vec![0], "both map to the single 'Nie'");
+
+        let crossing: Vec<_> = resolved
+            .links
+            .iter()
+            .filter(|l| l.source == vec![4] || l.source == vec![5])
+            .map(|l| (l.source.clone(), l.target.clone()))
+            .collect();
+        assert!(
+            crossing.contains(&(vec![4], vec![4])) && crossing.contains(&(vec![5], vec![3])),
+            "d'→y and eau→wod cross: {crossing:?}"
+        );
+    }
+
+    /// The source text is still rebuilt from the segments, and the elision
+    /// must not gain a space it never had.
+    #[test]
+    fn the_rebuilt_source_keeps_the_elision_tight() {
+        let resolved = negation().resolve().expect("should resolve");
+        assert_eq!(resolved.source.text, "Je ne veux pas d'eau");
+        assert_eq!(resolved.target.text, "Nie chcę wody");
+    }
+
+    /// Group 0 is the way to say "no counterpart", so it must produce no link
+    /// at all rather than an empty-sided one.
+    #[test]
+    fn group_zero_leaves_a_segment_unlinked() {
+        let a: wire_v4::AlignedTranslation = serde_json::from_value(serde_json::json!({
+            "source": [["Chodź"], ["!"]],
+            "source_groups": [[1], [0]],
+            "translation": "Come!",
+            "target": [["Come"], ["!"]],
+            "target_groups": [[1], [0]],
+        }))
+        .expect("payload should deserialize");
+
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links.len(), 1, "the two '!' are in no link");
+        assert_eq!(resolved.links[0].source, vec![0]);
+    }
+
+    /// The one structural risk of parallel arrays. It has to be caught, and
+    /// the message has to say which word drifted — the LLM retry reads it.
+    #[test]
+    fn a_word_missing_its_numbers_is_rejected_by_name() {
+        let a: wire_v4::AlignedTranslation = serde_json::from_value(serde_json::json!({
+            "source": [["Ev", "ler"], ["kal"]],
+            "source_groups": [[1], [2]],
+            "translation": "houses stay",
+            "target": [["houses"], ["stay"]],
+            "target_groups": [[1], [2]],
+        }))
+        .expect("payload should deserialize");
+
+        let error = a.resolve().expect_err("the shapes disagree");
+        assert!(
+            error.contains("word 0") && error.contains("2 segments but 1 group"),
+            "message must locate the drift: {error}"
+        );
+    }
+
+    /// A number used on one side only is a half-written correspondence; left
+    /// unchecked it would silently drop the link.
+    #[test]
+    fn a_one_sided_group_is_rejected() {
+        let a: wire_v4::AlignedTranslation = serde_json::from_value(serde_json::json!({
+            "source": [["Je"], ["dors"]],
+            "source_groups": [[1], [7]],
+            "translation": "I sleep",
+            "target": [["I"], ["sleep"]],
+            "target_groups": [[1], [2]],
+        }))
+        .expect("payload should deserialize");
+
+        let error = a.resolve().expect_err("groups 7 and 2 are each one-sided");
+        assert!(error.contains("group 2"), "{error}");
+        assert!(error.contains("group 7"), "{error}");
+    }
+
+    /// Numbering is free, so the resolver must not assume groups are dense or
+    /// sorted — only that the same number means the same correspondence.
+    #[test]
+    fn numbering_need_not_be_dense_or_ordered() {
+        let a: wire_v4::AlignedTranslation = serde_json::from_value(serde_json::json!({
+            "source": [["Ev", "ler"]],
+            "source_groups": [[40, 9]],
+            "translation": "the houses",
+            "target": [["the"], ["houses"]],
+            "target_groups": [[9], [40]],
+        }))
+        .expect("payload should deserialize");
+
+        let resolved = a.resolve().expect("should resolve");
+        assert_eq!(resolved.links.len(), 2);
+        // Links come out in numeric group order: 9 (ler→the) then 40 (Ev→houses).
+        assert_eq!(resolved.links[0].source, vec![1]);
+        assert_eq!(resolved.links[0].target, vec![0]);
+        assert_eq!(resolved.links[1].source, vec![0]);
+        assert_eq!(resolved.links[1].target, vec![1]);
+    }
+}
+
+pub mod wire_v6 {
+    use serde::{Deserialize, Serialize};
+
+    use super::wire;
+
+    /// One correspondence between 0-based flat segment indices of source and target.
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignmentLink {
+        /// 0-based flat segment indices in the source sentence (in reading order).
+        #[schemars(length(min = 1))]
+        pub source: Vec<u32>,
+        /// 0-based flat segment indices in the target sentence (in reading order).
+        #[schemars(length(min = 1))]
+        pub target: Vec<u32>,
+    }
+
+    /// Translation alignment wire format using 0-based flat segment indices.
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+    pub struct AlignedTranslation {
+        /// Words of the source sentence in reading order. Each word is an array of segment strings.
+        pub source: Vec<Vec<String>>,
+        /// The translated sentence exactly as displayed, unsegmented.
+        pub translation: String,
+        /// Words of `translation` in reading order, segmented under the same rules.
+        pub target: Vec<Vec<String>>,
+        /// Word-by-word literal rendering of the source sentence in the target language.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        pub literal: Option<String>,
+        /// Many-to-many correspondences referencing 0-based flat segment indices.
+        pub links: Vec<AlignmentLink>,
+    }
+
+    impl AlignedTranslation {
+        pub fn resolve(&self) -> Result<super::AlignedTranslation, String> {
+            let mut errors = Vec::new();
+
+            let source_wire_segs = lower_words(&self.source);
+            let target_wire_segs = lower_words(&self.target);
+
+            let source = wire::derive_source_sentence(
+                &wire::SourceSentence {
+                    segments: source_wire_segs.clone(),
+                },
+                &mut errors,
+            );
+            let target =
+                wire::derive_sentence(&self.translation, &target_wire_segs, "target", &mut errors);
+
+            let total_source_segs = source_wire_segs.len() as u32;
+            let total_target_segs = target_wire_segs.len() as u32;
+
+            let mut resolved_links = Vec::with_capacity(self.links.len());
+            for (i, link) in self.links.iter().enumerate() {
+                if link.source.is_empty() || link.target.is_empty() {
+                    errors.push(format!(
+                        "link {i}: both source and target must reference at least one segment index"
+                    ));
+                    continue;
+                }
+
+                for &src_id in &link.source {
+                    if src_id >= total_source_segs {
+                        errors.push(format!(
+                            "link {i}: source segment index {src_id} out of range (total segments: {total_source_segs})"
+                        ));
+                    }
+                }
+                for &tgt_id in &link.target {
+                    if tgt_id >= total_target_segs {
+                        errors.push(format!(
+                            "link {i}: target segment index {tgt_id} out of range (total segments: {total_target_segs})"
+                        ));
+                    }
+                }
+
+                resolved_links.push(super::AlignmentLink {
+                    source: link.source.clone(),
+                    target: link.target.clone(),
+                });
+            }
+
+            if !errors.is_empty() {
+                return Err(errors.join("\n"));
+            }
+
+            let mut resolved = super::AlignedTranslation {
+                source,
+                target,
+                literal_translation: self.literal.clone(),
+                links: resolved_links,
+            };
+            resolved.validate_structure()?;
+            resolved.locate_spans()?;
+            Ok(resolved)
+        }
+    }
+
+    fn lower_words(words: &[Vec<String>]) -> Vec<wire::AlignedSegment> {
+        let mut segments = Vec::new();
+        for word in words {
+            for (j, surface) in word.iter().enumerate() {
+                segments.push(wire::AlignedSegment {
+                    surface: surface.clone(),
+                    starts_new_token: j == 0,
+                });
+            }
+        }
+        segments
+    }
+}
+
+#[cfg(test)]
+mod v6_tests {
+    use super::wire_v6;
+
+    #[test]
+    fn test_v6_resolution() {
+        let wire = wire_v6::AlignedTranslation {
+            source: vec![
+                vec!["Je".into()],
+                vec!["ne".into()],
+                vec!["veux".into()],
+                vec!["pas".into()],
+                vec!["d'".into(), "eau".into()],
+            ],
+            translation: "Nie chcę wody".into(),
+            target: vec![
+                vec!["Nie".into()],
+                vec!["chc".into(), "ę".into()],
+                vec!["wod".into(), "y".into()],
+            ],
+            literal: None,
+            links: vec![
+                wire_v6::AlignmentLink {
+                    source: vec![0, 1, 2, 3],
+                    target: vec![0, 1, 2],
+                },
+                wire_v6::AlignmentLink {
+                    source: vec![4, 5],
+                    target: vec![3, 4],
+                },
+            ],
+        };
+
+        let resolved = wire.resolve().expect("v6 payload should resolve cleanly");
+        assert_eq!(resolved.links.len(), 2);
+        assert_eq!(resolved.links[0].source, vec![0, 1, 2, 3]);
+        assert_eq!(resolved.links[0].target, vec![0, 1, 2]);
+        assert_eq!(resolved.links[1].source, vec![4, 5]);
+        assert_eq!(resolved.links[1].target, vec![3, 4]);
     }
 }
