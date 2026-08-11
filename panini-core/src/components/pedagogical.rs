@@ -50,13 +50,17 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for PedagogicalExplanation {
                     "items": { "type": "string" }
                 },
                 "grammar_recap": {
-                    "type": "object",
+                    // Nullable rather than absent: strict structured-output
+                    // modes force every property into `required`, so "leave it
+                    // out" is not something the model can be asked for. Null is
+                    // the only way to say "there is none" that survives.
+                    "type": ["object", "null"],
                     "additionalProperties": false,
                     "required": ["title", "rules"],
                     "description": concat!(
                         "A short summary of the declension, conjugation or rule the sentence ",
-                        "exercises. Omit this field entirely when the sentence exercises no rule ",
-                        "worth restating -- an empty recap is worse than none."
+                        "exercises. Set this to null when the sentence exercises no rule worth ",
+                        "restating -- an empty recap is worse than none."
                     ),
                     "properties": {
                         "title": {
@@ -207,6 +211,33 @@ mod tests {
     #[test]
     fn a_recap_free_explanation_validates() {
         assert!(validate(json!({ "analysis": ["A point."] })).is_ok());
+        assert!(
+            validate(json!({ "analysis": ["A point."], "grammar_recap": null })).is_ok(),
+            "null is how the model says there is no recap"
+        );
+    }
+
+    /// Strict structured-output modes force every property into `required`, so
+    /// a schema cannot ask for a field to be left out. `grammar_recap` has to
+    /// be nullable instead, or the model is obliged to invent a recap for every
+    /// sentence that exercises no rule.
+    #[test]
+    fn the_recap_is_nullable_rather_than_optional() {
+        assert_eq!(
+            schema()["properties"]["grammar_recap"]["type"],
+            json!(["object", "null"])
+        );
+        assert!(
+            schema()["description"]
+                .as_str()
+                .expect("description")
+                .contains("null")
+                || schema()["properties"]["grammar_recap"]["description"]
+                    .as_str()
+                    .expect("recap description")
+                    .contains("null"),
+            "the instruction must tell the model to send null, not to omit"
+        );
     }
 
     #[test]
