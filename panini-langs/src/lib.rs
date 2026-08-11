@@ -22,6 +22,89 @@ pub mod mandarin_chinese;
 pub use mandarin_chinese::*;
 
 #[cfg(test)]
+mod lang_digest_tests {
+    use panini_core::lang_digest::LanguageDigest;
+    use panini_core::traits::LinguisticDefinition;
+
+    use super::*;
+
+    /// Every digest in this module, paired with the language it came from.
+    fn all_digests() -> Vec<(&'static str, LanguageDigest)> {
+        vec![
+            ("Arabic", arabic::Arabic.lang_digest()),
+            ("Danish", danish::Danish.lang_digest()),
+            ("French", french::French.lang_digest()),
+            ("Italian", italian::Italian.lang_digest()),
+            (
+                "MandarinChinese",
+                mandarin_chinese::MandarinChinese.lang_digest(),
+            ),
+            ("Polish", polish::Polish.lang_digest()),
+            ("Turkish", turkish::Turkish.lang_digest()),
+        ]
+    }
+
+    /// The digest is only worth storing if it actually reflects each language's
+    /// value space. If the derived catalogs came back empty, every language
+    /// would hash identically and the mechanism would be silently inert — which
+    /// is precisely the failure a fingerprint is supposed to prevent.
+    #[test]
+    fn every_language_has_a_distinct_value_space() {
+        let digests = all_digests();
+
+        for (name, digest) in &digests {
+            let collisions: Vec<&str> = digests
+                .iter()
+                .filter(|(other_name, other)| other_name != name && other.hash() == digest.hash())
+                .map(|(other_name, _)| *other_name)
+                .collect();
+
+            assert!(
+                collisions.is_empty(),
+                "{name} hashes to the same value space as {collisions:?} — \
+                 the catalogs are probably empty, making the digest inert"
+            );
+        }
+    }
+
+    #[test]
+    fn digests_are_deterministic_within_a_build() {
+        for (name, digest) in all_digests() {
+            let recomputed = all_digests()
+                .into_iter()
+                .find(|(other, _)| *other == name)
+                .expect("language is present twice")
+                .1;
+
+            assert_eq!(digest, recomputed, "{name} digest is not reproducible");
+        }
+    }
+
+    /// Turkish is the agglutinative case the whole mechanism exists for: its
+    /// morpheme functions, not just its morphology, must reach the hash.
+    #[test]
+    fn turkish_digest_covers_morpheme_functions() {
+        use panini_core::traits::MorphemeFunctionCatalog;
+
+        let with_functions = turkish::Turkish.lang_digest();
+        let morphology_only = LanguageDigest::compute::<
+            <turkish::Turkish as LinguisticDefinition>::Morphology,
+            (),
+        >(turkish::Turkish.iso_code());
+
+        assert!(
+            !<turkish::Turkish as LinguisticDefinition>::MorphemeFunction::function_descriptors()
+                .is_empty(),
+            "Turkish must expose morpheme functions for this test to mean anything"
+        );
+        assert_ne!(
+            with_functions, morphology_only,
+            "dropping the morpheme functions must change the digest"
+        );
+    }
+}
+
+#[cfg(test)]
 mod pivot_tests {
     use panini_core::pivot::PivotValueKind;
     use panini_core::traits::{BinaryGender, TernaryNumber};

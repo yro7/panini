@@ -670,7 +670,9 @@ mod tests {
     use super::*;
     use panini_core::aggregable::{Aggregable, FieldDescriptor};
     use panini_core::component::ComponentContext;
-    use panini_core::traits::{IsoLang, MorphologyInfo, Script};
+    use panini_core::traits::{
+        IsoLang, MorphologyCatalog, MorphologyGroupSchema, MorphologyInfo, Script,
+    };
     use serde::{Deserialize, Serialize};
     use std::collections::VecDeque;
     use std::sync::Mutex;
@@ -694,6 +696,12 @@ mod tests {
 
         fn observations(&self) -> Vec<Vec<(String, String)>> {
             vec![vec![]]
+        }
+    }
+
+    impl MorphologyCatalog for TestMorphology {
+        fn group_descriptors() -> Vec<MorphologyGroupSchema> {
+            vec![]
         }
     }
 
