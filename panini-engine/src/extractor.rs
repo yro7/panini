@@ -106,6 +106,25 @@ pub struct RetryConfig {
     pub initial_backoff_secs: u64,
 }
 
+impl RetryConfig {
+    /// Total wall-clock budget that permits every configured attempt and its
+    /// exponential backoff. `attempt_timeout` remains the cap for each wire call.
+    #[must_use]
+    pub fn total_timeout(&self, attempt_timeout: Duration) -> Duration {
+        let attempts = u32::try_from(self.max_retries.saturating_add(1)).unwrap_or(u32::MAX);
+        let backoff_factor = if self.max_retries >= u64::BITS as usize {
+            u64::MAX
+        } else {
+            (1_u64 << self.max_retries).saturating_sub(1)
+        };
+        attempt_timeout
+            .saturating_mul(attempts)
+            .saturating_add(Duration::from_secs(
+                self.initial_backoff_secs.saturating_mul(backoff_factor),
+            ))
+    }
+}
+
 impl Default for RetryConfig {
     fn default() -> Self {
         Self {
@@ -122,7 +141,10 @@ pub struct ExtractionOptions<'a> {
     pub max_tokens: u32,
     pub extractor_prompts: &'a ExtractorPrompts,
     pub retry: RetryConfig,
-    pub timeout: Duration,
+    /// Maximum duration of one LLM wire attempt.
+    pub attempt_timeout: Duration,
+    /// Maximum duration of the complete initial-attempt + retry sequence.
+    pub total_timeout: Duration,
     pub user_id: &'a str,
 }
 
@@ -134,7 +156,8 @@ impl<'a> ExtractionOptions<'a> {
             max_tokens: 4096,
             extractor_prompts,
             retry: RetryConfig::default(),
-            timeout: Duration::from_secs(30),
+            attempt_timeout: Duration::from_secs(30),
+            total_timeout: RetryConfig::default().total_timeout(Duration::from_secs(30)),
             user_id,
         }
     }
@@ -214,19 +237,23 @@ where
     let mut backoff = backoff::ExponentialBackoffBuilder::new()
         .with_initial_interval(Duration::from_secs(options.retry.initial_backoff_secs))
         .with_multiplier(2.0)
-        .with_max_elapsed_time(Some(options.timeout))
+        .with_max_elapsed_time(Some(options.total_timeout))
         .build();
 
     let start_time = std::time::Instant::now();
+    let mut retries_used = 0;
 
     loop {
         let elapsed = start_time.elapsed();
-        if elapsed >= options.timeout {
+        if elapsed >= options.total_timeout {
+            let context = prev_attempt.as_ref().map_or_else(String::new, |previous| {
+                format!(" after validation error: {}", previous.error)
+            });
             return Err(ExtractionError::StructuredLlm(StructuredLlmError::new(
-                "total timeout exceeded",
+                format!("total extraction timeout exceeded{context}"),
             )));
         }
-        let remaining = options.timeout - elapsed;
+        let remaining = options.total_timeout - elapsed;
 
         let result = perform_single_shot_extraction(
             language,
@@ -247,9 +274,11 @@ where
             Ok(res) => return Ok(res),
             Err(e) => {
                 // Only retry on parsing/validation errors
-                if let ExtractionError::Parse(pe) = &e
+                if retries_used < options.retry.max_retries
+                    && let ExtractionError::Parse(pe) = &e
                     && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff)
                 {
+                    retries_used += 1;
                     let err_msg = pe.reason.to_string();
                     tracing::warn!(
                         ?wait,
@@ -331,19 +360,23 @@ where
     let mut backoff = backoff::ExponentialBackoffBuilder::new()
         .with_initial_interval(Duration::from_secs(options.retry.initial_backoff_secs))
         .with_multiplier(2.0)
-        .with_max_elapsed_time(Some(options.timeout))
+        .with_max_elapsed_time(Some(options.total_timeout))
         .build();
 
     let start_time = std::time::Instant::now();
+    let mut retries_used = 0;
 
     loop {
         let elapsed = start_time.elapsed();
-        if elapsed >= options.timeout {
+        if elapsed >= options.total_timeout {
+            let context = prev_attempt.as_ref().map_or_else(String::new, |previous| {
+                format!(" after validation error: {}", previous.error)
+            });
             return Err(ExtractionError::StructuredLlm(StructuredLlmError::new(
-                "total timeout exceeded",
+                format!("total batch extraction timeout exceeded{context}"),
             )));
         }
-        let remaining = options.timeout - elapsed;
+        let remaining = options.total_timeout - elapsed;
 
         let result = perform_batch_single_shot(
             language,
@@ -365,9 +398,11 @@ where
             Ok(res) => return Ok(res),
             Err(e) => {
                 // Only retry on parsing/validation errors affecting the whole batch
-                if let ExtractionError::Parse(pe) = &e
+                if retries_used < options.retry.max_retries
+                    && let ExtractionError::Parse(pe) = &e
                     && let Some(wait) = backoff::backoff::Backoff::next_backoff(&mut backoff)
                 {
+                    retries_used += 1;
                     let err_msg = pe.reason.to_string();
                     tracing::warn!(
                         ?wait,
@@ -425,7 +460,7 @@ where
     L: LinguisticDefinition + Send + Sync,
     E: StructuredLlmExecutor,
 {
-    let attempt_timeout = std::cmp::min(options.timeout, remaining_total_timeout);
+    let attempt_timeout = std::cmp::min(options.attempt_timeout, remaining_total_timeout);
 
     let retry_context = previous_attempt.map(|prev| StructuredLlmRetryContext {
         raw_response: &prev.raw_response,
@@ -446,7 +481,15 @@ where
         }),
     )
     .await
-    .map_err(|_| StructuredLlmError::new("LLM request timed out"))??
+    .map_err(|_| {
+        let context = previous_attempt.map_or_else(String::new, |previous| {
+            format!(
+                " while self-correcting validation error: {}",
+                previous.error
+            )
+        });
+        StructuredLlmError::new(format!("LLM request timed out{context}"))
+    })??
     .text;
 
     let cleaned = clean_llm_json(&raw_text);
@@ -574,7 +617,7 @@ where
     L: LinguisticDefinition + Send + Sync,
     E: StructuredLlmExecutor,
 {
-    let attempt_timeout = std::cmp::min(options.timeout, remaining_total_timeout);
+    let attempt_timeout = std::cmp::min(options.attempt_timeout, remaining_total_timeout);
 
     // 4. Run LLM request through the injected transport with timeout wrapper.
     let retry_context = previous_attempt.map(|prev| StructuredLlmRetryContext {
@@ -596,7 +639,15 @@ where
         }),
     )
     .await
-    .map_err(|_| StructuredLlmError::new("LLM request timed out"))??
+    .map_err(|_| {
+        let context = previous_attempt.map_or_else(String::new, |previous| {
+            format!(
+                " while self-correcting validation error: {}",
+                previous.error
+            )
+        });
+        StructuredLlmError::new(format!("LLM request timed out{context}"))
+    })??
     .text;
 
     // 5. Chain pre_process from each component
@@ -676,6 +727,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use std::collections::VecDeque;
     use std::sync::Mutex;
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     use crate::structured_llm::{StructuredLlmFuture, StructuredLlmResponse};
 
@@ -786,6 +838,7 @@ mod tests {
     struct ExecutorCall {
         user_id: String,
         had_retry_context: bool,
+        timeout: Duration,
     }
 
     struct FakeExecutor {
@@ -816,6 +869,7 @@ mod tests {
                 self.calls.lock().unwrap().push(ExecutorCall {
                     user_id: request.user_id.to_string(),
                     had_retry_context: request.retry_context.is_some(),
+                    timeout: request.timeout,
                 });
                 let text =
                     self.responses.lock().unwrap().pop_front().ok_or_else(|| {
@@ -823,6 +877,34 @@ mod tests {
                     })?;
                 Ok(StructuredLlmResponse {
                     text,
+                    tokens_in: 1,
+                    tokens_out: 1,
+                })
+            })
+        }
+    }
+
+    struct TimeoutOnRetryExecutor {
+        calls: AtomicUsize,
+    }
+
+    impl StructuredLlmExecutor for TimeoutOnRetryExecutor {
+        fn execute_structured<'a>(
+            &'a self,
+            _request: StructuredLlmRequest<'a>,
+        ) -> StructuredLlmFuture<'a> {
+            Box::pin(async move {
+                let call = self.calls.fetch_add(1, Ordering::SeqCst);
+                if call == 0 {
+                    return Ok(StructuredLlmResponse {
+                        text: r#"{"cards": []}"#.to_string(),
+                        tokens_in: 1,
+                        tokens_out: 1,
+                    });
+                }
+                tokio::time::sleep(Duration::from_millis(50)).await;
+                Ok(StructuredLlmResponse {
+                    text: r#"{"cards": [{"alpha": "late"}]}"#.to_string(),
                     tokens_in: 1,
                     tokens_out: 1,
                 })
@@ -874,7 +956,8 @@ mod tests {
                 max_retries: 2,
                 initial_backoff_secs: 0,
             },
-            timeout: Duration::from_secs(5),
+            attempt_timeout: Duration::from_secs(1),
+            total_timeout: Duration::from_secs(5),
             user_id: "test-user",
         }
     }
@@ -940,6 +1023,61 @@ mod tests {
             calls[1].had_retry_context,
             "second attempt should carry the self-correction context"
         );
+        assert_eq!(calls[0].timeout, Duration::from_secs(1));
+        assert_eq!(calls[1].timeout, Duration::from_secs(1));
+    }
+
+    #[tokio::test]
+    async fn batch_extraction_honors_max_retries() {
+        let executor = FakeExecutor::new(vec![
+            r#"{"cards": []}"#,
+            r#"{"cards": []}"#,
+            r#"{"cards": [{"alpha": "would succeed too late"}]}"#,
+        ]);
+        let prompts = test_prompts();
+        let mut options = batch_options(&prompts);
+        options.retry.max_retries = 1;
+
+        let error = extract_batch_with_components_executor(
+            &TestLang,
+            &executor,
+            &batch_request(1),
+            &[&AlphaComponent as &dyn AnalysisComponent<TestLang>],
+            options,
+        )
+        .await
+        .expect_err("one configured retry must not permit a third attempt");
+
+        assert!(error.to_string().contains("expected exactly 1 cards"));
+        assert_eq!(executor.calls.lock().unwrap().len(), 2);
+    }
+
+    #[tokio::test]
+    async fn retry_timeout_preserves_the_validation_cause() {
+        let executor = TimeoutOnRetryExecutor {
+            calls: AtomicUsize::new(0),
+        };
+        let prompts = test_prompts();
+        let mut options = batch_options(&prompts);
+        options.retry.max_retries = 1;
+        options.attempt_timeout = Duration::from_millis(10);
+        options.total_timeout = Duration::from_millis(100);
+
+        let error = extract_batch_with_components_executor(
+            &TestLang,
+            &executor,
+            &batch_request(1),
+            &[&AlphaComponent as &dyn AnalysisComponent<TestLang>],
+            options,
+        )
+        .await
+        .expect_err("the self-correction attempt should time out");
+
+        let message = error.to_string();
+        assert!(message.contains("LLM request timed out"));
+        assert!(message.contains("self-correcting validation error"));
+        assert!(message.contains("cards"));
+        assert_eq!(executor.calls.load(Ordering::SeqCst), 2);
     }
 
     #[tokio::test]
@@ -990,7 +1128,8 @@ mod tests {
             max_tokens: 256,
             extractor_prompts: &test_prompts(),
             retry: RetryConfig::default(),
-            timeout: Duration::from_secs(5),
+            attempt_timeout: Duration::from_secs(1),
+            total_timeout: Duration::from_secs(5),
             user_id: "test-user",
         };
 
@@ -1032,7 +1171,8 @@ mod tests {
                 max_retries: 2,
                 initial_backoff_secs: 0,
             },
-            timeout: Duration::from_secs(5),
+            attempt_timeout: Duration::from_secs(1),
+            total_timeout: Duration::from_secs(5),
             user_id: "test-user",
         };
 
@@ -1054,10 +1194,12 @@ mod tests {
                 ExecutorCall {
                     user_id: "test-user".to_string(),
                     had_retry_context: false,
+                    timeout: Duration::from_secs(1),
                 },
                 ExecutorCall {
                     user_id: "test-user".to_string(),
                     had_retry_context: true,
+                    timeout: Duration::from_secs(1),
                 },
             ]
         );
