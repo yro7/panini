@@ -34,6 +34,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
     fn prompt_fragment(&self, _lang: &L, ctx: &ComponentContext) -> String {
         format!(
             "Translate the sentence into {ui_lang}; `t.x` is that idiomatic translation. \
+             CRITICAL: `t` MUST be an object containing BOTH `x` (the complete translation) \
+             and `w` (its token arrays); NEVER emit `t` as a bare array. \
              Align the two sentences segment by segment:\n\
              - Split BOTH sentences into words (`s` for the source sentence, `t.w` for the \
                translation), in reading order. Each word is an ARRAY of segment strings. A \
