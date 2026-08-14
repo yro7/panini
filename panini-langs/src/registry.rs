@@ -15,8 +15,6 @@ use panini_engine::{
     ExtractionOptions, ExtractionRequest, extract_with_components, extract_with_components_executor,
 };
 
-use crate::{Arabic, Danish, French, Italian, MandarinChinese, Polish, Turkish};
-
 /// Helper: build the component list for a concrete language and dispatch.
 async fn extract_for_language<L, M>(
     lang: &L,
@@ -140,6 +138,10 @@ where
 
 /// Macro to generate the registry functions for all languages.
 /// Each language must be a unit struct implementing `LinguisticDefinition`.
+///
+/// Names are resolved as `$crate::<Ident>`, so a language only has to be listed
+/// in the `generate_registry!` call below — the `pub use` in `lib.rs` is what
+/// puts it at the crate root. No import in this module.
 macro_rules! generate_registry {
     ($($lang:ident),* $(,)?) => {
         /// Extracts features using composable components for any supported language.
@@ -158,9 +160,9 @@ macro_rules! generate_registry {
         ) -> Result<ExtractionResult> {
             match lang_code {
                 $(
-                    s if s == <$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                         extract_for_language(
-                            &$lang,
+                            &$crate::$lang,
                             model,
                             request,
                             component_keys,
@@ -189,9 +191,9 @@ macro_rules! generate_registry {
         ) -> Result<ExtractionResult> {
             match lang_code {
                 $(
-                    s if s == <$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
                         extract_for_language_executor(
-                            &$lang,
+                            &$crate::$lang,
                             executor,
                             request,
                             component_keys,
@@ -206,7 +208,7 @@ macro_rules! generate_registry {
 
         /// Returns all supported ISO 639-3 language codes.
         pub fn supported_languages() -> Vec<&'static str> {
-            vec![$(<$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3()),*]
+            vec![$(<$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3()),*]
         }
     };
 }
