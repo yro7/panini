@@ -284,7 +284,7 @@ impl TurkishMorphemeFunction {
     panini_macro::MorphologyInfo,
 )]
 #[serde(tag = "pos")]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum TurkishMorphology {
     Adjective {
         lemma: String,
