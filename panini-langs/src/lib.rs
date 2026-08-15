@@ -1,25 +1,36 @@
-pub mod arabic;
-pub mod polish;
-pub mod turkish;
+/// The languages this crate ships — the single place the list lives.
+///
+/// X-macro: pass the name of a callback macro and it is re-invoked with one
+/// `(module, Struct)` pair per language. Module declarations, re-exports, the
+/// extraction registry and the digest test all expand from this list, so adding
+/// a language is one line here and nothing else in this crate.
+macro_rules! with_languages {
+    ($callback:ident) => {
+        $callback! {
+            (arabic, Arabic),
+            (danish, Danish),
+            (french, French),
+            (italian, Italian),
+            (mandarin_chinese, MandarinChinese),
+            (polish, Polish),
+            (turkish, Turkish),
+        }
+    };
+}
 
-pub use arabic::*;
-pub use polish::*;
-pub use turkish::*;
+macro_rules! declare_languages {
+    ($(($module:ident, $struct:ident)),* $(,)?) => {
+        $(
+            pub mod $module;
+            pub use $module::*;
+        )*
+    };
+}
 
-pub mod french;
-pub use french::*;
-
-pub mod italian;
-pub use italian::*;
-
-pub mod danish;
-pub use danish::*;
+with_languages!(declare_languages);
 
 #[cfg(feature = "registry")]
 pub mod registry;
-
-pub mod mandarin_chinese;
-pub use mandarin_chinese::*;
 
 #[cfg(test)]
 mod lang_digest_tests {
@@ -28,20 +39,28 @@ mod lang_digest_tests {
 
     use super::*;
 
-    /// Every digest in this module, paired with the language it came from.
+    macro_rules! digest_vec {
+        ($(($module:ident, $struct:ident)),* $(,)?) => {
+            vec![$((stringify!($struct), crate::$module::$struct.lang_digest())),*]
+        };
+    }
+
+    /// Every language's digest, paired with its name. Expanded from
+    /// `with_languages!`, so a new language is covered the moment it is listed.
     fn all_digests() -> Vec<(&'static str, LanguageDigest)> {
-        vec![
-            ("Arabic", arabic::Arabic.lang_digest()),
-            ("Danish", danish::Danish.lang_digest()),
-            ("French", french::French.lang_digest()),
-            ("Italian", italian::Italian.lang_digest()),
-            (
-                "MandarinChinese",
-                mandarin_chinese::MandarinChinese.lang_digest(),
-            ),
-            ("Polish", polish::Polish.lang_digest()),
-            ("Turkish", turkish::Turkish.lang_digest()),
-        ]
+        with_languages!(digest_vec)
+    }
+
+    /// The distinctness test below is vacuous on an empty vec, which is exactly
+    /// what a mis-expanded `with_languages!` would produce. No count to maintain
+    /// here: dropping a language from the list also drops its `pub mod`, so an
+    /// incomplete list fails to compile rather than silently shrinking coverage.
+    #[test]
+    fn the_language_list_actually_reaches_the_digest_tests() {
+        assert!(
+            all_digests().len() > 1,
+            "with_languages! expanded to nothing — every digest test below is vacuous"
+        );
     }
 
     /// The digest is only worth storing if it actually reflects each language's
