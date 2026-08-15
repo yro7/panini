@@ -36,7 +36,11 @@ pub fn normalize_pos_tags(json: &str) -> String {
         ("coordinating conjunction", "coordinating_conjunction"),
         ("subordinating conjunction", "subordinating_conjunction"),
         ("proper noun", "proper_noun"),
+        // Concatenated forms: what a PascalCase variant name lowercases to, and
+        // what Turkish's schema advertised while it used `rename_all = "lowercase"`.
         ("propernoun", "proper_noun"),
+        ("coordinatingconjunction", "coordinating_conjunction"),
+        ("subordinatingconjunction", "subordinating_conjunction"),
     ];
 
     // Regex: match `"pos"` (with optional whitespace) `:` string value
