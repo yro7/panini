@@ -167,10 +167,19 @@ pub enum BinaryVoice {
 /// Universal part-of-speech tag — the single typed PoS currency across the system.
 ///
 /// The [Universal Dependencies UPOS](https://universaldependencies.org/u/pos/)
-/// categories **except `AUX`** — panglot deliberately models auxiliaries as plain
-/// verbs (the AUX/VERB split is a UD flattening that dilutes lexicon analysis; an
-/// exercise needing auxiliaries specifically asks the LLM for them). Plus
-/// `Classifier` for languages (e.g. Mandarin) whose morphology model exposes
+/// categories **except `AUX` and `PUNCT`**.
+///
+/// Auxiliaries are modelled as plain verbs: the AUX/VERB split is a UD flattening
+/// that dilutes lexicon analysis, and an exercise needing auxiliaries specifically
+/// asks the LLM for them.
+///
+/// Punctuation is not analysed at all. It carries no morphology, is never a
+/// lexicon item, and never a target — analysing it only added tokens every
+/// consumer had to filter back out. `MorphologyAnalysis` tells the model to omit
+/// punctuation; one emitted anyway fails to deserialize exactly like any other
+/// value outside the schema, and is not worth special-casing.
+///
+/// Plus `Classifier` for languages (e.g. Mandarin) whose morphology model exposes
 /// measure words as a first-class part of speech.
 ///
 /// Every `{Language}Morphology` enum's outer variants are named identically to
@@ -205,8 +214,6 @@ pub enum Upos {
     Pronoun,
     /// Proper noun (PROPN).
     ProperNoun,
-    /// Punctuation (PUNCT).
-    Punctuation,
     /// Subordinating conjunction (SCONJ).
     SubordinatingConjunction,
     /// Symbol (SYM).
@@ -222,7 +229,7 @@ pub enum Upos {
 
 impl Upos {
     /// Every `Upos` value, in declaration order.
-    pub const ALL: [Upos; 17] = [
+    pub const ALL: [Upos; 16] = [
         Upos::Adjective,
         Upos::Adposition,
         Upos::Adverb,
@@ -234,7 +241,6 @@ impl Upos {
         Upos::Particle,
         Upos::Pronoun,
         Upos::ProperNoun,
-        Upos::Punctuation,
         Upos::SubordinatingConjunction,
         Upos::Symbol,
         Upos::Verb,
@@ -258,7 +264,6 @@ impl Upos {
             Upos::Particle => "Particle",
             Upos::Pronoun => "Pronoun",
             Upos::ProperNoun => "ProperNoun",
-            Upos::Punctuation => "Punctuation",
             Upos::SubordinatingConjunction => "SubordinatingConjunction",
             Upos::Symbol => "Symbol",
             Upos::Verb => "Verb",
