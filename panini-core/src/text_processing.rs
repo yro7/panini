@@ -27,8 +27,6 @@ pub fn normalize_pos_tags(json: &str) -> String {
         ("conj", "coordinating_conjunction"),
         ("interj", "interjection"),
         ("sym", "symbol"),
-        ("punc", "punctuation"),
-        ("punct", "punctuation"),
         ("x", "other"),
         // Long-form aliases that some LLMs emit
         ("preposition", "adposition"),
