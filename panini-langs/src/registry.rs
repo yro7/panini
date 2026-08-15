@@ -139,11 +139,10 @@ where
 /// Macro to generate the registry functions for all languages.
 /// Each language must be a unit struct implementing `LinguisticDefinition`.
 ///
-/// Names are resolved as `$crate::<Ident>`, so a language only has to be listed
-/// in the `generate_registry!` call below — the `pub use` in `lib.rs` is what
-/// puts it at the crate root. No import in this module.
+/// Driven by `with_languages!` in `lib.rs` — this module never names a language.
+/// Structs resolve as `$crate::<Ident>` via the re-exports that same list emits.
 macro_rules! generate_registry {
-    ($($lang:ident),* $(,)?) => {
+    ($(($module:ident, $lang:ident)),* $(,)?) => {
         /// Extracts features using composable components for any supported language.
         ///
         /// `component_keys` selects which analyses to include (e.g. `["pedagogical_explanation", "morphology"]`).
@@ -213,16 +212,8 @@ macro_rules! generate_registry {
     };
 }
 
-// Generate the registry for all supported languages
-generate_registry!(
-    Polish,
-    Turkish,
-    Arabic,
-    French,
-    Italian,
-    Danish,
-    MandarinChinese
-);
+// Generate the registry from the crate's single language list.
+with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
