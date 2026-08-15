@@ -182,9 +182,6 @@ pub enum FrenchMorphology {
         gender: BinaryGender,
         number: BinaryNumber,
     },
-    Punctuation {
-        lemma: String,
-    },
     SubordinatingConjunction {
         lemma: String,
     },

@@ -204,9 +204,6 @@ pub enum DanishMorphology {
         lemma: String,
         case: DanishCase,
     },
-    Punctuation {
-        lemma: String,
-    },
     SubordinatingConjunction {
         lemma: String,
     },
