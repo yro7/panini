@@ -402,6 +402,7 @@ impl Agglutinative for Indonesian {
         format!(
             "MORPHEME SEGMENTATION — fill `morpheme_segmentation` only for words carrying a listed affix or clitic.\n\
              Each entry contains the word and its affix morphemes in surface order. Do NOT include the stem: its lemma is recorded separately.\n\
+             For words without a listed affix or clitic, omit them from `morpheme_segmentation` entirely. Never use `-`, a root word, or any placeholder as a base form.\n\
              For `meN-`, map the assimilated surface allomorph (`me-`, `mem-`, `men-`, `meng-`, or `meny-`) to the one base form `meN-`.\n\
              Do not treat reduplication as an affix morpheme; it is non-concatenative word formation and not represented by this inventory.\n\
              <morpheme_inventory>\n\
