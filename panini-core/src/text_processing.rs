@@ -12,7 +12,12 @@ pub fn normalize_pos_tags(json: &str) -> String {
         ("adj", "adjective"),
         ("adp", "adposition"),
         ("adv", "adverb"),
-        ("aux", "auxiliary"),
+        // UD's AUX has no Panglotive counterpart, by choice rather than by claim:
+        // an auxiliary is filed under Verb so one lexeme keeps one mastery record
+        // (auxiliary `être` and lexical `être` are the same word to a learner).
+        // Where an "auxiliary" is a suffix rather than a word — Turkish `-dir`,
+        // Japanese `-ta` — it is a MorphemeFunction and never reaches this table.
+        ("aux", "verb"),
         ("cconj", "coordinating_conjunction"),
         ("det", "determiner"),
         ("intj", "interjection"),
@@ -87,6 +92,17 @@ mod tests {
         assert_eq!(
             normalize_pos_tags(input3),
             r#"{"pos": "adposition", "lemma": "na"}"#
+        );
+    }
+
+    /// `Auxiliary` was removed from `Upos`; the mapping outlived it and pointed
+    /// at a name nothing could deserialize, so every UD `AUX` tag failed its card.
+    #[test]
+    fn normalize_pos_maps_the_ud_auxiliary_tag_onto_verb() {
+        let input = r#"{"pos": "AUX", "lemma": "være"}"#;
+        assert_eq!(
+            normalize_pos_tags(input),
+            r#"{"pos": "verb", "lemma": "være"}"#
         );
     }
 
