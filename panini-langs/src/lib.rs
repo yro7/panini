@@ -10,6 +10,7 @@ macro_rules! with_languages {
             (arabic, Arabic),
             (danish, Danish),
             (french, French),
+            (indonesian, Indonesian),
             (italian, Italian),
             (mandarin_chinese, MandarinChinese),
             (polish, Polish),
