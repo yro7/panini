@@ -123,6 +123,83 @@ mod lang_digest_tests {
     }
 }
 
+/// The `pos` tag is written twice by two different mechanisms that must agree:
+/// serde names the variants for the schema the LLM answers against, and
+/// `MorphologyAnalysis::pre_process` rewrites the model's tag before
+/// deserialization. Nothing connects them, so a language whose serde naming
+/// disagrees with the normalizer ships parts of speech that can never be
+/// extracted — Turkish did, for `rename_all = "lowercase"`, until 2026-08-15.
+#[cfg(test)]
+mod pos_tag_wire_tests {
+    use panini_core::text_processing::normalize_pos_tags;
+    use panini_core::traits::LinguisticDefinition;
+
+    /// Every `pos` value the schema advertises, harvested from the generated
+    /// JSON Schema so it reflects serde's naming and nothing else.
+    fn pos_tags_of<L: LinguisticDefinition>() -> Vec<String> {
+        let schema = schemars::SchemaGenerator::default().into_root_schema_for::<L::Morphology>();
+        let mut tags = Vec::new();
+        collect_pos_tags(&serde_json::to_value(&schema).unwrap(), &mut tags);
+        tags
+    }
+
+    fn collect_pos_tags(node: &serde_json::Value, out: &mut Vec<String>) {
+        match node {
+            serde_json::Value::Object(map) => {
+                if let Some(pos) = map.get("pos") {
+                    if let Some(value) = pos.get("const").and_then(serde_json::Value::as_str) {
+                        out.push(value.to_string());
+                    }
+                    if let Some(values) = pos.get("enum").and_then(serde_json::Value::as_array) {
+                        out.extend(
+                            values
+                                .iter()
+                                .filter_map(serde_json::Value::as_str)
+                                .map(str::to_string),
+                        );
+                    }
+                }
+                for value in map.values() {
+                    collect_pos_tags(value, out);
+                }
+            }
+            serde_json::Value::Array(items) => {
+                for item in items {
+                    collect_pos_tags(item, out);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    macro_rules! pos_tag_vec {
+        ($(($module:ident, $struct:ident)),* $(,)?) => {
+            vec![$((stringify!($struct), pos_tags_of::<crate::$module::$struct>())),*]
+        };
+    }
+
+    #[test]
+    fn every_schema_pos_tag_survives_the_prompt_normalizer() {
+        for (name, tags) in with_languages!(pos_tag_vec) {
+            assert!(
+                !tags.is_empty(),
+                "{name}: no pos tags found in the schema — the walker is stale, not the language"
+            );
+
+            for tag in tags {
+                let probe = format!(r#"{{"pos": "{tag}"}}"#);
+                assert_eq!(
+                    normalize_pos_tags(&probe),
+                    probe,
+                    "{name}: normalize_pos_tags rewrites the schema's own tag `{tag}`, so that \
+                     part of speech can never deserialize. Use `rename_all = \"snake_case\"` on \
+                     the morphology enum."
+                );
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod pivot_tests {
     use panini_core::pivot::PivotValueKind;
