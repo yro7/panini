@@ -331,9 +331,6 @@ pub enum TurkishMorphology {
         possessive: Option<TurkishPossessive>,
         person: Option<Person>,
     },
-    Punctuation {
-        lemma: String,
-    },
     SubordinatingConjunction {
         lemma: String,
     },

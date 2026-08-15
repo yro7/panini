@@ -128,8 +128,6 @@ pub enum ItalianMorphology {
     },
     /// Proper noun
     ProperNoun { lemma: String },
-    /// Punctuation
-    Punctuation { lemma: String },
     /// Subordinating conjunction
     SubordinatingConjunction { lemma: String },
     /// Symbol

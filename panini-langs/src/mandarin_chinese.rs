@@ -122,9 +122,6 @@ pub enum MandarinChineseMorphology {
     ProperNoun {
         lemma: String,
     },
-    Punctuation {
-        lemma: String,
-    },
     SubordinatingConjunction {
         lemma: String,
     },
