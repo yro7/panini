@@ -217,7 +217,7 @@ with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
-    use crate::{Arabic, Danish, Polish, Turkish};
+    use crate::{Arabic, Danish, Indonesian, Polish, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
     use panini_core::morpheme::Agglutinative;
@@ -231,12 +231,19 @@ mod tests {
     #[test]
     fn test_agglutinative_inventories_integrity() {
         assert_agglutinative_inventory_valid::<Turkish>();
+        assert_agglutinative_inventory_valid::<Indonesian>();
     }
 
     #[test]
     fn morpheme_segmentation_compatible_with_turkish() {
         let comp = MorphemeSegmentation;
         assert!(comp.is_compatible(&Turkish));
+    }
+
+    #[test]
+    fn morpheme_segmentation_compatible_with_indonesian() {
+        let comp = MorphemeSegmentation;
+        assert!(comp.is_compatible(&Indonesian));
     }
 
     #[test]
