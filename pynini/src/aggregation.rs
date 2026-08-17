@@ -250,7 +250,7 @@ impl PyBasicAggregator {
             }
         }
 
-        dispatch_record!(Polish, Turkish, Arabic, French, Italian);
+        dispatch_record!(Polish, Turkish, French, Italian);
         Ok(())
     }
 }

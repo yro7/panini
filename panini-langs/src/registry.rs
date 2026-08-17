@@ -217,7 +217,7 @@ with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
-    use crate::{Arabic, Danish, Indonesian, Polish, Turkish};
+    use crate::{Danish, Indonesian, Polish, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
     use panini_core::morpheme::Agglutinative;
@@ -253,12 +253,6 @@ mod tests {
     }
 
     #[test]
-    fn morpheme_segmentation_incompatible_with_arabic() {
-        let comp = MorphemeSegmentation;
-        assert!(!comp.is_compatible(&Arabic));
-    }
-
-    #[test]
     fn morpheme_segmentation_incompatible_with_danish() {
         let comp = MorphemeSegmentation;
         assert!(!comp.is_compatible(&Danish));
@@ -281,10 +275,10 @@ mod tests {
         assert!(multi.is_compatible(&Polish));
         assert!(translation.is_compatible(&Polish));
 
-        assert!(ped.is_compatible(&Arabic));
-        assert!(morph.is_compatible(&Arabic));
-        assert!(multi.is_compatible(&Arabic));
-        assert!(translation.is_compatible(&Arabic));
+        assert!(ped.is_compatible(&Danish));
+        assert!(morph.is_compatible(&Danish));
+        assert!(multi.is_compatible(&Danish));
+        assert!(translation.is_compatible(&Danish));
     }
 
     #[test]
