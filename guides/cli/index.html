@@ -1190,11 +1190,11 @@
 <h2 id="configuration-paninitoml">🚀 Configuration (<code>panini.toml</code>)</h2>
 <p>The CLI uses a TOML configuration file to store your API keys and model preferences.</p>
 <div class="language-toml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># panini.toml</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">provider</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;google&quot;</span><span class="w">           </span><span class="c1"># openai | anthropic | google</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">model</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;gemini-2.0-flash&quot;</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">language</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pol&quot;</span><span class="w">              </span><span class="c1"># pol | tur | ara</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">api_key</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;$GEMINI_API_KEY&quot;</span><span class="w">  </span><span class="c1"># Environment variable support</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">prompts_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;panini-cli/prompts/default.yml&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">provider</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">"google"</span><span class="w">           </span><span class="c1"># openai | anthropic | google</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">model</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">"gemini-2.0-flash"</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">language</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">"pol"</span><span class="w">              </span><span class="c1"># pol | tur | ara</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">api_key</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">"$GEMINI_API_KEY"</span><span class="w">  </span><span class="c1"># Environment variable support</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">prompts_file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"panini-cli/prompts/default.yml"</span>
 </span></code></pre></div>
 <hr />
 <h2 id="core-commands">🏗 Core Commands</h2>
@@ -1204,8 +1204,8 @@
 </span></code></pre></div>
 <p><strong>Extraction Result (Simplified):</strong>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;word&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;studentka&quot;</span><span class="p">,</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;morphology&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;lemma&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;studentka&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;pos&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;noun&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;case&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nominative&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">"word"</span><span class="p">:</span><span class="w"> </span><span class="s2">"studentka"</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">"morphology"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"lemma"</span><span class="p">:</span><span class="w"> </span><span class="s2">"studentka"</span><span class="p">,</span><span class="w"> </span><span class="nt">"pos"</span><span class="p">:</span><span class="w"> </span><span class="s2">"noun"</span><span class="p">,</span><span class="w"> </span><span class="nt">"case"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nominative"</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="p">}</span>
 </span></code></pre></div></p>
 <p><strong>Useful Options:</strong>
@@ -1224,7 +1224,7 @@
 <p><strong>Generation Output:</strong>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>[INFO] Analyzing Japanese morphology...
 </span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>[INFO] Generated src/japanese.rs
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>[INFO] Registered &#39;jpn&#39; in registry.rs
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>[INFO] Registered 'jpn' in registry.rs
 </span></code></pre></div></p>
 <div class="admonition warning">
 <p class="admonition-title">LLM Scaffolding Warning</p>
@@ -1237,12 +1237,12 @@
 <h2 id="productivity-tips">🪄 Productivity Tips</h2>
 <h3 id="pipes-and-json-output">Pipes and JSON Output</h3>
 <p>The <code>panini</code> binary outputs pure JSON to stdout. You can use <code>jq</code> to filter results:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span>--target<span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.morphology.target_features&#39;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">"..."</span><span class="w"> </span>--target<span class="w"> </span><span class="s2">"..."</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">'.morphology.target_features'</span>
 </span></code></pre></div>
 <h3 id="logging">Logging</h3>
 <p>Use the <code>RUST_LOG</code> environment variable to see prompt assembly details or API calls:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">RUST_LOG</span><span class="o">=</span>info<span class="w"> </span>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">&quot;...&quot;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nv">RUST_LOG</span><span class="o">=</span>info<span class="w"> </span>panini<span class="w"> </span>extract<span class="w"> </span>--text<span class="w"> </span><span class="s2">"..."</span>
 </span></code></pre></div>
 <hr />
 <div class="admonition tip">
