@@ -16,7 +16,7 @@ use crate::config::{Config, Provider};
 
 const POLISH_EXAMPLE: &str = include_str!("../../panini-langs/src/polish.rs");
 const TURKISH_EXAMPLE: &str = include_str!("../../panini-langs/src/turkish.rs");
-const ARABIC_EXAMPLE: &str = include_str!("../../panini-langs/src/arabic.rs");
+const PORTUGUESE_EXAMPLE: &str = include_str!("../../panini-langs/src/portuguese.rs");
 const TRAITS_DEF: &str = include_str!("../../panini-core/src/traits.rs");
 const MORPHEME_DEF: &str = include_str!("../../panini-core/src/morpheme.rs");
 const SHARED_ENUMS: &str = include_str!("../../panini-core/src/morphology_enums.rs");
@@ -257,8 +257,8 @@ fn build_system_prompt(agglutinative: bool) -> String {
     prompt.push_str(POLISH_EXAMPLE);
     prompt.push_str("\n```\n\n");
 
-    prompt.push_str("### Arabic (complex, non-agglutinative, root+pattern system)\n```rust\n");
-    prompt.push_str(ARABIC_EXAMPLE);
+    prompt.push_str("### Portuguese (Romance, conjugation + agreement)\n```rust\n");
+    prompt.push_str(PORTUGUESE_EXAMPLE);
     prompt.push_str("\n```\n\n");
 
     prompt.push_str("### Turkish (agglutinative, with morpheme inventory)\n```rust\n");

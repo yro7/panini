@@ -27,6 +27,3 @@ serde_json = "1"
 name = "turkish_segmentation"
 path = "src/bin/turkish_segmentation.rs"
 
-[[bin]]
-name = "arabic_pivot_aggregation"
-path = "src/bin/arabic_pivot_aggregation.rs"
