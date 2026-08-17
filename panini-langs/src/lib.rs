@@ -7,7 +7,6 @@
 macro_rules! with_languages {
     ($callback:ident) => {
         $callback! {
-            (arabic, Arabic),
             (danish, Danish),
             (french, French),
             (indonesian, Indonesian),
@@ -205,7 +204,6 @@ mod pos_tag_wire_tests {
 #[cfg(test)]
 mod pivot_tests {
     use panini_core::pivot::PivotValueKind;
-    use panini_core::traits::{BinaryGender, TernaryNumber};
 
     use super::*;
 
@@ -234,29 +232,6 @@ mod pivot_tests {
     }
 
     #[test]
-    fn morphology_open_field_handle_extracts_root() {
-        let morphology = arabic::ArabicMorphology::Noun {
-            lemma: "كتاب".to_string(),
-            root: "ك-ت-ب".to_string(),
-            pattern: None,
-            gender: BinaryGender::Masculine,
-            number: TernaryNumber::Singular,
-            case: arabic::ArabicCase::Nominative,
-            state: arabic::ArabicState::Absolute,
-            definiteness: arabic::ArabicDefiniteness::Indefinite,
-        };
-
-        assert_eq!(
-            arabic::ArabicMorphology::PIVOT_ROOT.value_kind,
-            PivotValueKind::Open
-        );
-        assert_eq!(
-            arabic::ArabicMorphology::PIVOT_ROOT.value(&morphology),
-            Some("ك-ت-ب".to_string())
-        );
-    }
-
-    #[test]
     fn morpheme_function_handle_extracts_matching_category_only() {
         let polarity = turkish::TurkishMorphemeFunction::Polarity {
             value: turkish::TurkishPolarity::Negative,
@@ -273,5 +248,111 @@ mod pivot_tests {
             turkish::TurkishMorphemeFunction::PIVOT_POLARITY.value(&tense),
             None
         );
+    }
+}
+
+#[cfg(test)]
+mod macrolanguage_tests {
+    use panini_core::traits::LinguisticDefinition;
+
+    /// Official ISO 639-3 macrolanguages (SIL International / ISO 639-3 Registration Authority).
+    /// Macrolanguages are administrative umbrellas that conflate multiple distinct individual
+    /// languages with divergent morphological type systems. Panini strictly forbids them.
+    const ISO_639_3_MACROLANGUAGES: &[(&str, &str)] = &[
+        ("aka", "Akan"),
+        (
+            "ara",
+            "Arabic (use 'arb' for Standard Arabic, 'arz', 'apc', etc.)",
+        ),
+        ("aym", "Aymara"),
+        ("aze", "Azerbaijani (use 'azj' or 'azb')"),
+        ("bal", "Balochi"),
+        ("bik", "Bikol"),
+        ("bua", "Buriat"),
+        ("chm", "Mari"),
+        ("cre", "Cree"),
+        ("del", "Delaware"),
+        ("den", "Slave"),
+        ("din", "Dinka"),
+        ("doi", "Dogri"),
+        ("est", "Estonian (use 'ekk' for Standard Estonian)"),
+        (
+            "fas",
+            "Persian (use 'pes' for Western Persian or 'prs' for Dari)",
+        ),
+        ("ful", "Fulah"),
+        ("gba", "Gbaya"),
+        ("gon", "Gondi"),
+        ("grb", "Grebo"),
+        ("hai", "Haida"),
+        ("hbs", "Serbo-Croatian (use 'bos', 'hrv', 'srp', or 'cnr')"),
+        ("hmn", "Hmong"),
+        ("iku", "Inuktitut (use 'ike' or 'ikt')"),
+        ("ipk", "Inupiaq"),
+        ("jrb", "Judeo-Arabic"),
+        ("kln", "Kalenjin"),
+        ("kok", "Konkani"),
+        ("kom", "Komi"),
+        ("kon", "Kongo"),
+        ("kpe", "Kpelle"),
+        ("krn", "Kanuri"),
+        ("kur", "Kurdish (use 'kmr' for Kurmanji, 'ckb' for Sorani)"),
+        ("lah", "Lahnda"),
+        ("man", "Mandingo"),
+        ("mlg", "Malagasy"),
+        ("mon", "Mongolian (use 'khk' for Halh Mongolian)"),
+        (
+            "msa",
+            "Malay (use 'ind' for Indonesian or 'zlm' for Standard Malay)",
+        ),
+        ("mwr", "Marwari"),
+        (
+            "nor",
+            "Norwegian (use 'nob' for Bokmål or 'nno' for Nynorsk)",
+        ),
+        ("oji", "Ojibwa"),
+        ("orm", "Oromo"),
+        ("pus", "Pashto"),
+        ("que", "Quechua"),
+        ("raj", "Rajasthani"),
+        ("rom", "Romany (use 'rmy', 'rmc', etc.)"),
+        ("sqi", "Albanian (use 'als' for Tosk or 'aln' for Gheg)"),
+        ("srd", "Sardinian"),
+        ("swa", "Swahili (use 'swh' for Coastal Swahili)"),
+        ("syr", "Syriac"),
+        ("tmh", "Tamashek"),
+        ("uzb", "Uzbek"),
+        ("yid", "Yiddish (use 'ydd' for Eastern Yiddish)"),
+        ("zap", "Zapotec"),
+        ("zha", "Zhuang"),
+        (
+            "zho",
+            "Chinese (use 'cmn' for Mandarin, 'yue' for Cantonese, etc.)",
+        ),
+        ("zza", "Zaza"),
+    ];
+
+    macro_rules! lang_iso_pair {
+        ($(($module:ident, $struct:ident)),* $(,)?) => {
+            vec![$((stringify!($struct), crate::$module::$struct.iso_code())),*]
+        };
+    }
+
+    #[test]
+    fn no_registered_language_uses_a_macrolanguage() {
+        let languages = with_languages!(lang_iso_pair);
+
+        for (struct_name, iso_code) in languages {
+            if let Some((_, hint)) = ISO_639_3_MACROLANGUAGES
+                .iter()
+                .find(|(macro_code, _)| *macro_code == iso_code)
+            {
+                panic!(
+                    "Language `{struct_name}` is registered with ISO 639-3 code `{iso_code}`, \
+                     which is a MACROLANGUAGE. Panini strictly enforces individual ISO 639-3 \
+                     languages only. Hint: {hint}"
+                );
+            }
+        }
     }
 }

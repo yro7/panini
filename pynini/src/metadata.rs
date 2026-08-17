@@ -39,7 +39,7 @@ pub fn get_language_info(lang_code: &str) -> PyResult<LanguageInfo> {
         }
     }
 
-    dispatch_info!(Polish, Turkish, Arabic, French, Italian)
+    dispatch_info!(Polish, Turkish, French, Italian)
 }
 
 #[pyfunction]
@@ -63,7 +63,7 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
         }
     }
 
-    dispatch_schema!(Polish, Turkish, Arabic, French, Italian)
+    dispatch_schema!(Polish, Turkish, French, Italian)
 }
 
 /// Returns the list of supported ISO 639-3 language codes.
