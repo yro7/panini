@@ -91,7 +91,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignmentV4 {
              with \"nicht\": one discontinuous unit, one number, no special structure. Both \
              full stops take 0 because neither corresponds to anything. And \"n'aime\" would be \
              ONE word of two segments, [\"n'\", \"aime\"], never two words.",
-            ui_lang = ctx.learner_ui_language,
+            ui_lang = ctx.learner_ui_language.to_name(),
             example = EXAMPLE
         )
     }

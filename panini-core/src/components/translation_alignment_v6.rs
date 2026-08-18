@@ -66,7 +66,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignmentV6 {
              \n\
              Worked example — German \"Der Hund sieht den Hund nicht.\" into French:\n\
              {example}",
-            ui_lang = ctx.learner_ui_language,
+            ui_lang = ctx.learner_ui_language.to_name(),
             example = EXAMPLE_V6
         )
     }

@@ -63,7 +63,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                exposing its structure the way \"pomme de terre\" is literally \"apple of \
                earth\". Follow the source's own word order and morphology, not {ui_lang} \
                idiom. Null when it would read the same as `t.x`.",
-            ui_lang = ctx.learner_ui_language
+            ui_lang = ctx.learner_ui_language.to_name()
         )
     }
 

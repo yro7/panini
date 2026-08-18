@@ -75,7 +75,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for LeipzigGloss {
              - Rule 10: Mark reduplication with `~` (e.g. IPFV~buy).\n\
              - Provide `original_script` with the raw unsegmented sentence.\n\
              - Provide `free_translation` as an idiomatic translation in {ui_lang}.",
-            ui_lang = ctx.learner_ui_language
+            ui_lang = ctx.learner_ui_language.to_name()
         )
     }
 

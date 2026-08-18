@@ -51,7 +51,7 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
 const fn create_request(
     text: String,
     targets: Vec<String>,
-    ui_language: String,
+    ui_language: IsoLang,
 ) -> ExtractionRequest {
     ExtractionRequest {
         content: text,
@@ -81,6 +81,8 @@ async fn do_extract(
 ) -> anyhow::Result<Value> {
     let language = IsoLang::from_639_3(&language)
         .ok_or_else(|| anyhow::anyhow!("Unsupported ISO 639-3 language: {language}"))?;
+    let ui_language = IsoLang::from_name(&ui_language)
+        .ok_or_else(|| anyhow::anyhow!("Unsupported UI language name: {ui_language}"))?;
     let request = create_request(text, targets, ui_language);
 
     let component_refs: Option<Vec<&str>> = components

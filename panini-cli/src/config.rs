@@ -1,5 +1,7 @@
 use panini_core::traits::IsoLang;
 use serde::Deserialize;
+use std::path::PathBuf;
+use url::Url;
 
 /// Top-level configuration loaded from a TOML file.
 #[derive(Debug, Deserialize)]
@@ -15,9 +17,9 @@ pub struct Config {
     pub api_key: String,
     /// Optional custom base URL for the provider's API endpoint.
     #[allow(dead_code)] // For future implementation
-    pub base_url: Option<String>,
+    pub base_url: Option<Url>,
     /// Optional path to a custom prompts YAML file.
-    pub prompts_file: Option<String>,
+    pub prompts_file: Option<PathBuf>,
 }
 
 fn deserialize_iso_lang<'de, D>(deserializer: D) -> Result<IsoLang, D::Error>

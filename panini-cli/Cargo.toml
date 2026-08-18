@@ -29,3 +29,4 @@ tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 isolang = { version = "2.4.0", features = ["english_names"] }
+url = { version = "2", features = ["serde"] }

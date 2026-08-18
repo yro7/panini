@@ -140,13 +140,12 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     components: &[&dyn AnalysisComponent<L>],
 ) -> Result<String, crate::prompts::PromptBuilderError> {
     use crate::prompts::interpolate;
-    use isolang::Language as IsoLang;
     use std::collections::HashMap;
 
     let cfg = extractor_prompts;
 
-    let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
+    let ui_language = request.learner_ui_language;
+    let ui_lang_name = ui_language.to_name();
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -157,8 +156,8 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", lang.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
-    global_ctx.insert("name", ui_lang_name.clone());
+    global_ctx.insert("iso", ui_language.to_639_3().to_string());
+    global_ctx.insert("name", ui_lang_name.to_string());
     global_ctx.insert("context_description", context_description.to_string());
 
     // Pedagogical context blocks (learner profile, skill context, user context)
@@ -196,7 +195,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
         // Learner profile section
         let wrapped_profile = cfg
             .learner_profile
-            .build_prompt(ui_lang_name, &request.linguistic_background)?;
+            .build_prompt(ui_language, &request.linguistic_background)?;
         blocks.push(wrapped_profile);
 
         // Skill context section
@@ -222,7 +221,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     // Component-specific prompt fragments
     let comp_ctx = ComponentContext {
         targets: &request.targets,
-        learner_ui_language: &request.learner_ui_language,
+        learner_ui_language: request.learner_ui_language,
         pedagogical_context: request.pedagogical_context.as_deref(),
         skill_path: request.skill_path.as_deref(),
         linguistic_background: &request.linguistic_background,
@@ -583,7 +582,7 @@ mod tests {
             targets: vec![],
             pedagogical_context: Some("Generate a cloze exercise.".to_string()),
             skill_path: Some("Basics > Greetings".to_string()),
-            learner_ui_language: "English".to_string(),
+            learner_ui_language: IsoLang::Eng,
             linguistic_background: vec![],
             user_prompt: Some("food vocabulary".to_string()),
         }

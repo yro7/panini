@@ -109,7 +109,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignmentV5 {
              Notice how the two \"Hund\" receive DIFFERENT group numbers (2 and 5) because they map \
              to two distinct \"chien\". The discontinuous negation \"ne ... pas\" correctly shares \
              group 6 with \"nicht\".",
-            ui_lang = ctx.learner_ui_language,
+            ui_lang = ctx.learner_ui_language.to_name(),
             example = EXAMPLE_V5
         )
     }
