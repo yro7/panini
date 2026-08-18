@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use panini_core::traits::IsoLang;
+use serde::Deserialize;
 
 /// Top-level configuration loaded from a TOML file.
 #[derive(Debug, Deserialize)]
@@ -25,9 +25,8 @@ where
     D: serde::Deserializer<'de>,
 {
     let code = String::deserialize(deserializer)?;
-    IsoLang::from_639_3(&code).ok_or_else(|| {
-        serde::de::Error::custom(format!("invalid ISO 639-3 language code: {code}"))
-    })
+    IsoLang::from_639_3(&code)
+        .ok_or_else(|| serde::de::Error::custom(format!("invalid ISO 639-3 language code: {code}")))
 }
 
 #[derive(Debug, Deserialize, Clone, Copy)]
