@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
             targets: vec![], // Automated: extracts everything in context
             pedagogical_context: None,
             skill_path: None,
-            learner_ui_language: "English".to_string(),
+            learner_ui_language: IsoLang::Eng,
             linguistic_background: vec![],
             user_prompt: None,
         };

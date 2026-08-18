@@ -81,7 +81,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for PedagogicalExplanation {
     fn prompt_fragment(&self, _lang: &L, ctx: &ComponentContext) -> String {
         let mut s = format!(
             "Write a clear, pedagogically useful explanation of the sentence in {}.",
-            ctx.learner_ui_language
+            ctx.learner_ui_language.to_name()
         );
         if !ctx.linguistic_background.is_empty() {
             s.push_str(

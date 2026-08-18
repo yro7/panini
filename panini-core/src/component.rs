@@ -9,13 +9,43 @@ use crate::traits::{IsoLang, LinguisticDefinition};
 #[derive(Debug, Clone)]
 pub struct LanguageLevel {
     pub iso_639_3: IsoLang,
-    pub level: String,
+    pub level: ProficiencyLevel,
+}
+
+/// Proficiency scale used by Panglotive's learner profile.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProficiencyLevel {
+    Beginner,
+    Intermediate,
+    Advanced,
+    Fluent,
+    Native,
+}
+
+/// TODO: refactor avec l'imp de Panglotive
+impl ProficiencyLevel {
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Beginner => "Beginner",
+            Self::Intermediate => "Intermediate",
+            Self::Advanced => "Advanced",
+            Self::Fluent => "Fluent",
+            Self::Native => "Native",
+        }
+    }
+}
+
+impl std::fmt::Display for ProficiencyLevel {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(self.as_str())
+    }
 }
 
 /// Context passed to components during schema/prompt generation.
 pub struct ComponentContext<'a> {
     pub targets: &'a [String],
-    pub learner_ui_language: &'a str,
+    pub learner_ui_language: IsoLang,
     pub pedagogical_context: Option<&'a str>,
     pub skill_path: Option<&'a str>,
     pub linguistic_background: &'a [LanguageLevel],

@@ -24,7 +24,7 @@ pub use aggregable::{Aggregable, AggregableFields, ClosedValues, FieldDescriptor
 pub use alignment::{AlignedSegment, AlignedSentence, AlignedTranslation, AlignmentLink, CharSpan};
 pub use component::{
     Aggregating, AggregationError, AnalysisComponent, ComponentContext, ComponentRequires,
-    ExtractionResult, ExtractionResultError, LanguageLevel,
+    ExtractionResult, ExtractionResultError, LanguageLevel, ProficiencyLevel,
 };
 pub use explanation::{
     GrammarRecap, MarkupKind, MarkupRun, StructuredExplanation, parse_markup, plain_text,

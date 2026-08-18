@@ -941,7 +941,7 @@ mod tests {
                 .collect(),
             pedagogical_context: None,
             skill_path: None,
-            learner_ui_language: "English".to_string(),
+            learner_ui_language: IsoLang::Eng,
             linguistic_background: vec![],
             user_prompt: None,
         }
@@ -1119,7 +1119,7 @@ mod tests {
             targets: vec![],
             pedagogical_context: None,
             skill_path: None,
-            learner_ui_language: "English".to_string(),
+            learner_ui_language: IsoLang::Eng,
             linguistic_background: vec![],
             user_prompt: None,
         };
@@ -1159,7 +1159,7 @@ mod tests {
             targets: vec!["content".to_string()],
             pedagogical_context: None,
             skill_path: None,
-            learner_ui_language: "English".to_string(),
+            learner_ui_language: IsoLang::Eng,
             linguistic_background: vec![],
             user_prompt: None,
         };
