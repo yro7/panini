@@ -36,7 +36,7 @@ pub mod registry;
 #[cfg(test)]
 mod lang_digest_tests {
     use panini_core::lang_digest::LanguageDigest;
-    use panini_core::traits::LinguisticDefinition;
+    use panini_core::traits::{IsoLang, LinguisticDefinition};
 
     use super::*;
 
@@ -110,7 +110,7 @@ mod lang_digest_tests {
         let morphology_only = LanguageDigest::compute::<
             <turkish::Turkish as LinguisticDefinition>::Morphology,
             (),
-        >(turkish::Turkish.iso_code());
+        >(IsoLang::Tur);
 
         assert!(
             !<turkish::Turkish as LinguisticDefinition>::MorphemeFunction::function_descriptors()
@@ -342,15 +342,16 @@ mod macrolanguage_tests {
     fn no_registered_language_uses_a_macrolanguage() {
         let languages = with_languages!(lang_iso_pair);
 
-        for (struct_name, iso_code) in languages {
+        for (struct_name, iso_lang) in languages {
             if let Some((_, hint)) = ISO_639_3_MACROLANGUAGES
                 .iter()
-                .find(|(macro_code, _)| *macro_code == iso_code)
+                .find(|(macro_code, _)| *macro_code == iso_lang.to_639_3())
             {
                 panic!(
                     "Language `{struct_name}` is registered with ISO 639-3 code `{iso_code}`, \
                      which is a MACROLANGUAGE. Panini strictly enforces individual ISO 639-3 \
-                     languages only. Hint: {hint}"
+                     languages only. Hint: {hint}",
+                    iso_code = iso_lang.to_639_3()
                 );
             }
         }
