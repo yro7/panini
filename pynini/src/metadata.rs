@@ -1,8 +1,8 @@
 #![allow(clippy::useless_conversion)]
 
+use panini_core::traits::IsoLang;
 use pyo3::prelude::*;
 use pythonize::pythonize;
-use panini_core::traits::{IsoLang, LinguisticDefinition};
 
 use panini_langs::registry;
 
@@ -78,7 +78,7 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
 pub fn supported_languages() -> Vec<&'static str> {
     registry::supported_languages()
         .into_iter()
-        .map(IsoLang::to_639_3)
+        .map(|lang| lang.to_639_3())
         .collect()
 }
 

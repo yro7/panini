@@ -6,8 +6,8 @@ use pyo3_async_runtimes::tokio::future_into_py;
 use pythonize::{depythonize, pythonize};
 use serde_json::Value;
 
-use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_core::traits::IsoLang;
+use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
 use rig::client::CompletionClient;
 use rig::providers::{anthropic, gemini, openai};

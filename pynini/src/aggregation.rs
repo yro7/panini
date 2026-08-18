@@ -193,9 +193,7 @@ impl PyBasicAggregator {
         pivot_callback: Option<PyObject>,
     ) -> PyResult<()> {
         let lang_code = IsoLang::from_639_3(lang_code).ok_or_else(|| {
-            pyo3::exceptions::PyValueError::new_err(format!(
-                "Invalid ISO 639-3 code: {lang_code}"
-            ))
+            pyo3::exceptions::PyValueError::new_err(format!("Invalid ISO 639-3 code: {lang_code}"))
         })?;
         let agg = self.inner_mut()?;
 
