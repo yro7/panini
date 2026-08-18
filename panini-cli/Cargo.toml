@@ -15,6 +15,7 @@ name = "panini"
 path = "src/main.rs"
 
 [dependencies]
+panini-core = { version = "0.3.0", path = "../panini-core", package = "panini-lang-core" }
 panini-engine = { version = "0.3.0", path = "../panini-engine", package = "panini-lang-engine" }
 panini-langs = { version = "0.3.0", path = "../panini-langs", features = ["registry"], package = "panini-lang-langs" }
 rig-core = "0.33"

@@ -4,9 +4,9 @@ mod config;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use config::{Config, Provider};
+use panini_core::traits::IsoLang;
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
-use panini_core::traits::IsoLang;
 use rig::client::CompletionClient;
 
 // ---------------------------------------------------------------------------
@@ -125,9 +125,8 @@ async fn main() -> Result<()> {
             let iso_code = iso_code
                 .as_deref()
                 .map(|code| {
-                    IsoLang::from_639_3(code).ok_or_else(|| {
-                        anyhow::anyhow!("Invalid ISO 639-3 code: {code}")
-                    })
+                    IsoLang::from_639_3(code)
+                        .ok_or_else(|| anyhow::anyhow!("Invalid ISO 639-3 code: {code}"))
                 })
                 .transpose()?;
 

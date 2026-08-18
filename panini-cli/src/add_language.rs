@@ -149,7 +149,7 @@ async fn generate_with_retries<M: CompletionModel>(
             .with_context(|| format!("Writing {}", lang_file.display()))?;
 
         // Patch lib.rs and registry.rs (idempotent — re-patches on retry).
-        let iso = iso_code.map_or("xxx", IsoLang::to_639_3);
+        let iso = iso_code.map_or("xxx", |lang| lang.to_639_3());
         patch_lib_rs(workspace_root, module_name)?;
         patch_registry_rs(workspace_root, module_name, struct_name, iso)?;
 
