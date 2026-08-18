@@ -6,6 +6,7 @@ use clap::{Parser, Subcommand};
 use config::{Config, Provider};
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
+use panini_core::traits::IsoLang;
 use rig::client::CompletionClient;
 
 // ---------------------------------------------------------------------------
@@ -107,7 +108,7 @@ async fn main() -> Result<()> {
     match cli.command {
         Command::Languages => {
             for code in registry::supported_languages() {
-                println!("{code}");
+                println!("{}", code.to_639_3());
             }
         }
         Command::AddLanguage {
@@ -121,10 +122,19 @@ async fn main() -> Result<()> {
             let config = Config::load(&config_path)
                 .with_context(|| format!("Loading config from '{config_path}'"))?;
 
+            let iso_code = iso_code
+                .as_deref()
+                .map(|code| {
+                    IsoLang::from_639_3(code).ok_or_else(|| {
+                        anyhow::anyhow!("Invalid ISO 639-3 code: {code}")
+                    })
+                })
+                .transpose()?;
+
             add_language::run(
                 &config,
                 &language,
-                iso_code.as_deref(),
+                iso_code,
                 agglutinative,
                 temperature,
                 skip_check,
@@ -198,7 +208,7 @@ async fn run_component_extraction(
                 .map_err(|e| anyhow::anyhow!("Failed to create OpenAI client: {e}"))?;
             let model = client.completion_model(&config.model);
             let result = registry::extract_erased_with_components(
-                &config.language,
+                config.language,
                 &model,
                 request,
                 component_keys,
@@ -212,7 +222,7 @@ async fn run_component_extraction(
                 .map_err(|e| anyhow::anyhow!("Failed to create Anthropic client: {e}"))?;
             let model = client.completion_model(&config.model);
             let result = registry::extract_erased_with_components(
-                &config.language,
+                config.language,
                 &model,
                 request,
                 component_keys,
@@ -226,7 +236,7 @@ async fn run_component_extraction(
                 .map_err(|e| anyhow::anyhow!("Failed to create Gemini client: {e}"))?;
             let model = client.completion_model(&config.model);
             let result = registry::extract_erased_with_components(
-                &config.language,
+                config.language,
                 &model,
                 request,
                 component_keys,

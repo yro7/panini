@@ -2,6 +2,7 @@ use anyhow::Result;
 use dotenv::dotenv;
 use panini_core::component::ExtractionResult;
 use panini_core::morpheme::WordSegmentation;
+use panini_core::traits::IsoLang;
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
 use panini_langs::turkish::TurkishMorphemeFunction;
@@ -61,7 +62,7 @@ async fn main() -> Result<()> {
         options.max_tokens = 8192;
 
         let result: ExtractionResult = registry::extract_erased_with_components(
-            "tur",
+            IsoLang::Tur,
             &model,
             &request,
             Some(&["morpheme_segmentation"]),

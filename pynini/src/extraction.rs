@@ -7,6 +7,7 @@ use pythonize::{depythonize, pythonize};
 use serde_json::Value;
 
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
+use panini_core::traits::IsoLang;
 use panini_langs::registry;
 use rig::client::CompletionClient;
 use rig::providers::{anthropic, gemini, openai};
@@ -78,6 +79,8 @@ async fn do_extract(
     max_tokens: u32,
     components: Option<Vec<String>>,
 ) -> anyhow::Result<Value> {
+    let language = IsoLang::from_639_3(&language)
+        .ok_or_else(|| anyhow::anyhow!("Unsupported ISO 639-3 language: {language}"))?;
     let request = create_request(text, targets, ui_language);
 
     let component_refs: Option<Vec<&str>> = components
@@ -94,7 +97,7 @@ async fn do_extract(
                 .map_err(|e| anyhow::anyhow!("OpenAI init error: {e}"))?;
             let model = client.completion_model(&model_name);
             let result = registry::extract_erased_with_components(
-                &language,
+                language,
                 &model,
                 &request,
                 component_refs.as_deref(),
@@ -108,7 +111,7 @@ async fn do_extract(
                 .map_err(|e| anyhow::anyhow!("Anthropic init error: {e}"))?;
             let model = client.completion_model(&model_name);
             let result = registry::extract_erased_with_components(
-                &language,
+                language,
                 &model,
                 &request,
                 component_refs.as_deref(),
@@ -122,7 +125,7 @@ async fn do_extract(
                 .map_err(|e| anyhow::anyhow!("Google init error: {e}"))?;
             let model = client.completion_model(&model_name);
             let result = registry::extract_erased_with_components(
-                &language,
+                language,
                 &model,
                 &request,
                 component_refs.as_deref(),

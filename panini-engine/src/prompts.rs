@@ -42,13 +42,12 @@ impl LearnerProfile {
         ui_lang_name: &str,
         linguistic_background: &[panini_core::component::LanguageLevel],
     ) -> Result<String, PromptBuilderError> {
-        let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
-            .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+        let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
 
         let mut global_ctx = HashMap::new();
         global_ctx.insert("language", ui_lang_name.to_string());
         global_ctx.insert("name", ui_lang_name.to_string());
-        global_ctx.insert("iso", ui_lang_iso_code);
+        global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
 
         let mut learner_profile_content = String::new();
 
@@ -62,7 +61,7 @@ impl LearnerProfile {
 
             for lang in linguistic_background {
                 let mut ctx = global_ctx.clone();
-                ctx.insert("iso", lang.iso_639_3.clone());
+                ctx.insert("iso", lang.iso_639_3.to_639_3().to_string());
                 ctx.insert("level", lang.level.clone());
                 let entry = interpolate(&self.linguistic_background_entry, &ctx)?;
                 learner_profile_content.push_str(&entry);
@@ -214,8 +213,7 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
-        .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -226,7 +224,7 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", language.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code);
+    global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
     global_ctx.insert("name", ui_lang_name.clone());
     global_ctx.insert("context_description", context_description.to_string());
 

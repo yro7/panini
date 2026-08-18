@@ -11,7 +11,7 @@ use panini_core::aggregable::digest::{
 use panini_core::aggregable::Aggregable;
 use panini_core::component::{AggregationError, AnalysisComponent, ExtractionResult};
 use panini_core::components::{MorphemeSegmentation, MorphologyAnalysis};
-use panini_core::traits::LinguisticDefinition;
+use panini_core::traits::{IsoLang, LinguisticDefinition};
 
 #[pyclass(name = "Distribution")]
 #[derive(Clone)]
@@ -192,13 +192,18 @@ impl PyBasicAggregator {
         value: serde_json::Value,
         pivot_callback: Option<PyObject>,
     ) -> PyResult<()> {
+        let lang_code = IsoLang::from_639_3(lang_code).ok_or_else(|| {
+            pyo3::exceptions::PyValueError::new_err(format!(
+                "Invalid ISO 639-3 code: {lang_code}"
+            ))
+        })?;
         let agg = self.inner_mut()?;
 
         macro_rules! dispatch_record {
             ($($lang:ident),*) => {
                 match lang_code {
                     $(
-                        s if s == <panini_langs::$lang as LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                        s if s == <panini_langs::$lang as LinguisticDefinition>::ISO_LANG => {
                             use panini_langs::$lang;
                             use panini_core::domain::TokenAnalysis;
 
@@ -245,7 +250,7 @@ impl PyBasicAggregator {
                             }
                         }
                     )*
-                    _ => return Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code))),
+                    _ => return Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code.to_639_3()))),
                 }
             }
         }
