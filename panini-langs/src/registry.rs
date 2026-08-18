@@ -11,6 +11,7 @@ use panini_core::components::{
     LeipzigGloss, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
     PedagogicalExplanation, TranslationAlignment,
 };
+use panini_core::traits::IsoLang;
 use panini_engine::{
     ExtractionOptions, ExtractionRequest, extract_with_components, extract_with_components_executor,
 };
@@ -151,15 +152,15 @@ macro_rules! generate_registry {
         /// # Errors
         /// Returns an error if the language code is unsupported, or if extraction fails.
         pub async fn extract_erased_with_components<M: CompletionModel + Sync>(
-            lang_code: &str,
+            lang: IsoLang,
             model: &M,
             request: &ExtractionRequest,
             component_keys: Option<&[&str]>,
             options: ExtractionOptions<'_>,
         ) -> Result<ExtractionResult> {
-            match lang_code {
+            match lang {
                 $(
-                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG => {
                         extract_for_language(
                             &$crate::$lang,
                             model,
@@ -170,7 +171,7 @@ macro_rules! generate_registry {
                         .await
                     }
                 )*
-                _ => Err(anyhow!("Unsupported language: {lang_code}")),
+                _ => Err(anyhow!("Unsupported language: {}", lang.to_639_3())),
             }
         }
 
@@ -182,15 +183,15 @@ macro_rules! generate_registry {
         /// # Errors
         /// Returns an error if the language code is unsupported, or if extraction fails.
         pub async fn extract_erased_with_components_executor<E: panini_engine::structured_llm::StructuredLlmExecutor>(
-            lang_code: &str,
+            lang: IsoLang,
             executor: &E,
             request: &ExtractionRequest,
             component_keys: Option<&[&str]>,
             options: ExtractionOptions<'_>,
         ) -> Result<ExtractionResult> {
-            match lang_code {
+            match lang {
                 $(
-                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG => {
                         extract_for_language_executor(
                             &$crate::$lang,
                             executor,
@@ -201,13 +202,13 @@ macro_rules! generate_registry {
                         .await
                     }
                 )*
-                _ => Err(anyhow!("Unsupported language: {lang_code}")),
+                _ => Err(anyhow!("Unsupported language: {}", lang.to_639_3())),
             }
         }
 
         /// Returns all supported ISO 639-3 language codes.
-        pub fn supported_languages() -> Vec<&'static str> {
-            vec![$(<$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG.to_639_3()),*]
+        pub fn supported_languages() -> Vec<IsoLang> {
+            vec![$(<$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG),*]
         }
     };
 }

@@ -2,6 +2,7 @@
 
 use pyo3::prelude::*;
 use pythonize::pythonize;
+use panini_core::traits::{IsoLang, LinguisticDefinition};
 
 use panini_langs::registry;
 
@@ -19,11 +20,14 @@ pub struct LanguageInfo {
 
 #[pyfunction]
 pub fn get_language_info(lang_code: &str) -> PyResult<LanguageInfo> {
+    let lang_code = IsoLang::from_639_3(lang_code).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err(format!("Invalid ISO 639-3 code: {lang_code}"))
+    })?;
     macro_rules! dispatch_info {
         ($($lang:ident),*) => {
             match lang_code {
                 $(
-                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG => {
                         use panini_core::traits::LinguisticDefinition;
                         let lang = panini_langs::$lang;
                         Ok(LanguageInfo {
@@ -34,7 +38,7 @@ pub fn get_language_info(lang_code: &str) -> PyResult<LanguageInfo> {
                         })
                     }
                 )*
-                _ => Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code))),
+                _ => Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code.to_639_3()))),
             }
         }
     }
@@ -44,11 +48,14 @@ pub fn get_language_info(lang_code: &str) -> PyResult<LanguageInfo> {
 
 #[pyfunction]
 pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
+    let lang_code = IsoLang::from_639_3(lang_code).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err(format!("Invalid ISO 639-3 code: {lang_code}"))
+    })?;
     macro_rules! dispatch_schema {
         ($($lang:ident),*) => {
             match lang_code {
                 $(
-                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG.to_639_3() => {
+                    s if s == <panini_langs::$lang as panini_core::traits::LinguisticDefinition>::ISO_LANG => {
                         use panini_core::component::AnalysisComponent;
                         use panini_core::components::MorphologyAnalysis;
                         let lang = panini_langs::$lang;
@@ -58,7 +65,7 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
                         })
                     }
                 )*
-                _ => Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code))),
+                _ => Err(pyo3::exceptions::PyValueError::new_err(format!("Unsupported language: {}", lang_code.to_639_3()))),
             }
         }
     }
@@ -70,6 +77,9 @@ pub fn get_morphology_schema(lang_code: &str) -> PyResult<PyObject> {
 #[pyfunction]
 pub fn supported_languages() -> Vec<&'static str> {
     registry::supported_languages()
+        .into_iter()
+        .map(IsoLang::to_639_3)
+        .collect()
 }
 
 /// Returns the current package version.

@@ -146,8 +146,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let cfg = extractor_prompts;
 
     let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name)
-        .map_or_else(|| "eng".to_string(), |lang| lang.to_639_3().to_string());
+    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -158,7 +157,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", lang.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code);
+    global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
     global_ctx.insert("name", ui_lang_name.clone());
     global_ctx.insert("context_description", context_description.to_string());
 

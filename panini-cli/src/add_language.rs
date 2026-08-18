@@ -11,6 +11,7 @@ use rig::client::CompletionClient;
 use rig::completion::CompletionModel;
 
 use crate::config::{Config, Provider};
+use panini_core::traits::IsoLang;
 
 // ─── Embedded source files (compile-time) ────────────────────────────────────
 
@@ -26,17 +27,11 @@ const SHARED_ENUMS: &str = include_str!("../../panini-core/src/morphology_enums.
 pub async fn run(
     config: &Config,
     language: &str,
-    iso_code: Option<&str>,
+    iso_code: Option<IsoLang>,
     agglutinative: bool,
     temperature: f32,
     skip_check: bool,
 ) -> Result<()> {
-    // Validate ISO code if provided.
-    if let Some(code) = iso_code {
-        isolang::Language::from_639_3(code)
-            .ok_or_else(|| anyhow!("ISO 639-3 code '{code}' not found in the isolang crate"))?;
-    }
-
     let workspace_root = find_workspace_root()?;
     let module_name = language.to_lowercase().replace([' ', '-'], "_");
     let struct_name = to_pascal_case(language);
@@ -122,7 +117,7 @@ pub async fn run(
 async fn generate_with_retries<M: CompletionModel>(
     model: &M,
     language: &str,
-    iso_code: Option<&str>,
+    iso_code: Option<IsoLang>,
     agglutinative: bool,
     temperature: f32,
     workspace_root: &Path,
@@ -154,7 +149,7 @@ async fn generate_with_retries<M: CompletionModel>(
             .with_context(|| format!("Writing {}", lang_file.display()))?;
 
         // Patch lib.rs and registry.rs (idempotent — re-patches on retry).
-        let iso = iso_code.unwrap_or("xxx");
+        let iso = iso_code.map_or("xxx", IsoLang::to_639_3);
         patch_lib_rs(workspace_root, module_name)?;
         patch_registry_rs(workspace_root, module_name, struct_name, iso)?;
 
@@ -190,7 +185,7 @@ async fn generate_with_retries<M: CompletionModel>(
 async fn call_llm<M: CompletionModel>(
     model: &M,
     language: &str,
-    iso_code: Option<&str>,
+    iso_code: Option<IsoLang>,
     agglutinative: bool,
     temperature: f32,
     previous_error: Option<&str>,
@@ -306,7 +301,7 @@ fn build_system_prompt(agglutinative: bool) -> String {
 
 fn build_user_prompt(
     language: &str,
-    iso_code: Option<&str>,
+    iso_code: Option<IsoLang>,
     agglutinative: bool,
     previous_error: Option<&str>,
 ) -> String {
@@ -314,7 +309,7 @@ fn build_user_prompt(
 
     if let Some(code) = iso_code {
         use std::fmt::Write;
-        write!(prompt, " (ISO 639-3: {code})").unwrap();
+        write!(prompt, " (ISO 639-3: {})", code.to_639_3()).unwrap();
     }
 
     if agglutinative {

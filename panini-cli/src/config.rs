@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use panini_core::traits::IsoLang;
 
 /// Top-level configuration loaded from a TOML file.
 #[derive(Debug, Deserialize)]
@@ -7,8 +8,9 @@ pub struct Config {
     pub provider: Provider,
     /// Model identifier (e.g. "gpt-4o", "claude-3-5-sonnet-20241022")
     pub model: String,
-    /// ISO 639-3 language code (e.g. "pol", "tur", "ara")
-    pub language: String,
+    /// ISO 639-3 language (e.g. `pol`, `tur`, `ara`).
+    #[serde(deserialize_with = "deserialize_iso_lang")]
+    pub language: IsoLang,
     /// API key — can be a plain string or "${`ENV_VAR`}" to read from the environment.
     pub api_key: String,
     /// Optional custom base URL for the provider's API endpoint.
@@ -16,6 +18,16 @@ pub struct Config {
     pub base_url: Option<String>,
     /// Optional path to a custom prompts YAML file.
     pub prompts_file: Option<String>,
+}
+
+fn deserialize_iso_lang<'de, D>(deserializer: D) -> Result<IsoLang, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let code = String::deserialize(deserializer)?;
+    IsoLang::from_639_3(&code).ok_or_else(|| {
+        serde::de::Error::custom(format!("invalid ISO 639-3 language code: {code}"))
+    })
 }
 
 #[derive(Debug, Deserialize, Clone, Copy)]

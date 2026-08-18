@@ -3,12 +3,12 @@ use std::fmt::Debug;
 use serde::de::DeserializeOwned;
 
 use crate::aggregable::digest::AggregationSink;
-use crate::traits::LinguisticDefinition;
+use crate::traits::{IsoLang, LinguisticDefinition};
 
 /// A language the learner already speaks, with proficiency level.
 #[derive(Debug, Clone)]
 pub struct LanguageLevel {
-    pub iso_639_3: String,
+    pub iso_639_3: IsoLang,
     pub level: String,
 }
 

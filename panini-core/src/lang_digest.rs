@@ -32,7 +32,7 @@
 use std::fmt;
 
 use crate::aggregable::{FieldDescriptor, FieldKind};
-use crate::traits::{MorphemeFunctionCatalog, MorphologyCatalog};
+use crate::traits::{IsoLang, MorphemeFunctionCatalog, MorphologyCatalog};
 
 /// Field separator inside one descriptor line. A control character, so it can
 /// never occur in a Rust identifier or serde rename and blur two fields into one.
@@ -45,7 +45,7 @@ const UNIT: char = '\u{1f}';
 /// value space, and nothing more specific than that.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct LanguageDigest {
-    iso_code: &'static str,
+    iso_code: IsoLang,
     hash: u64,
 }
 
@@ -53,7 +53,7 @@ impl LanguageDigest {
     /// Compute the digest for a language definition's morphology and morpheme
     /// function catalogs.
     #[must_use]
-    pub fn compute<M, F>(iso_code: &'static str) -> Self
+    pub fn compute<M, F>(iso_code: IsoLang) -> Self
     where
         M: MorphologyCatalog,
         F: MorphemeFunctionCatalog,
@@ -95,7 +95,7 @@ impl LanguageDigest {
 
     /// The ISO 639-3 code this digest was computed for.
     #[must_use]
-    pub const fn iso_code(&self) -> &'static str {
+    pub const fn iso_code(&self) -> IsoLang {
         self.iso_code
     }
 
@@ -108,7 +108,7 @@ impl LanguageDigest {
 
 impl fmt::Display for LanguageDigest {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{:016x}", self.iso_code, self.hash)
+        write!(f, "{}:{:016x}", self.iso_code.to_639_3(), self.hash)
     }
 }
 
@@ -236,16 +236,16 @@ mod tests {
     #[test]
     fn digest_is_stable_across_runs() {
         assert_eq!(
-            LanguageDigest::compute::<Morph, ()>("tur"),
-            LanguageDigest::compute::<Morph, ()>("tur")
+            LanguageDigest::compute::<Morph, ()>(IsoLang::Tur),
+            LanguageDigest::compute::<Morph, ()>(IsoLang::Tur)
         );
     }
 
     #[test]
     fn digest_ignores_declaration_order_and_labels() {
         assert_eq!(
-            LanguageDigest::compute::<Morph, ()>("tur"),
-            LanguageDigest::compute::<MorphReordered, ()>("tur"),
+            LanguageDigest::compute::<Morph, ()>(IsoLang::Tur),
+            LanguageDigest::compute::<MorphReordered, ()>(IsoLang::Tur),
             "reordering variants and rewording a label changes no stored data"
         );
     }
@@ -253,8 +253,8 @@ mod tests {
     #[test]
     fn digest_moves_when_a_variant_is_added() {
         assert_ne!(
-            LanguageDigest::compute::<Morph, ()>("tur"),
-            LanguageDigest::compute::<MorphExtraCase, ()>("tur"),
+            LanguageDigest::compute::<Morph, ()>(IsoLang::Tur),
+            LanguageDigest::compute::<MorphExtraCase, ()>(IsoLang::Tur),
             "a new case widens what stored cards may contain"
         );
     }
@@ -262,16 +262,16 @@ mod tests {
     #[test]
     fn digest_moves_when_morpheme_functions_change() {
         assert_ne!(
-            LanguageDigest::compute::<Morph, ()>("tur"),
-            LanguageDigest::compute::<Morph, Func>("tur"),
+            LanguageDigest::compute::<Morph, ()>(IsoLang::Tur),
+            LanguageDigest::compute::<Morph, Func>(IsoLang::Tur),
             "morpheme functions are part of the value space"
         );
     }
 
     #[test]
     fn digest_distinguishes_languages_sharing_a_value_space() {
-        let turkish = LanguageDigest::compute::<Morph, ()>("tur");
-        let polish = LanguageDigest::compute::<Morph, ()>("pol");
+        let turkish = LanguageDigest::compute::<Morph, ()>(IsoLang::Tur);
+        let polish = LanguageDigest::compute::<Morph, ()>(IsoLang::Pol);
 
         assert_ne!(turkish, polish);
         assert_eq!(
@@ -283,7 +283,7 @@ mod tests {
 
     #[test]
     fn digest_renders_as_prefixed_hex() {
-        let rendered = LanguageDigest::compute::<Morph, ()>("tur").to_string();
+        let rendered = LanguageDigest::compute::<Morph, ()>(IsoLang::Tur).to_string();
 
         let (iso, hash) = rendered.split_once(':').expect("digest is prefixed");
         assert_eq!(iso, "tur");

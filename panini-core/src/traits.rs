@@ -258,9 +258,9 @@ pub trait LinguisticDefinition {
     /// example `TurkishMorphemeFunction::PIVOT_POLARITY`.
     const MORPHEME_PIVOTS: &'static [crate::pivot::PivotField<Self::MorphemeFunction>] = &[];
 
-    /// Returns the ISO 639-3 three-letter code string (e.g. `"pol"`, `"tur"`, `"fra"`).
-    fn iso_code(&self) -> &'static str {
-        Self::ISO_LANG.to_639_3()
+    /// Returns the typed ISO 639 language identity.
+    fn iso_code(&self) -> IsoLang {
+        Self::ISO_LANG
     }
 
     /// The English name of the language, auto-derived from `ISO_LANG`.
