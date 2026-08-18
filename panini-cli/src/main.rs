@@ -153,13 +153,15 @@ async fn main() -> Result<()> {
                 .with_context(|| format!("Loading config from '{config_path}'"))?;
 
             let prompts = load_prompts(&config)?;
+            let learner_ui_language = IsoLang::from_name(&ui_language)
+                .ok_or_else(|| anyhow::anyhow!("Invalid UI language name: {ui_language}"))?;
 
             let request = ExtractionRequest {
                 content: text,
                 targets,
                 pedagogical_context: None,
                 skill_path: None,
-                learner_ui_language: ui_language,
+                learner_ui_language,
                 linguistic_background: vec![],
                 user_prompt: None,
             };
@@ -261,5 +263,6 @@ fn load_prompts(config: &Config) -> Result<ExtractorPrompts> {
         )
     })?;
 
-    ExtractorPrompts::load(path).with_context(|| format!("Failed to load prompts from '{path}'"))
+    ExtractorPrompts::load(path)
+        .with_context(|| format!("Failed to load prompts from '{}'", path.display()))
 }

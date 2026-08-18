@@ -3,6 +3,7 @@ use panini_core::traits::LinguisticDefinition;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::Path;
 
 // ----- Prompt Builder Errors -----
 
@@ -39,15 +40,15 @@ pub struct LearnerProfile {
 impl LearnerProfile {
     pub fn build_prompt(
         &self,
-        ui_lang_name: &str,
+        ui_language: IsoLang,
         linguistic_background: &[panini_core::component::LanguageLevel],
     ) -> Result<String, PromptBuilderError> {
-        let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
+        let ui_lang_name = ui_language.to_name();
 
         let mut global_ctx = HashMap::new();
         global_ctx.insert("language", ui_lang_name.to_string());
         global_ctx.insert("name", ui_lang_name.to_string());
-        global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
+        global_ctx.insert("iso", ui_language.to_639_3().to_string());
 
         let mut learner_profile_content = String::new();
 
@@ -62,7 +63,7 @@ impl LearnerProfile {
             for lang in linguistic_background {
                 let mut ctx = global_ctx.clone();
                 ctx.insert("iso", lang.iso_639_3.to_639_3().to_string());
-                ctx.insert("level", lang.level.clone());
+                ctx.insert("level", lang.level.to_string());
                 let entry = interpolate(&self.linguistic_background_entry, &ctx)?;
                 learner_profile_content.push_str(&entry);
                 learner_profile_content.push('\n');
@@ -84,12 +85,13 @@ impl ExtractorPrompts {
     ///
     /// # Errors
     /// Returns an error if the file cannot be read or parsed.
-    pub fn load(path: &str) -> Result<Self, PromptBuilderError> {
+    pub fn load(path: impl AsRef<Path>) -> Result<Self, PromptBuilderError> {
+        let path = path.as_ref();
         let content = std::fs::read_to_string(path).map_err(|e| {
-            PromptBuilderError::ConfigLoadError(format!("Failed to read {path}: {e}"))
+            PromptBuilderError::ConfigLoadError(format!("Failed to read {}: {e}", path.display()))
         })?;
         serde_yml::from_str(&content).map_err(|e| {
-            PromptBuilderError::ConfigLoadError(format!("Failed to parse {path}: {e}"))
+            PromptBuilderError::ConfigLoadError(format!("Failed to parse {}: {e}", path.display()))
         })
     }
 }
@@ -111,8 +113,8 @@ pub struct ExtractionRequest {
     /// Optional skill/topic path for context.
     pub skill_path: Option<String>,
     /// Learner's UI language (for pedagogical explanation).
-    #[builder(default = "English".to_string())]
-    pub learner_ui_language: String,
+    #[builder(default = IsoLang::Eng)]
+    pub learner_ui_language: IsoLang,
     /// Learner's linguistic background.
     #[builder(default)]
     pub linguistic_background: Vec<LanguageLevel>,
@@ -139,7 +141,7 @@ pub struct BatchExtractionRequest {
     /// Optional skill/topic path for context.
     pub skill_path: Option<String>,
     /// Learner's UI language (for pedagogical explanation).
-    pub learner_ui_language: String,
+    pub learner_ui_language: IsoLang,
     /// Learner's linguistic background.
     pub linguistic_background: Vec<LanguageLevel>,
     /// Optional user-provided context.
@@ -156,7 +158,7 @@ impl BatchExtractionRequest {
             targets: Vec::new(),
             pedagogical_context: self.pedagogical_context.clone(),
             skill_path: self.skill_path.clone(),
-            learner_ui_language: self.learner_ui_language.clone(),
+            learner_ui_language: self.learner_ui_language,
             linguistic_background: self.linguistic_background.clone(),
             user_prompt: self.user_prompt.clone(),
         }
@@ -212,8 +214,8 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
 ) -> Result<String, PromptBuilderError> {
     let cfg = extractor_prompts;
 
-    let ui_lang_name = &request.learner_ui_language;
-    let ui_lang_iso_code = IsoLang::from_name(ui_lang_name).unwrap_or(IsoLang::Eng);
+    let ui_language = request.learner_ui_language;
+    let ui_lang_name = ui_language.to_name();
 
     let context_description = request.user_prompt.as_deref().unwrap_or("");
     let skill_path = request.skill_path.as_deref().unwrap_or("");
@@ -224,8 +226,8 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     global_ctx.insert("directives", language.extraction_directives().to_string());
     global_ctx.insert("path", skill_path.to_string());
     global_ctx.insert("instructions", instructions.to_string());
-    global_ctx.insert("iso", ui_lang_iso_code.to_639_3().to_string());
-    global_ctx.insert("name", ui_lang_name.clone());
+    global_ctx.insert("iso", ui_language.to_639_3().to_string());
+    global_ctx.insert("name", ui_lang_name.to_string());
     global_ctx.insert("context_description", context_description.to_string());
 
     let mut blocks = Vec::new();
@@ -244,7 +246,7 @@ pub fn build_extraction_prompt<L: LinguisticDefinition>(
     // Learner profile section
     let wrapped_profile = cfg
         .learner_profile
-        .build_prompt(ui_lang_name, &request.linguistic_background)?;
+        .build_prompt(ui_language, &request.linguistic_background)?;
     blocks.push(wrapped_profile);
 
     // Skill context section
