@@ -10,7 +10,7 @@
     <b><a href="https://yro7.github.io/panini/">Official Documentation (MkDocs)</a></b>
   </p>
   <p>
-    Usage: <a href="docs/guides/python.md">Python</a> | <a href="docs/guides/rust.md">Rust</a> | <a href="docs/guides/cli.md">CLI</a>
+    Usage: <a href="docs/guides/python.md">Python</a> | <a href="docs/guides/rust.md">Rust</a>
   </p>
 </div>
 
@@ -31,13 +31,11 @@ Pāṇini is a linguistic feature extraction framework: describe your language's
     - [`leipzig_gloss`](#leipzig_gloss)
 - [Usage](#usage)
   - [As a library (Rust API)](#as-a-library-rust-api)
-  - [As a standalone CLI](#as-a-standalone-cli)
   - [Python](#python)
 - [What you define, what the framework does](#what-you-define-what-the-framework-does)
 - [Design principles](#design-principles)
 - [Workspace structure](#workspace-structure)
 - [Adding a language](#adding-a-language)
-  - [Automatically (LLM-assisted)](#automatically-llm-assisted)
   - [Manually (step by step)](#manually-step-by-step)
 - [Adding an analysis component](#adding-an-analysis-component)
 - [Building](#building)
@@ -218,64 +216,6 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-### As a standalone CLI
-
-**1. Install**
-
-```bash
-# from the workspace root
-cargo install --path panini-cli
-
-# or build locally
-cargo build -p panini-cli --release
-```
-
-**2. Create a config file** (copy from `panini.example.toml`):
-
-```toml
-# panini.toml
-provider     = "google"           # openai | anthropic | google
-model        = "gemini-2.0-flash"
-language     = "pol"              # pol | tur | ara
-api_key      = "$GEMINI_API_KEY"
-prompts_file = "prompts/default.yml"
-```
-
-**3. Run**
-
-```bash
-export GEMINI_API_KEY="$GEMINI_API_KEY"
-
-panini extract \
-  --config panini.toml \
-  --text "Studentka czyta interesującą książkę." \
-  --target studentka --target czyta --target książkę
-
-# Select specific components
-panini extract --config panini.toml \
-  --text "Dał kotowi mleko." --target kotowi \
-  --components morphology,leipzig_gloss
-
-# List supported languages
-panini languages
-
-# Pipe output to jq
-panini extract --config panini.toml --text "…" --target "…" \
-  | jq '.morphology.target_features'
-```
-
-**CLI options**
-
-| Flag            | Default                  | Description                                       |
-| --------------- | ------------------------ | ------------------------------------------------- |
-| `--config`      | `panini.toml`            | Path to TOML config                               |
-| `--text`        | *(required)*             | Sentence / card content to analyse                |
-| `--target`      | *(required, repeatable)* | Target word(s) to focus extraction on             |
-| `--components`  | *(all)*                  | Comma-separated list of components to run         |
-| `--temperature` | `0.2`                    | Sampling temperature                              |
-| `--max-tokens`  | `4096`                   | Max tokens for LLM response                       |
-| `--ui-language` | `English`                | Learner's UI language for pedagogical explanation |
-
 ### Python
 
 ```bash
@@ -334,14 +274,6 @@ panini-macro/        # #[derive(MorphologyInfo)], #[derive(PaniniResult)] proc m
 ```
 
 ## Adding a language
-
-### Automatically (LLM-assisted)
-
-Fill your `panini.toml` config, choose a language (with its ISO 639-3 code) and run:
-
-`cargo run -p panini-cli -- add-language --language "French" --iso-code fra --config panini.toml`
-
-You should ALWAYS check the file output, especially for linguistic definitions, to ensure the LLM properly described the language.
 
 ### Manually (step by step)
 

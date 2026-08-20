@@ -135,19 +135,3 @@ The `extract_erased` function will now be able to resolve the `"mynewlanguage"` 
 This macro automatically generates:
 1. `extract_erased_with_components`: The unified entry point used by the CLI.
 2. `supported_languages()`: A function returning the list of supported ISO codes.
-
----
-
-## 🚀 Usage (Automated Scaffolding)
-
-If you have configured your `panini.toml`, you can use the CLI to automatically generate the skeleton for a new language:
-
-```bash
-cargo run -p panini-cli -- add-language \
-  --language "Japanese" \
-  --iso-code jpn \
-  --config panini.toml
-```
-
-!!! warning "Manual Verification"
-    Although the scaffolding is LLM-assisted, ALWAYS verify the generated linguistic definitions to ensure they correctly describe the target language.
