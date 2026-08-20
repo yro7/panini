@@ -30,7 +30,7 @@ api_key = "${GOOGLE_API_KEY}"
 # ── Prompts ──────────────────────────────────────────────────────────────────
 # Path to the prompts YAML file (relative to where you run the command,
 # or an absolute path).
-prompts_file = "panini-cli/prompts/default.yml"
+prompts_file = "prompts/default.yml"
 
 # ── Optional ─────────────────────────────────────────────────────────────────
 # Custom API base URL (useful for proxies or local deployments)
