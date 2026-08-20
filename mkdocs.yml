@@ -52,7 +52,6 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Quick Start:
-      - CLI: guides/cli.md
       - Python: guides/python.md
       - Rust: guides/rust.md
   - 🌍 Languages:

@@ -13,7 +13,6 @@ graph TD
     Macro[panini-macro] --> Core[panini-core]
     Core --> Engine[panini-engine]
     Engine --> Langs[panini-langs]
-    Langs --> CLI[panini-cli]
     Langs --> Pynini[pynini]
     Langs --> Facade[panini]
 ```
