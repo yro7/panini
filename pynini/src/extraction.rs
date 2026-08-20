@@ -12,7 +12,7 @@ use panini_langs::registry;
 use rig::client::CompletionClient;
 use rig::providers::{anthropic, gemini, openai};
 
-const DEFAULT_PROMPTS_YAML: &str = include_str!("../../panini-cli/prompts/default.yml");
+const DEFAULT_PROMPTS_YAML: &str = include_str!("../../prompts/default.yml");
 
 fn default_prompts() -> ExtractorPrompts {
     serde_yml::from_str(DEFAULT_PROMPTS_YAML).expect("embedded default prompts must be valid YAML")

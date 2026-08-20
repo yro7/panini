@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
 
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let prompts_path =
-        std::path::Path::new(manifest_dir).join("../../panini-cli/prompts/default.yml");
+        std::path::Path::new(manifest_dir).join("../../prompts/default.yml");
     let prompts = ExtractorPrompts::load(prompts_path.to_str().unwrap())?;
 
     let client = gemini::Client::new(&api_key)?;

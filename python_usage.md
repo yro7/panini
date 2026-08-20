@@ -11,7 +11,7 @@ This document is the definitive reference for utilizing the Panini framework via
 | **Rust Bindings** | `pynini/src/lib.rs` | PyO3 definitions and the bridge to the Rust engine. |
 | **Package Config** | `pynini/pyproject.toml` | Build and metadata configuration for `maturin`. |
 | **Testing Suite** | `pynini/test_pynini.py` | Integration tests and usage examples. |
-| **Prompts** | `panini-cli/prompts/default.yml` | Embedded default extraction instructions. |
+| **Prompts** | `prompts/default.yml` | Embedded default extraction instructions. |
 
 ---
 
