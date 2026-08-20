@@ -5,7 +5,6 @@ members = [
     "panini-engine",
     "panini-langs",
     "panini",
-    "panini-cli",
     "pynini",
     "examples/rust",
 ]
