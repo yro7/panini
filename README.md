@@ -238,7 +238,7 @@ provider     = "google"           # openai | anthropic | google
 model        = "gemini-2.0-flash"
 language     = "pol"              # pol | tur | ara
 api_key      = "$GEMINI_API_KEY"
-prompts_file = "panini-cli/prompts/default.yml"
+prompts_file = "prompts/default.yml"
 ```
 
 **3. Run**
