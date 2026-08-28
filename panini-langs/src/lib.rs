@@ -9,6 +9,7 @@ macro_rules! with_languages {
         $callback! {
             (danish, Danish),
             (eastern_armenian, EasternArmenian),
+            (english, English),
             (french, French),
             (indonesian, Indonesian),
             (italian, Italian),
