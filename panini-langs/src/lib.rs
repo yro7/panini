@@ -12,6 +12,7 @@ macro_rules! with_languages {
             (english, English),
             (french, French),
             (german, German),
+            (hindi, Hindi),
             (indonesian, Indonesian),
             (italian, Italian),
             (korean, Korean),
