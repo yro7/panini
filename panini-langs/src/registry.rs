@@ -218,7 +218,7 @@ with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
-    use crate::{Danish, Indonesian, Polish, Turkish};
+    use crate::{Danish, Indonesian, Korean, Polish, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
     use panini_core::morpheme::Agglutinative;
@@ -233,6 +233,7 @@ mod tests {
     fn test_agglutinative_inventories_integrity() {
         assert_agglutinative_inventory_valid::<Turkish>();
         assert_agglutinative_inventory_valid::<Indonesian>();
+        assert_agglutinative_inventory_valid::<Korean>();
     }
 
     #[test]
