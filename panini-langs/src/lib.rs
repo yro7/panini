@@ -14,6 +14,7 @@ macro_rules! with_languages {
             (german, German),
             (indonesian, Indonesian),
             (italian, Italian),
+            (korean, Korean),
             (mandarin_chinese, MandarinChinese),
             (polish, Polish),
             (portuguese, Portuguese),
