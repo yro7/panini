@@ -11,6 +11,7 @@ macro_rules! with_languages {
             (eastern_armenian, EasternArmenian),
             (english, English),
             (french, French),
+            (german, German),
             (indonesian, Indonesian),
             (italian, Italian),
             (mandarin_chinese, MandarinChinese),
