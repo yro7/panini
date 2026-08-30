@@ -203,6 +203,29 @@ pub enum DutchPronounCase {
     Oblique,
 }
 
+/// The syntactic role that selects an oblique personal-pronoun form.
+///
+/// This keeps the standard `hen`/`hun` opposition representable without
+/// pretending that Dutch nouns still have a productive case paradigm.
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum DutchPronounRole {
+    DirectObject,
+    IndirectObject,
+    Prepositional,
+}
+
 #[derive(
     Debug,
     Clone,
@@ -361,6 +384,8 @@ pub enum DutchMorphology {
     Determiner {
         lemma: String,
         determiner_type: DutchDeterminerType,
+        /// Number of the possessed or otherwise determined noun phrase, not
+        /// the number of a possessor.
         number: BinaryNumber,
         /// Singular agreement only. Plural determiners do not distinguish the
         /// `de`/`het` class.
@@ -375,6 +400,12 @@ pub enum DutchMorphology {
         /// common/neuter agreement class of the possessed noun.
         #[serde(skip_serializing_if = "Option::is_none")]
         possessor_gender: Option<TernaryGender>,
+        /// Full versus reduced possessive form (`mijn`/`m'n`, `jouw`/`je`).
+        #[serde(skip_serializing_if = "Option::is_none")]
+        strength: Option<DutchPronounStrength>,
+        /// Familiar `jouw`/`je` versus formal `uw`; other possessives omit it.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        politeness: Option<DutchPoliteness>,
     },
     Interjection {
         lemma: String,
@@ -414,6 +445,10 @@ pub enum DutchMorphology {
         nominal_gender: Option<DutchNominalGender>,
         #[serde(skip_serializing_if = "Option::is_none")]
         case: Option<DutchPronounCase>,
+        /// Direct object, indirect object without a preposition, or complement
+        /// of a preposition. Personal oblique forms only.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        pronoun_role: Option<DutchPronounRole>,
         #[serde(skip_serializing_if = "Option::is_none")]
         strength: Option<DutchPronounStrength>,
         /// Second-person forms only.
@@ -469,7 +504,29 @@ impl DutchMorphology {
 
     fn __pivot_politeness(&self) -> Option<String> {
         match self {
-            Self::Pronoun { politeness, .. } => politeness.as_ref().map(|value| {
+            Self::Determiner { politeness, .. } | Self::Pronoun { politeness, .. } => politeness
+                .as_ref()
+                .map(|value| {
+                    panini_core::aggregable::ClosedValues::variant_str(value).to_string()
+                }),
+            _ => None,
+        }
+    }
+
+    fn __pivot_strength(&self) -> Option<String> {
+        match self {
+            Self::Determiner { strength, .. } | Self::Pronoun { strength, .. } => strength
+                .as_ref()
+                .map(|value| {
+                    panini_core::aggregable::ClosedValues::variant_str(value).to_string()
+                }),
+            _ => None,
+        }
+    }
+
+    fn __pivot_pronoun_role(&self) -> Option<String> {
+        match self {
+            Self::Pronoun { pronoun_role, .. } => pronoun_role.as_ref().map(|value| {
                 panini_core::aggregable::ClosedValues::variant_str(value).to_string()
             }),
             _ => None,
@@ -519,6 +576,22 @@ impl DutchMorphology {
             Self::__pivot_politeness,
         );
 
+    pub const PIVOT_STRENGTH: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "strength",
+            "Form Strength",
+            <DutchPronounStrength as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_strength,
+        );
+
+    pub const PIVOT_PRONOUN_ROLE: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "pronoun_role",
+            "Pronoun Role",
+            <DutchPronounRole as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_pronoun_role,
+        );
+
     pub const PIVOT_SEPARABILITY: panini_core::pivot::PivotField<Self> =
         panini_core::pivot::PivotField::closed(
             "separability",
@@ -557,6 +630,8 @@ impl LinguisticDefinition for Dutch {
         DutchMorphology::PIVOT_DIMINUTIVE,
         DutchMorphology::PIVOT_DEGREE,
         DutchMorphology::PIVOT_INFLECTED,
+        DutchMorphology::PIVOT_STRENGTH,
+        DutchMorphology::PIVOT_PRONOUN_ROLE,
         DutchMorphology::PIVOT_POLITENESS,
         DutchMorphology::PIVOT_VERB_CLASS,
         DutchMorphology::PIVOT_SEPARABILITY,
@@ -588,11 +663,11 @@ impl LinguisticDefinition for Dutch {
 
     fn extraction_directives(&self) -> &'static str {
         "1. Scope and lemmatization: analyze the contemporary Standard Dutch actually written, including standard usage from the Netherlands, Belgium, Suriname and the Caribbean without normalizing one region into another. Lemmatize nouns to the singular dictionary form, verbs to the complete infinitive, adjectives and degree-bearing adverbs to the positive form, and compounds to the whole compound. Keep the official spelling of the lemma, including ij, diaereses and apostrophes. Never split an ordinary lexical compound into its heads.\n\
-         2. Nouns: always report number, nominal_gender and diminutive. Nominal gender is ONLY common or neuter: singular de-words are common and singular het-words are neuter. Retain that lexical gender in the plural even though every plural takes de. Every productive diminutive is neuter and takes an -s plural; set diminutive true, but keep the diminutive itself as the lemma (huisjes -> huisje, not huis). Lexicalized diminutives likewise keep their dictionary lemma (meisjes -> meisje). A compound normally inherits the gender of its final head, but use the lexical gender of the actual compound rather than guessing from spelling alone. Dutch nouns have no productive nominative/accusative/dative paradigm, so never attach case to a noun.\n\
+         2. Nouns: always report number, nominal_gender and diminutive. Nominal gender is ONLY common or neuter: singular de-words are common and singular het-words are neuter. Retain that lexical gender in the plural even though every definite plural takes de. Every productive diminutive is neuter and takes an -s plural; set diminutive true, but keep the diminutive itself as the lemma (huisjes -> huisje, not huis). Lexicalized diminutives likewise keep their dictionary lemma (meisjes -> meisje). A compound normally inherits the gender of its final head, but use the lexical gender of the actual compound rather than guessing from spelling alone. Dutch nouns have no productive nominative/accusative/dative paradigm, so never attach case to a noun.\n\
          3. Adjectives: for a gradable adjective, report positive, comparative or superlative; omit degree for a non-gradable relational, material or absolute adjective (medisch, houten, rechter). Set inflected true only when this occurrence carries the overt adjectival -e (grote, mooiere, grootste); set it false for a bare form (groot, mooi, groter, grootst) and for an invariant adjective whose form takes no added -e. For every ATTRIBUTIVE adjective, provide number and definiteness; provide nominal_gender in the singular and omit it in the plural. In the ordinary rule, an attributive adjective is bare only in an indefinite singular neuter phrase (een mooi huis, mooi weer) and takes -e elsewhere (de mooie dag, het mooie huis, een mooie dag, mooie huizen), but invariant forms and adjectives ending in -en such as houten remain uninflected. Predicative and adverbially used adjectives are bare and must omit nominal_gender, number and definiteness. Ordinals used attributively are Adjectives. An attributive participle functioning as a modifier is an Adjective with its adjectival lemma; an uninflected participle in a verbal construction is a Verb.\n\
-         4. Determiners: classify articles, demonstratives, possessives, quantifiers, interrogatives and relatives by their function in context. Always report number. Report nominal_gender for singular agreement and omit it in the plural, where de/deze/die no longer distinguish common from neuter. Add definiteness only where the determiner has a definite or indefinite value: de and het are definite, een is indefinite; demonstratives and possessives are definite. For a third-person singular possessive, also report possessor_gender from its antecedent: zijn/z'n for masculine or neuter and haar/d'r for feminine; omit possessor_gender on all other determiners. Resolve the many syncretic forms from their noun phrase rather than from spelling alone. A substantively used form is a Pronoun, not a Determiner.\n\
-         5. Pronouns: lemmatize reduced and oblique personal forms to the strong nominative paradigm base (mij/me -> ik, jou/je -> jij, hem/'m -> hij, haar/d'r -> zij, ons -> wij, hen/hun/ze -> zij); u stays u. Use case nominative for a subject personal pronoun and oblique for an object, prepositional complement or reflexive; other pronoun types receive case only when the contrast genuinely applies. Personal third-person singular pronouns use pronominal_gender masculine/feminine/neuter and OMIT nominal_gender. Demonstrative and relative die/dat instead use nominal_gender common/neuter and OMIT pronominal_gender. Plural personal pronouns have no gender.\n\
-         6. Pronoun strength and address: when a personal-pronoun paradigm has distinct full/stressed and reduced/unstressed forms, classify the actual written form: jij/jou, mij, wij, zij, hij, hem and haar are strong; je, me, we, ze, -ie, 'm and d'r are weak. Personal-pronoun het occurs only in positions for reduced forms, so both the usual spelling het and the spelling 't are weak; emphatic reference instead normally uses demonstrative dat. Omit strength for forms such as u, ons and jullie whose spelling does not express that contrast. Familiar second-person forms jij/je/jou and jullie take politeness familiar. Formal u takes person second, agreement number singular and politeness formal even when it addresses more than one listener; its finite verb is singular. Recognize ge/gij as a southern/Belgian second-person form when it occurs and analyze the text as written rather than rewriting it to jij or u. Resolve je as personal Pronoun versus possessive Determiner from syntax, and resolve singular feminine ze against plural ze from agreement and context.\n\
+         4. Determiners: classify articles, demonstratives, possessives, quantifiers, interrogatives and relatives by their function in context. Always report number for the determined noun phrase; this is NOT the possessor's number. Report nominal_gender for singular agreement and omit it in the plural, where de/deze/die no longer distinguish common from neuter. Add definiteness only where the determiner has a definite or indefinite value: de and het are definite, een is indefinite; demonstratives and possessives are definite. Lemmatize reduced possessives to their contextually correct full possessive form: m'n -> mijn, z'n -> zijn and d'r -> haar; je -> jouw for one familiar addressee but jullie for multiple familiar addressees (Jullie moeten je boek meenemen). Report strength only where the written possessive belongs to a full/reduced pair: mijn/m'n, jouw or jullie/je, zijn/z'n and haar/d'r; report strong for the full form and weak for the reduced form. Report politeness familiar on second-person familiar possessives (jouw, jullie and either use of je) and formal on uw; omit strength and politeness where those oppositions do not apply. For a third-person singular possessive, also report possessor_gender from its antecedent: zijn/z'n for masculine or neuter and haar/d'r for feminine; omit possessor_gender on all other determiners. Resolve the many syncretic forms from their noun phrase rather than from spelling alone. A substantively used form is a Pronoun, not a Determiner.\n\
+         5. Pronouns: lemmatize reduced and oblique personal forms to the strong nominative paradigm base (mij/me -> ik, jou/je -> jij, hem/'m -> hij, haar/d'r -> zij, ons -> wij, hen/hun/ze -> zij); u stays u. Use case nominative for a subject personal pronoun and oblique for an object, prepositional complement or reflexive; other pronoun types receive case only when the contrast genuinely applies. On an oblique personal pronoun, report pronoun_role direct_object, indirect_object or prepositional from its syntax; in edited Standard Dutch this distinguishes hen as direct object or prepositional complement from hun as an indirect object without a preposition, while reduced ze can fill either object role. Personal third-person singular pronouns use pronominal_gender masculine/feminine/neuter and OMIT nominal_gender. Demonstrative and relative die/dat instead use nominal_gender common/neuter only in the singular and OMIT it in the plural; they always OMIT pronominal_gender. Plural personal pronouns have no gender.\n\
+         6. Pronoun strength and address: when a personal-pronoun paradigm has distinct full/stressed and reduced/unstressed forms, classify the actual written form: jij/jou, mij, wij, zij, hij, hem, haar, hen and hun are strong; 'k, je, me, we, ze, -ie, 'm and d'r are weak. Personal-pronoun het occurs only in positions for reduced forms, so both the usual spelling het and the spelling 't are weak; emphatic reference instead normally uses demonstrative dat. Omit strength for forms such as u, ons and jullie whose spelling does not express that contrast. Familiar second-person forms jij/je/jou and jullie take politeness familiar. Formal u takes person second, agreement number singular and politeness formal even when it addresses more than one listener; its finite verb is singular. Recognize ge/gij as a southern/Belgian second-person form when it occurs and analyze the text as written rather than rewriting it to jij or u. Resolve je as personal Pronoun versus possessive Determiner from syntax, and resolve singular feminine ze against plural ze from agreement and context.\n\
          7. Verbs: every verb token, including zijn, hebben, worden, zullen and modal auxiliaries, gets verb_class and verb_form. Weak verbs form the past with -de/-te and the participle with -d/-t (werken, werkte, gewerkt); strong verbs use stem alternation and normally an -en participle (lopen, liep, gelopen); irregular is reserved for paradigms that fit neither, such as zeggen, zei, gezegd and the highly irregular auxiliaries. Report the lexical class on every token, including present forms where it is not visible. Where Standard Dutch permits competing weak and strong paradigms, follow the paradigm realized by the surrounding text and its regional/register context.\n\
          8. Finite features: a finite indicative gets mood, present/past tense, person and number. Dutch has no synthetic future or conditional: zal is present zullen and zou is past zullen, each followed by a separate infinitive. An imperative gets mood imperative but no tense, person or number because contemporary Standard Dutch has no productive person/number opposition in the imperative. Use subjunctive only for a genuine surviving form such as leve, neme, moge or zij, never merely for a semantic wish. Non-finite infinitives and participles get no mood, tense, person or number. With jij/je, identify the inverted present form correctly: jij werkt but werk jij/je; a following possessive je does not trigger deletion (werkt je broer?). With formal u, use second person singular analysis despite the third-singular-shaped -t agreement.\n\
          9. Analytic verb phrases: split every written verb into its own token. A perfect is finite hebben/zijn plus a past participle (heeft gewerkt, is gekomen); a passive is finite worden/zijn plus the same past participle; a future or conditional reading is finite zullen plus an infinitive. Do not invent perfect, future, conditional, aspect or voice values on a single token: this morphology records only categories expressed by that word form. The aan het + infinitive progressive is likewise a multi-token construction, not a synthetic verb form.\n\
@@ -714,12 +789,48 @@ mod tests {
             nominal_gender: Some(DutchNominalGender::Common),
             definiteness: Some(DutchDefiniteness::Definite),
             possessor_gender: Some(TernaryGender::Masculine),
+            strength: Some(DutchPronounStrength::Strong),
+            politeness: None,
+        };
+        let je_boek = DutchMorphology::Determiner {
+            lemma: "jouw".to_string(),
+            determiner_type: DutchDeterminerType::Possessive,
+            number: BinaryNumber::Singular,
+            nominal_gender: Some(DutchNominalGender::Neuter),
+            definiteness: Some(DutchDefiniteness::Definite),
+            possessor_gender: None,
+            strength: Some(DutchPronounStrength::Weak),
+            politeness: Some(DutchPoliteness::Familiar),
+        };
+        let jullie_je_boek = DutchMorphology::Determiner {
+            lemma: "jullie".to_string(),
+            determiner_type: DutchDeterminerType::Possessive,
+            // The possessed noun is singular even though the possessor is plural.
+            number: BinaryNumber::Singular,
+            nominal_gender: Some(DutchNominalGender::Neuter),
+            definiteness: Some(DutchDefiniteness::Definite),
+            possessor_gender: None,
+            strength: Some(DutchPronounStrength::Weak),
+            politeness: Some(DutchPoliteness::Familiar),
         };
 
         assert_eq!(DutchMorphology::PIVOT_DEGREE.value(&houten), None);
         let serialized = serde_json::to_value(zijn_tafel).unwrap();
         assert_eq!(serialized["nominal_gender"], "common");
         assert_eq!(serialized["possessor_gender"], "masculine");
+        assert_eq!(
+            DutchMorphology::PIVOT_STRENGTH.value(&je_boek),
+            Some("weak".to_string())
+        );
+        assert_eq!(
+            DutchMorphology::PIVOT_POLITENESS.value(&je_boek),
+            Some("familiar".to_string())
+        );
+        assert_eq!(jullie_je_boek.lemma(), Some("jullie".to_string()));
+        assert_eq!(
+            DutchMorphology::PIVOT_STRENGTH.value(&jullie_je_boek),
+            Some("weak".to_string())
+        );
     }
 
     #[test]
@@ -732,6 +843,7 @@ mod tests {
             pronominal_gender: Some(TernaryGender::Neuter),
             nominal_gender: None,
             case: Some(DutchPronounCase::Oblique),
+            pronoun_role: Some(DutchPronounRole::DirectObject),
             strength: Some(DutchPronounStrength::Weak),
             politeness: None,
         };
@@ -739,5 +851,36 @@ mod tests {
         let serialized = serde_json::to_value(het).unwrap();
         assert_eq!(serialized["strength"], "weak");
         assert_eq!(serialized["pronominal_gender"], "neuter");
+    }
+
+    #[test]
+    fn third_person_plural_roles_keep_hen_and_hun_distinct() {
+        let make = |pronoun_role| DutchMorphology::Pronoun {
+            lemma: "zij".to_string(),
+            pronoun_type: DutchPronounType::Personal,
+            person: Some(Person::Third),
+            number: Some(BinaryNumber::Plural),
+            pronominal_gender: None,
+            nominal_gender: None,
+            case: Some(DutchPronounCase::Oblique),
+            pronoun_role: Some(pronoun_role),
+            strength: Some(DutchPronounStrength::Strong),
+            politeness: None,
+        };
+        let hen = make(DutchPronounRole::DirectObject);
+        let hun = make(DutchPronounRole::IndirectObject);
+
+        assert_ne!(
+            serde_json::to_string(&hen).unwrap(),
+            serde_json::to_string(&hun).unwrap()
+        );
+        assert_eq!(
+            DutchMorphology::PIVOT_PRONOUN_ROLE.value(&hen),
+            Some("direct_object".to_string())
+        );
+        assert_eq!(
+            DutchMorphology::PIVOT_PRONOUN_ROLE.value(&hun),
+            Some("indirect_object".to_string())
+        );
     }
 }
