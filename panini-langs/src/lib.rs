@@ -24,6 +24,7 @@ macro_rules! with_languages {
             (spanish, Spanish),
             (swedish, Swedish),
             (turkish, Turkish),
+            (vietnamese, Vietnamese),
         }
     };
 }
