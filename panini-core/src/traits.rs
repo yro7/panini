@@ -78,6 +78,7 @@ impl Script {
     pub const HANG: Self = Self("Hang");
     pub const ARMN: Self = Self("Armn");
     pub const DEVA: Self = Self("Deva");
+    pub const GREK: Self = Self("Grek");
 
     /// Returns the 4-character ISO 15924 code.
     #[must_use]
