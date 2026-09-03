@@ -10,6 +10,7 @@ macro_rules! with_languages {
             (danish, Danish),
             (dutch, Dutch),
             (eastern_armenian, EasternArmenian),
+            (egyptian_arabic, EgyptianArabic),
             (english, English),
             (french, French),
             (german, German),
