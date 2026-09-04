@@ -7,6 +7,7 @@
 macro_rules! with_languages {
     ($callback:ident) => {
         $callback! {
+            (basque, Basque),
             (czech, Czech),
             (danish, Danish),
             (dutch, Dutch),
