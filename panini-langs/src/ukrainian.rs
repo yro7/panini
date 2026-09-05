@@ -134,28 +134,28 @@ pub enum UkrainianAnimacy {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum UkrainianDeclension {
-    /// I відміна — nouns in -а/-я of any gender: жінка, земля, Микола, суддя.
+    // I відміна — nouns in -а/-я of any gender: жінка, земля, Микола, суддя.
     #[serde(rename = "first_declension")]
     First,
-    /// II відміна — masculines with a zero ending or -о (стіл, кінь, батько,
-    /// Дніпро) and neuters in -о/-е/-я (село, поле, життя, обличчя).
+    // II відміна — masculines with a zero ending or -о (стіл, кінь, батько,
+    // Дніпро) and neuters in -о/-е/-я (село, поле, життя, обличчя).
     #[serde(rename = "second_declension")]
     Second,
-    /// III відміна — feminines with a zero ending: ніч, сіль, радість, любов,
-    /// plus мати.
+    // III відміна — feminines with a zero ending: ніч, сіль, радість, любов,
+    // plus мати.
     #[serde(rename = "third_declension")]
     Third,
-    /// IV відміна — neuters in -а/-я that grow a suffix in the oblique cases:
-    /// теля → теляти, курча → курчати, ім'я → імені, плем'я → племені.
+    // IV відміна — neuters in -а/-я that grow a suffix in the oblique cases:
+    // теля → теляти, курча → курчати, ім'я → імені, плем'я → племені.
     #[serde(rename = "fourth_declension")]
     Fourth,
-    /// Незмінювані — borrowings that take no ending at all: кіно, таксі, метро,
-    /// журі, Токіо, Гюго. The case and number reported are the ones their syntax
-    /// assigns.
+    // Незмінювані — borrowings that take no ending at all: кіно, таксі, метро,
+    // журі, Токіо, Гюго. The case and number reported are the ones their syntax
+    // assigns.
     Indeclinable,
-    /// Множинні іменники — the plural-only nouns, which decline on a pattern of
-    /// their own and belong to none of the four: двері, ножиці, окуляри,
-    /// канікули, гроші, Карпати.
+    // Множинні іменники — the plural-only nouns, which decline on a pattern of
+    // their own and belong to none of the four: двері, ножиці, окуляри,
+    // канікули, гроші, Карпати.
     PluraleTantum,
 }
 
@@ -180,13 +180,13 @@ pub enum UkrainianDeclension {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum UkrainianStemGroup {
-    /// Тверда група — новий, нова, нове, нового, новим…
+    // Тверда група — новий, нова, нове, нового, новим…
     Hard,
-    /// М'яка група — синій, синя, синє, синього, синім…
+    // М'яка група — синій, синя, синє, синього, синім…
     Soft,
-    /// Незмінювані — the endingless borrowings that stand outside both groups:
-    /// бордо, хакі, максі, беж. The gender, number and case reported are the
-    /// ones the noun assigns.
+    // Незмінювані — the endingless borrowings that stand outside both groups:
+    // бордо, хакі, максі, беж. The gender, number and case reported are the
+    // ones the noun assigns.
     Indeclinable,
 }
 
@@ -263,24 +263,24 @@ pub enum UkrainianMood {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum UkrainianVerbForm {
-    /// Дієвідмінювана форма — a conjugated form, including the past: пишу,
-    /// писатиму, буду, пиши, писав, писала б.
+    // Дієвідмінювана форма — a conjugated form, including the past: пишу,
+    // писатиму, буду, пиши, писав, писала б.
     Finite,
-    /// Інфінітив (неозначена форма) — писати, написати, бути.
+    // Інфінітив (неозначена форма) — писати, написати, бути.
     Infinitive,
-    /// Дієприкметник — a participle, which declines like an adjective: активний
-    /// (почорнілий, квітучий) or пасивний (написаний, розбитий, вимита).
-    /// Ukrainian has no short participle; the -но/-то form took over that slot.
+    // Дієприкметник — a participle, which declines like an adjective: активний
+    // (почорнілий, квітучий) or пасивний (написаний, розбитий, вимита).
+    // Ukrainian has no short participle; the -но/-то form took over that slot.
     Participle,
-    /// Дієприслівник — пишучи, читаючи, написавши, прочитавши. Invariable, and
-    /// the aspect alone carries the simultaneous/anterior contrast.
+    // Дієприслівник — пишучи, читаючи, написавши, прочитавши. Invariable, and
+    // the aspect alone carries the simultaneous/anterior contrast.
     AdverbialParticiple,
-    /// Безособова форма на -но, -то — написано, зроблено, вбито, здобуто.
-    /// Wholly invariable and the most distinctively Ukrainian cell of the whole
-    /// system: *Роботу виконано* keeps its patient in the accusative, so it is a
-    /// predicate with no subject at all rather than a passive clause. It takes
-    /// no tense of its own — було зроблено and буде зроблено shift the time on
-    /// the auxiliary.
+    // Безособова форма на -но, -то — написано, зроблено, вбито, здобуто.
+    // Wholly invariable and the most distinctively Ukrainian cell of the whole
+    // system: *Роботу виконано* keeps its patient in the accusative, so it is a
+    // predicate with no subject at all rather than a passive clause. It takes
+    // no tense of its own — було зроблено and буде зроблено shift the time on
+    // the auxiliary.
     Impersonal,
 }
 
@@ -306,16 +306,16 @@ pub enum UkrainianVerbForm {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum UkrainianFutureFormation {
-    /// Проста форма — a perfective conjugated on the present pattern: напишу,
-    /// зроблю, прочитаєш.
+    // Проста форма — a perfective conjugated on the present pattern: напишу,
+    // зроблю, прочитаєш.
     #[serde(rename = "simple_future")]
     Simple,
-    /// Складна форма — the infinitive fused with the descendants of яти:
-    /// писатиму, писатимеш, читатиме, робитимуть. Imperfective only.
+    // Складна форма — the infinitive fused with the descendants of яти:
+    // писатиму, писатимеш, читатиме, робитимуть. Imperfective only.
     #[serde(rename = "synthetic_future")]
     Synthetic,
-    /// Складена форма — буду / будеш / буде + infinitive. The auxiliary carries
-    /// this value; the infinitive beside it is an ordinary infinitive token.
+    // Складена форма — буду / будеш / буде + infinitive. The auxiliary carries
+    // this value; the infinitive beside it is an ordinary infinitive token.
     #[serde(rename = "analytic_future")]
     Analytic,
 }
@@ -753,10 +753,10 @@ impl LinguisticDefinition for Ukrainian {
          директоре, Іване Петровичу).\n\
          6. Nouns: always give gender, animacy, declension, number and case. Gender is inherent and \
          lexical — report it for plurals too (книги → feminine). Pick the declension from the \
-         NOMINATIVE SINGULAR plus the gender: first for any noun in -а/-я whatever its gender \
-         (жінка, земля, Микола, суддя, сирота); second for a masculine with a zero ending or -о \
+         NOMINATIVE SINGULAR plus the gender: first_declension for any noun in -а/-я whatever its gender \
+         (жінка, земля, Микола, суддя, сирота); second_declension for a masculine with a zero ending or -о \
          (стіл, кінь, батько, Дніпро) and for a neuter in -о/-е/-я (село, поле, життя, обличчя); \
-         third for a feminine with a zero ending (ніч, сіль, радість, любов) and for мати; fourth \
+         third_declension for a feminine with a zero ending (ніч, сіль, радість, любов) and for мати; fourth_declension \
          ONLY for the neuters that grow -ат-/-ят-/-ен- in the oblique cases (теля → теляти, курча \
          → курчати, ім'я → імені, плем'я → племені). Use indeclinable for the endingless borrowings \
          (кіно, таксі, метро, журі, Токіо) and plurale_tantum for the plural-only nouns (двері, \
@@ -799,15 +799,15 @@ impl LinguisticDefinition for Ukrainian {
          буде stands beside it (Було зроблено, Буде здобуто) that auxiliary is a separate finite \
          verb token, lemma бути, carrying the tense.\n\
          9. The three futures, and each is a different value of future_formation:\n\
-         - simple (проста): a PERFECTIVE conjugated on the present pattern — напишу, зробиш, \
-         прочитає. tense future, aspect perfective, future_formation simple. A perfective \
+         - simple_future (проста): a PERFECTIVE conjugated on the present pattern — напишу, зробиш, \
+         прочитає. tense future, aspect perfective, future_formation simple_future. A perfective \
          present-shaped ending is ALWAYS a future, never a present.\n\
-         - synthetic (складна): the imperfective infinitive fused with -му/-меш/-ме/-мемо/-мете/-муть \
+         - synthetic_future (складна): the imperfective infinitive fused with -му/-меш/-ме/-мемо/-мете/-муть \
          — писатиму, читатимеш, робитиме, ходитимуть. ONE token, tense future, aspect \
-         imperfective, future_formation synthetic, with its own person and number. This form has no \
+         imperfective, future_formation synthetic_future, with its own person and number. This form has no \
          Russian counterpart; do not mistake it for an infinitive.\n\
-         - analytic (складена): буду / будеш / буде / будемо / будете / будуть + infinitive. TWO \
-         tokens: the auxiliary is lemma бути, finite, tense future, future_formation analytic, with \
+         - analytic_future (складена): буду / будеш / буде / будемо / будете / будуть + infinitive. TWO \
+         tokens: the auxiliary is lemma бути, finite, tense future, future_formation analytic_future, with \
          person and number; the following infinitive is a separate verb token with no tense and no \
          future_formation.\n\
          Set future_formation ONLY on a finite future form. Omit it everywhere else.\n\
