@@ -27,6 +27,7 @@ macro_rules! with_languages {
             (portuguese, Portuguese),
             (russian, Russian),
             (spanish, Spanish),
+            (swahili, Swahili),
             (swedish, Swedish),
             (thai, Thai),
             (turkish, Turkish),
