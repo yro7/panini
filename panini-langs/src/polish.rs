@@ -171,8 +171,14 @@ pub enum PolishMorphology {
         number: PolishNumber,
         case: PolishCase,
     },
-    /// Proper noun
-    ProperNoun { lemma: String },
+    /// Proper noun — declines exactly like a common noun (Kraków → w Krakowie,
+    /// Ania → Aniu, Tomek → Tomku, Kowalska → Kowalskiej).
+    ProperNoun {
+        lemma: String,
+        gender: PolishGender,
+        number: PolishNumber,
+        case: PolishCase,
+    },
     /// Subordinating conjunction
     SubordinatingConjunction { lemma: String },
     /// Verb
@@ -270,7 +276,13 @@ impl LinguisticDefinition for Polish {
          and their agreeing modifiers as 'masculine_personal'; reserve 'masculine_animate' for \
          non-human animates. Provide gender for determiners and for gendered third-person, \
          possessive, demonstrative, and adjective-like pronouns; omit pronoun gender only when \
-         the form does not encode it.\n\
+         the form does not encode it. \
+         Analyse proper nouns exactly like common nouns, always with 'gender', 'number' and \
+         'case': 'w Krakowie' is locative, 'Aniu' and 'Tomku' are vocative. \
+         In the plural the non-masculine-personal ending is syncretic across genders, so report \
+         an agreeing modifier's gender as the gender of its head noun rather than defaulting to \
+         neuter: 'świeże owoce' is masculine_inanimate on both words, 'czarne koty' is \
+         masculine_animate on both.\n\
          For verbs, provide 'person', 'number' and 'tense' only for finite forms; \
          omit all three for infinitives, and omit 'tense' for imperatives. Provide 'gender' for \
          past-tense l-participles and conditional forms, where the verb agrees in gender; omit \
@@ -318,6 +330,29 @@ mod tests {
         assert_eq!(pronoun_value["gender"], "feminine");
         assert_eq!(determiner_value["gender"], "neuter");
         assert_eq!(determiner_value["case"], "nominative");
+    }
+
+    #[test]
+    fn proper_noun_declines_like_a_common_noun() {
+        let vocative = PolishMorphology::ProperNoun {
+            lemma: "Ania".to_string(),
+            gender: PolishGender::Feminine,
+            number: PolishNumber::Singular,
+            case: PolishCase::Vocative,
+        };
+        let locative = PolishMorphology::ProperNoun {
+            lemma: "Kraków".to_string(),
+            gender: PolishGender::MasculineInanimate,
+            number: PolishNumber::Singular,
+            case: PolishCase::Locative,
+        };
+
+        let vocative_value = serde_json::to_value(vocative).unwrap();
+        let locative_value = serde_json::to_value(locative).unwrap();
+        assert_eq!(vocative_value["case"], "vocative");
+        assert_eq!(vocative_value["gender"], "feminine");
+        assert_eq!(locative_value["case"], "locative");
+        assert_eq!(locative_value["lemma"], "Kraków");
     }
 
     #[test]
