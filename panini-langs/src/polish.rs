@@ -127,7 +127,12 @@ pub enum PolishMorphology {
     /// Coordinating conjunction
     CoordinatingConjunction { lemma: String },
     /// Determiner
-    Determiner { lemma: String },
+    Determiner {
+        lemma: String,
+        gender: PolishGender,
+        number: PolishNumber,
+        case: PolishCase,
+    },
     /// Interjection
     Interjection { lemma: String },
     /// Noun
@@ -137,13 +142,32 @@ pub enum PolishMorphology {
         number: PolishNumber,
         case: PolishCase,
     },
-    /// Numeral
-    Numeral { lemma: String },
+    /// Cardinal numeral — jeden, dwa, pięć, sto, tysiąc.
+    ///
+    /// Ordinals are analysed as adjectives because they carry the full
+    /// adjective agreement paradigm.
+    Numeral {
+        lemma: String,
+        /// Only jeden (jeden/jedna/jedno) and dwa (dwaj/dwa/dwie) distinguish
+        /// gender.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gender: Option<PolishGender>,
+        /// Only jeden has a number contrast of its own (jeden / jedni, jedne).
+        #[serde(skip_serializing_if = "Option::is_none")]
+        number: Option<PolishNumber>,
+        /// Polish cardinals decline, including higher numerals such as
+        /// pięć → pięciu and sto → stu.
+        case: PolishCase,
+    },
     /// Particle
     Particle { lemma: String },
     /// Pronoun
     Pronoun {
         lemma: String,
+        /// Agreement gender for third-person, possessive, demonstrative, and adjective-like
+        /// pronouns; absent for forms that do not encode gender.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gender: Option<PolishGender>,
         number: PolishNumber,
         case: PolishCase,
     },
@@ -163,6 +187,9 @@ pub enum PolishMorphology {
         /// Tense; omit for infinitives and imperatives.
         #[serde(skip_serializing_if = "Option::is_none")]
         tense: Option<PolishTense>,
+        /// Agreement gender; present on past-tense l-participles and conditional forms.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gender: Option<PolishGender>,
         aspect: SlavicAspect,
     },
     /// Other, for unanalyzable tokens
@@ -232,8 +259,89 @@ impl LinguisticDefinition for Polish {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "Always specify 'case' and 'number' for nouns, adjectives and pronouns.\n\
+        "Always specify 'case' and 'number' for nouns, adjectives, pronouns and determiners. \
+         For cardinal numerals, always specify 'case'; provide 'gender' only for forms of jeden, \
+         dwa and related compounds that encode it, and 'number' only for forms of jeden. Analyse \
+         ordinal numerals as adjectives, with gender, number and case. \
+         Determine case from syntax, not just the surface ending: masculine animate and \
+         masculine personal accusative singular forms are syncretic with the genitive but \
+         remain accusative in direct-object and accusative-preposition contexts; likewise, \
+         'czekam na ciebie' contains accusative 'ciebie', not genitive. Classify male human nouns \
+         and their agreeing modifiers as 'masculine_personal'; reserve 'masculine_animate' for \
+         non-human animates. Provide gender for determiners and for gendered third-person, \
+         possessive, demonstrative, and adjective-like pronouns; omit pronoun gender only when \
+         the form does not encode it.\n\
          For verbs, provide 'person', 'number' and 'tense' only for finite forms; \
-         omit all three for infinitives, and omit 'tense' for imperatives."
+         omit all three for infinitives, and omit 'tense' for imperatives. Provide 'gender' for \
+         past-tense l-participles and conditional forms, where the verb agrees in gender; omit \
+         it from present and future non-past forms."
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{PolishCase, PolishGender, PolishMorphology, PolishNumber, PolishTense};
+    use panini_core::traits::SlavicAspect;
+
+    #[test]
+    fn past_tense_verb_preserves_agreement_gender() {
+        let verb = PolishMorphology::Verb {
+            lemma: "czytać".to_string(),
+            person: Some(panini_core::traits::Person::First),
+            number: Some(PolishNumber::Singular),
+            tense: Some(PolishTense::Past),
+            gender: Some(PolishGender::Feminine),
+            aspect: SlavicAspect::Imperfective,
+        };
+
+        let value = serde_json::to_value(verb).unwrap();
+        assert_eq!(value["gender"], "feminine");
+    }
+
+    #[test]
+    fn agreeing_function_words_preserve_distinguishing_features() {
+        let pronoun = PolishMorphology::Pronoun {
+            lemma: "on".to_string(),
+            gender: Some(PolishGender::Feminine),
+            number: PolishNumber::Singular,
+            case: PolishCase::Genitive,
+        };
+        let determiner = PolishMorphology::Determiner {
+            lemma: "ten".to_string(),
+            gender: PolishGender::Neuter,
+            number: PolishNumber::Singular,
+            case: PolishCase::Nominative,
+        };
+
+        let pronoun_value = serde_json::to_value(pronoun).unwrap();
+        let determiner_value = serde_json::to_value(determiner).unwrap();
+        assert_eq!(pronoun_value["gender"], "feminine");
+        assert_eq!(determiner_value["gender"], "neuter");
+        assert_eq!(determiner_value["case"], "nominative");
+    }
+
+    #[test]
+    fn numeral_preserves_only_grammatically_encoded_features() {
+        let jeden = PolishMorphology::Numeral {
+            lemma: "jeden".to_string(),
+            gender: Some(PolishGender::Feminine),
+            number: Some(PolishNumber::Singular),
+            case: PolishCase::Accusative,
+        };
+        let piec = PolishMorphology::Numeral {
+            lemma: "pięć".to_string(),
+            gender: None,
+            number: None,
+            case: PolishCase::Genitive,
+        };
+
+        let jeden_value = serde_json::to_value(jeden).unwrap();
+        let piec_value = serde_json::to_value(piec).unwrap();
+        assert_eq!(jeden_value["gender"], "feminine");
+        assert_eq!(jeden_value["number"], "singular");
+        assert_eq!(jeden_value["case"], "accusative");
+        assert!(piec_value.get("gender").is_none());
+        assert!(piec_value.get("number").is_none());
+        assert_eq!(piec_value["case"], "genitive");
     }
 }
