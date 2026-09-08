@@ -14,13 +14,29 @@ use crate::traits::LinguisticDefinition;
 ///
 /// The composable pipeline nests `target_features` and `context_features` under
 /// the `"morphology"` key.
-#[derive(serde::Deserialize, Default)]
+#[derive(serde::Deserialize, serde::Serialize, Default)]
 #[serde(bound(deserialize = "M: serde::de::DeserializeOwned"))]
 pub struct MorphSection<M> {
     #[serde(default = "Vec::new")]
     pub target_features: Vec<TokenAnalysis<M>>,
     #[serde(default = "Vec::new")]
     pub context_features: Vec<TokenAnalysis<M>>,
+}
+
+/// Projects a raw morphology section through a language's concrete morphology
+/// type and serializes the typed value back to JSON.
+///
+/// This exposes the exact representation seen by downstream typed consumers,
+/// including fields discarded during deserialization.
+pub fn project_typed_section<L>(
+    section: &serde_json::Value,
+) -> Result<serde_json::Value, serde_json::Error>
+where
+    L: LinguisticDefinition,
+    L::Morphology: DeserializeOwned + serde::Serialize,
+{
+    let typed: MorphSection<L::Morphology> = serde_json::from_value(section.clone())?;
+    serde_json::to_value(typed)
 }
 
 // ─── MorphologyAnalysis ───────────────────────────────────────────────────────
