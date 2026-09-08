@@ -19,3 +19,4 @@ isolang = { version = "2.4.0", features = ["english_names", "local_names"] }
 iso15924 = "0.1.0"
 thiserror = "2"
 regex = "1"
+unicode-normalization = "0.1"
