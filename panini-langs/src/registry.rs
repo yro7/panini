@@ -137,6 +137,15 @@ where
     Ok(extract_with_components_executor(lang, executor, request, &selected, options).await?)
 }
 
+fn project_morphology_for_language<L>(section: &serde_json::Value) -> Result<serde_json::Value>
+where
+    L: panini_core::LinguisticDefinition,
+    L::Morphology: serde::Serialize + for<'de> serde::Deserialize<'de>,
+{
+    panini_core::components::morphology::project_typed_section::<L>(section)
+        .map_err(anyhow::Error::from)
+}
+
 /// Macro to generate the registry functions for all languages.
 /// Each language must be a unit struct implementing `LinguisticDefinition`.
 ///
@@ -206,6 +215,26 @@ macro_rules! generate_registry {
             }
         }
 
+        /// Projects a raw morphology section through the concrete language's
+        /// typed morphology model, then serializes that typed value back to JSON.
+        ///
+        /// # Errors
+        /// Returns an error if the language is unsupported or the section cannot
+        /// be deserialized by its morphology model.
+        pub fn project_morphology_erased(
+            lang: IsoLang,
+            section: &serde_json::Value,
+        ) -> Result<serde_json::Value> {
+            match lang {
+                $(
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG => {
+                        project_morphology_for_language::<$crate::$lang>(section)
+                    }
+                )*
+                _ => Err(anyhow!("Unsupported language: {}", lang.to_639_3())),
+            }
+        }
+
         /// Returns all supported ISO 639-3 language codes.
         pub fn supported_languages() -> Vec<IsoLang> {
             vec![$(<$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG),*]
@@ -218,10 +247,12 @@ with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
+    use super::project_morphology_erased;
     use crate::{Basque, Danish, Indonesian, Korean, Polish, Swahili, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
     use panini_core::morpheme::Agglutinative;
+    use panini_core::traits::IsoLang;
 
     fn assert_agglutinative_inventory_valid<L: Agglutinative>() {
         if let Err(err) = L::validate_inventory() {
@@ -260,6 +291,30 @@ mod tests {
     fn morpheme_segmentation_incompatible_with_danish() {
         let comp = MorphemeSegmentation;
         assert!(!comp.is_compatible(&Danish));
+    }
+
+    #[test]
+    fn typed_morphology_projection_exposes_discarded_fields() {
+        let raw = serde_json::json!({
+            "target_features": [{
+                "word": "hej",
+                "morphology": {
+                    "lemma": "hej",
+                    "invented": "discarded",
+                    "pos": "interjection"
+                }
+            }],
+            "context_features": []
+        });
+
+        let typed = project_morphology_erased(IsoLang::Pol, &raw).unwrap();
+
+        assert_eq!(typed["target_features"][0]["morphology"]["lemma"], "hej");
+        assert!(
+            typed["target_features"][0]["morphology"]
+                .get("invented")
+                .is_none()
+        );
     }
 
     #[test]
