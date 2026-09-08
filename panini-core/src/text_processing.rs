@@ -61,6 +61,49 @@ pub fn normalize_pos_tags(json: &str) -> String {
     .to_string()
 }
 
+use std::borrow::Cow;
+use unicode_normalization::{UnicodeNormalization, is_nfc};
+
+/// Returns the string in Unicode Normalization Form C (NFC).
+/// Returns a borrowed slice if the string is already NFC to avoid allocations.
+#[must_use]
+pub fn normalize_nfc_str(text: &str) -> Cow<'_, str> {
+    if is_nfc(text) {
+        Cow::Borrowed(text)
+    } else {
+        Cow::Owned(text.nfc().collect())
+    }
+}
+
+/// Recursively canonicalizes every string in a JSON value (both object keys and string values) to Unicode NFC.
+pub fn normalize_json_value(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::String(text) => {
+            if !is_nfc(text) {
+                *text = text.nfc().collect();
+            }
+        }
+        serde_json::Value::Array(values) => {
+            for v in values {
+                normalize_json_value(v);
+            }
+        }
+        serde_json::Value::Object(map) => {
+            for v in map.values_mut() {
+                normalize_json_value(v);
+            }
+            if map.keys().any(|k| !is_nfc(k)) {
+                let old_map = std::mem::take(map);
+                for (k, v) in old_map {
+                    let normalized_key = if is_nfc(&k) { k } else { k.nfc().collect() };
+                    map.insert(normalized_key, v);
+                }
+            }
+        }
+        serde_json::Value::Null | serde_json::Value::Bool(_) | serde_json::Value::Number(_) => {}
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -134,5 +177,40 @@ mod tests {
     fn normalize_pos_leaves_valid_values_unchanged() {
         let input = r#"{"pos": "noun", "lemma": "dom"}"#;
         assert_eq!(normalize_pos_tags(input), input);
+    }
+
+    #[test]
+    fn test_normalize_nfc_str() {
+        // Already NFC Polish: returns borrowed Cow
+        let nfc_str = "Dzień dobry, książka";
+        let res = normalize_nfc_str(nfc_str);
+        assert!(matches!(res, std::borrow::Cow::Borrowed(_)));
+        assert_eq!(res, nfc_str);
+
+        // Decomposed NFD: returns owned Cow normalized to NFC
+        let nfd_str = "a\u{0328}"; // 'a' with combining ogonek -> 'ą'
+        let res_decomposed = normalize_nfc_str(nfd_str);
+        assert!(matches!(res_decomposed, std::borrow::Cow::Owned(_)));
+        assert_eq!(res_decomposed, "ą");
+    }
+
+    #[test]
+    fn test_normalize_json_value() {
+        let mut val = serde_json::json!({
+            "normal_key": "a\u{0328}", // decomposed 'ą'
+            "c\u{0301}": {              // decomposed 'ć' in key
+                "nested_arr": ["e\u{0301}", 42, true, null], // decomposed 'é'
+                "nested_obj": {
+                    "hint": "n\u{0301}" // decomposed 'ń'
+                }
+            }
+        });
+
+        normalize_json_value(&mut val);
+
+        assert_eq!(val["normal_key"], "ą");
+        assert_eq!(val["ć"]["nested_arr"][0], "é");
+        assert_eq!(val["ć"]["nested_arr"][1], 42);
+        assert_eq!(val["ć"]["nested_obj"]["hint"], "ń");
     }
 }

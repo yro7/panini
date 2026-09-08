@@ -9,4 +9,6 @@ pub fn clean_llm_json(raw: &str) -> &str {
 }
 
 /// Re-export from panini-core for backwards compatibility.
-pub use panini_core::text_processing::normalize_pos_tags;
+pub use panini_core::text_processing::{
+    normalize_json_value, normalize_nfc_str, normalize_pos_tags,
+};

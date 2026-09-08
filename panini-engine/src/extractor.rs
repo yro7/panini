@@ -498,7 +498,7 @@ where
         processed = comp.pre_process(&processed);
     }
 
-    let json_value: serde_json::Value = match serde_json::from_str(&processed) {
+    let mut json_value: serde_json::Value = match serde_json::from_str(&processed) {
         Ok(v) => v,
         Err(e) => {
             return Err(ExtractionParseError {
@@ -508,6 +508,7 @@ where
             .into());
         }
     };
+    crate::llm_utils::normalize_json_value(&mut json_value);
 
     if let Ok(validator) = jsonschema::validator_for(schema_value) {
         let schema_errors: Vec<_> = validator.iter_errors(&json_value).collect();
@@ -670,6 +671,7 @@ where
             .into());
         }
     };
+    crate::llm_utils::normalize_json_value(&mut json_value);
 
     // 7. Validate composed schema
     if let Ok(validator) = jsonschema::validator_for(schema_value) {
