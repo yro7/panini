@@ -93,19 +93,28 @@ pub enum EgyptianArabicAdjectiveForm {
 #[serde(rename_all = "snake_case")]
 pub enum EgyptianArabicVerbPattern {
     FormI,
+    // Roman numerals need explicit names: `rename_all = "snake_case"` starts a new
+    // word at every capital, so `FormII` would serialize as `form_i_i`.
+    #[serde(rename = "form_ii")]
     FormII,
+    #[serde(rename = "form_iii")]
     FormIII,
+    #[serde(rename = "form_iv")]
     FormIV,
     FormV,
+    #[serde(rename = "form_vi")]
     FormVI,
     #[serde(rename = "form_vii_in")]
     FormVIIIn,
     #[serde(rename = "form_vii_it")]
     FormVIIIt,
+    #[serde(rename = "form_viii")]
     FormVIII,
+    #[serde(rename = "form_ix")]
     FormIX,
     FormX,
     QuadriliteralI,
+    #[serde(rename = "quadriliteral_ii")]
     QuadriliteralII,
 }
 
@@ -600,6 +609,30 @@ mod tests {
                 "bi_imperfective",
                 "ha_imperfective",
                 "imperative",
+            ]
+        );
+    }
+
+    #[test]
+    fn verb_pattern_names_spell_their_roman_numerals() {
+        // The frontend labels these values by name; a numeral mangled by
+        // `rename_all` (`form_i_i` for Form II) reaches the UI unlabelled.
+        assert_eq!(
+            EgyptianArabicMorphology::PIVOT_PATTERN.values(),
+            &[
+                "form_i",
+                "form_ii",
+                "form_iii",
+                "form_iv",
+                "form_v",
+                "form_vi",
+                "form_vii_in",
+                "form_vii_it",
+                "form_viii",
+                "form_ix",
+                "form_x",
+                "quadriliteral_i",
+                "quadriliteral_ii",
             ]
         );
     }
