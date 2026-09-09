@@ -179,21 +179,21 @@ pub enum CzechMood {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum CzechVerbForm {
-    /// Určitý tvar — a conjugated form: píšu, napíšeš, budeme, piš, bych.
+    // Určitý tvar — a conjugated form: píšu, napíšeš, budeme, piš, bych.
     Finite,
-    /// Infinitiv — psát, napsat, být.
+    // Infinitiv — psát, napsat, být.
     Infinitive,
-    /// Příčestí činné, the *l*-participle: psal, psala, psali, psaly. The lexical
-    /// half of both the past tense and the conditional; agrees in gender and
-    /// number and has no person of its own.
+    // Příčestí činné, the *l*-participle: psal, psala, psali, psaly. The lexical
+    // half of both the past tense and the conditional; agrees in gender and
+    // number and has no person of its own.
     PastParticiple,
-    /// Příčestí trpné in its short, predicative form: je napsán, byla otevřena,
-    /// jsou zavřeny. The long form (napsaný) declines like a hard adjective and
-    /// is analysed as an adjective, which is what Czech dictionaries make of it.
+    // Příčestí trpné in its short, predicative form: je napsán, byla otevřena,
+    // jsou zavřeny. The long form (napsaný) declines like a hard adjective and
+    // is analysed as an adjective, which is what Czech dictionaries make of it.
     PassiveParticiple,
-    /// Přechodník — nesa, nesouc, napsav, napsavši. Alive in literary and older
-    /// written Czech, and frozen into a small set of prepositions (počínaje,
-    /// konče, nehledě na); a slot for it keeps those out of `Other`.
+    // Přechodník — nesa, nesouc, napsav, napsavši. Alive in literary and older
+    // written Czech, and frozen into a small set of prepositions (počínaje,
+    // konče, nehledě na); a slot for it keeps those out of `Other`.
     Transgressive,
 }
 
@@ -243,16 +243,16 @@ pub enum CzechPolarity {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum CzechAdjectiveDeclension {
-    /// Tvrdá — vzor mladý: mladý, mladá, mladé, mladého, mladým…
+    // Tvrdá — vzor mladý: mladý, mladá, mladé, mladého, mladým…
     Hard,
-    /// Měkká — vzor jarní: jarní throughout the singular and most of the plural.
-    /// Every comparative and superlative declines here, whatever the positive
-    /// does (mladý is hard, mladší and nejmladší are soft).
+    // Měkká — vzor jarní: jarní throughout the singular and most of the plural.
+    // Every comparative and superlative declines here, whatever the positive
+    // does (mladý is hard, mladší and nejmladší are soft).
     Soft,
-    /// Přivlastňovací — otcův, otcova, otcovo; matčin, matčina, matčino.
+    // Přivlastňovací — otcův, otcova, otcovo; matčin, matčina, matčino.
     Possessive,
-    /// Nesklonná — khaki, bordó, prima, fajn, super, blond. No endings at all;
-    /// the case, gender and number reported are the ones the noun assigns.
+    // Nesklonná — khaki, bordó, prima, fajn, super, blond. No endings at all;
+    // the case, gender and number reported are the ones the noun assigns.
     Indeclinable,
 }
 
@@ -357,10 +357,10 @@ pub enum CzechMorphology {
         number: BinaryNumber,
         case: CzechCase,
     },
-    /// Cardinal numeral — jeden, dva, pět, sto, tisíc.
-    ///
-    /// Ordinals are not here: první, druhý and třetí inflect exactly like
-    /// adjectives and are analysed as adjectives.
+    // Cardinal numeral — jeden, dva, pět, sto, tisíc.
+    //
+    // Ordinals are not here: první, druhý and třetí inflect exactly like
+    // adjectives and are analysed as adjectives.
     Numeral {
         lemma: String,
         /// Only jeden (jeden/jedna/jedno) and dva (dva/dvě) distinguish gender.
@@ -599,7 +599,9 @@ impl LinguisticDefinition for Czech {
          napsat); nouns to the nominative singular (na stole → stůl, v Praze → Praha, na ruce → \
          ruka), pluralia tantum staying plural (kalhoty, dveře, nůžky, Vánoce, játra); adjectives \
          to the masculine nominative singular POSITIVE degree (mladší → mladý, nejlepší → dobrý, \
-         napsaného → napsaný); adverbs to the positive (lépe → dobře, rychleji → rychle); \
+         napsaného → napsaný). This remains true for substantivized adjectives in fixed phrases: \
+         in na shledanou, analyse shledanou as an adjective and use the lemma shledaný, never \
+         shledaná; adverbs to the positive (lépe → dobře, rychleji → rychle); \
          participles and transgressives to the infinitive of the verb they are built on, same \
          aspect (napsán → napsat, píše jako přechodník → psát); pronouns and determiners to the \
          masculine nominative singular (jemu → on, mého → můj, té → ten). Lemmatize past the stem \
@@ -609,7 +611,9 @@ impl LinguisticDefinition for Czech {
          2. Aspect pairs are DIFFERENT LEXEMES, not two forms of one verb. Never lemmatize a \
          perfective to its imperfective partner or the reverse: psát/napsat, dělat/udělat, \
          číst/přečíst, brát/vzít, říkat/říct, dávat/dát are twelve lemmas, not six. Report the \
-         aspect the form actually carries. For the biaspectual verbs (informovat, absolvovat, \
+         aspect the form actually carries. In particular, vidět is always imperfective; a bounded \
+         English translation such as \"saw\" does not make it perfective. Its perfective counterpart \
+         is uvidět (or a separate lexical verb such as spatřit). For the biaspectual verbs (informovat, absolvovat, \
          organizovat, věnovat, jmenovat, obětovat) report the aspect the context realizes.\n\
          3. Negation is a PREFIX, never a separate token: nevím, nechtěl, nebudu, nejsem are one \
          token each. Keep the lemma positive (nevím → vědět, nebyl → být) and record the negation \
@@ -626,11 +630,16 @@ impl LinguisticDefinition for Czech {
          dative and locative singular are both ženě, and only the preposition separates them. Use \
          this rule for that last one: the LOCATIVE never occurs without a preposition (v, na, o, \
          po, při) — a bare -ě/-i form after a verb is a dative (dal jsem to ženě), the same form \
-         after v/na/o is a locative (o ženě).\n\
+         after v/na/o is a locative (o ženě). The conjunction než does not govern accusative: an \
+         elliptical comparison keeps the case of the compared phrase, so Tento úkol je lehčí než \
+         minulý [úkol] has nominative minulý.\n\
          5. The vocative is a full case and is REQUIRED in direct address: Petře!, pane doktore!, \
          Jano!, Evo!, kolegové!, přátelé!. Report vocative for every noun, proper noun, adjective \
          and determiner inside an address, including the ones whose vocative is identical to the \
-         nominative (paní!, město!, Ivo!) — never fall back to nominative there.\n\
+         nominative (paní!, město!, Ivo!) — never fall back to nominative there. The fixed \
+         greetings Dobrý den, Dobré ráno and Dobrý večer are elliptical ACCUSATIVE phrases, \
+         not direct address: mark both their adjective and noun accusative. In Dobrý den, pane \
+         Nováku, only pane Nováku is vocative.\n\
          6. Gender has four values, and animacy is a declension class rather than a semantic test: \
          masculine_animate is the class whose singular accusative equals its genitive, which \
          covers people and animals and a few nouns for things that decline that way (sněhulák, \
@@ -657,7 +666,19 @@ impl LinguisticDefinition for Czech {
          - short passive participle (je napsán, byla otevřena, jsou zavřeny): verb_form \
          passive_participle, number and gender; no tense, no person, no mood. The LONG form \
          (napsaný, otevřená) is an ADJECTIVE, not a verb — analyse it as one, with its degree, \
-         declension, gender, number and case.\n\
+         declension, gender, number and case. In an analytic past passive, the past form of být is \
+         itself an l-participle and agrees with the grammatical subject's lexical gender, just as \
+         the passive participle does: Dopis byl napsán has masculine_inanimate byl and napsán; \
+         Student byl pozván has masculine_animate byl and pozván; Okna byla umyta has neuter \
+         plural byla and umyta. The plural short-passive ending -y is syncretic between masculine \
+         inanimate and feminine, so recover gender from the subject rather than the ending: \
+         Dokumenty jsou podepsány is masculine_inanimate, while Smlouvy jsou podepsány is \
+         feminine.\n\
+         - active participial adjectives (dělající, nesoucí, udělavší) are ADJECTIVES too because \
+         they decline for case, number and gender. Lemmatize an inflected form to its masculine \
+         nominative singular adjective (dělajícího → dělající), not to the source verb, and report \
+         degree positive plus the adjective fields. Do not confuse them with the non-declining \
+         transgressives dělaje, nesa, nesouc, udělav, udělavši.\n\
          - transgressive (nesa, nesouc, napsav, napsavši): verb_form transgressive, tense, number \
          and gender; no person, no mood.\n\
          9. The compound tenses are two tokens each, and the auxiliary is a verb in its own right. \
@@ -671,8 +692,10 @@ impl LinguisticDefinition for Czech {
          future. Unlike Russian, Czech WRITES its present copula: analyse je in Petr je student as \
          a verb.\n\
          10. Tokenization: the reflexive se and si are separate PRONOUN tokens, never fused with \
-         the verb, and the verb is lemmatized without them (myje se → 'mýt' + 'se'). Beware that se \
-         is also a preposition (se mnou, se školou) — the vocalized form of s, and lemmatized to s; \
+         the verb, and the verb is lemmatized without them (myje se → 'mýt' + 'se'). Following \
+         Czech morphological-dictionary convention, use lemma se for the whole reflexive series: \
+         se, si, sebe, sobě and sebou. Never emit sebe as the lemma of clitic se. Beware that se is \
+         also a preposition (se mnou, se školou) — the vocalized form of s, and lemmatized to s; \
          the same goes for ve → v, ke → k, ze → z, and for the -e added before a pronoun (ke mně, \
          ve všem). aby and kdyby fuse the conjunction with the conditional auxiliary and stay ONE \
          subordinating-conjunction token (abych, abys, aby, abychom, abyste; kdybych, kdybys, \
@@ -689,20 +712,58 @@ impl LinguisticDefinition for Czech {
          adjectives too: hard declension, nominative.\n\
          12. Pronouns and determiners: a pronoun used adnominally before a noun is a DETERMINER \
          (ten dům, moje kniha, každý den), the same word standing alone is a PRONOUN (ten je můj, \
-         každý ví). Set clitic true only for the short unstressed second-position forms — mě, mi, \
+         každý ví). This includes the tenhle series: Tohle je nejdelší cesta has standalone tohle \
+         as a pronoun with lemma tenhle, while tahle cesta has adnominal tahle as a determiner with \
+         the same lemma tenhle. Never reduce tenhle/tahle/tohle to the distinct lemma ten. Set \
+         clitic true only for the short unstressed second-position forms — mě, mi, \
          tě, ti, ho, mu, ji, je, se, si — and false for the long stressed alternants (mne, mně, \
          tebe, tobě, jeho, jemu, sebe, sobě) and for every pronoun with no such alternation (já, \
          ty, on, kdo, co, který, ten). The possessives jeho and jejich are indeclinable but still \
          occupy a syntactic slot: report the gender, number and case the noun assigns.\n\
-         13. Orthography and register: keep every diacritic exactly as written, and keep ú and ů \
+         13. Question and relative adverbs such as kde, kam, kdy, jak and proč are ADVERBS, never \
+         'other'. Give them the positive degree like other non-comparative adverbs.\n\
+         14. Orthography and register: keep every diacritic exactly as written, and keep ú and ů \
          apart (úterý, dům) — they are different letters, not variants. If the input contains \
          colloquial obecná čeština forms, analyse them as the standard forms they correspond to \
          and lemmatize to the STANDARD lemma: dobrej / dobrý mléko → dobrý, vokno → okno, von → on, \
          s klukama → kluk (instrumental plural), voni dělaj → dělat. Never emit a colloquial form \
          as a lemma.\n\
-         14. Value guardrails: NEVER put a gender value in the 'number' field or a number value in \
+         15. Value guardrails: NEVER put a gender value in the 'number' field or a number value in \
          the 'gender' field. NEVER report 'dual' — the enum has no such value. Do not report a case \
          on a verb: Czech verbs do not decline, and the long passive participle that does is an \
-         adjective."
+         adjective. Emit ONLY the exact serialized JSON enum keys allowed by the schema. The full \
+         verb_form set is 'finite', 'infinitive', 'past_participle', 'passive_participle', \
+         'transgressive'; the adjective declension set is 'hard', 'soft', 'possessive', \
+         'indeclinable'. Never copy an enum's prose description or example sentence into an enum \
+         field, and never append prose to a key. Every cardinal numeral (jeden, dva/dvě, pět, sto) \
+         uses pos 'numeral'; 'cardinal_numeral' and 'cardinal numeral' are not valid keys."
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn extractor_enums_expose_only_their_wire_keys() {
+        let verb_forms = serde_json::to_value(schemars::schema_for!(CzechVerbForm)).unwrap();
+        assert_eq!(
+            verb_forms["enum"],
+            json!([
+                "finite",
+                "infinitive",
+                "past_participle",
+                "passive_participle",
+                "transgressive"
+            ])
+        );
+
+        let adjective_declensions =
+            serde_json::to_value(schemars::schema_for!(CzechAdjectiveDeclension)).unwrap();
+        assert_eq!(
+            adjective_declensions["enum"],
+            json!(["hard", "soft", "possessive", "indeclinable"])
+        );
     }
 }
