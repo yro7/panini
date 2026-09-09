@@ -17,8 +17,7 @@ async fn main() -> Result<()> {
         env::var("GOOGLE_API_KEY").expect("GOOGLE_API_KEY must be set in .env or environment");
 
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let prompts_path =
-        std::path::Path::new(manifest_dir).join("../../prompts/default.yml");
+    let prompts_path = std::path::Path::new(manifest_dir).join("../../prompts/default.yml");
     let prompts = ExtractorPrompts::load(prompts_path.to_str().unwrap())?;
 
     let client = gemini::Client::new(&api_key)?;
