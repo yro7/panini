@@ -307,8 +307,6 @@ pub enum GermanParticleType {
     Negation,
     /// The zu of a zu-infinitive, written as its own word (ohne zu fragen).
     Infinitival,
-    /// A separable prefix stranded away from its verb (Ich stehe früh auf).
-    SeparatedVerbPrefix,
 }
 
 #[derive(
