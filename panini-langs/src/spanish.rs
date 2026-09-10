@@ -9,9 +9,8 @@ use panini_core::traits::{
 ///
 /// Every compound tense is periphrastic — `haber` plus an invariable
 /// participio — and is analysed as two tokens, so no `perfect` or `pluperfect`
-/// value is needed. The `condicional` is listed here and not among the moods:
-/// the modern academic description treats it as a tense of the indicative,
-/// alongside the futuro it is built from.
+/// value is needed. The `condicional` is a tense of the indicative, alongside
+/// the futuro it is built from, not a mood.
 #[derive(
     Debug,
     Clone,
@@ -43,8 +42,7 @@ pub enum SpanishTense {
 ///
 /// The first three are the finite moods; the last three are the *formas no
 /// personales*, which carry no person and no tense. Every verb token is in
-/// exactly one of the six, which is why the field is required while `tense` is
-/// not.
+/// exactly one of the six.
 #[derive(
     Debug,
     Clone,
