@@ -614,7 +614,9 @@ mod tests {
             .expect("prompt should compose");
 
         assert_eq!(prompt.matches("Test directives").count(), 1);
-        assert!(prompt.contains("<extraction_directives>\nTest directives\n</extraction_directives>"));
+        assert!(
+            prompt.contains("<extraction_directives>\nTest directives\n</extraction_directives>")
+        );
     }
 
     #[test]
