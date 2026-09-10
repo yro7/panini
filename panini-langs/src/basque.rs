@@ -540,9 +540,15 @@ pub enum BasqueMorphology {
         lemma: String,
         particle_type: BasqueParticleType,
     },
+    /// Demonstrative pronouns carry the same fused singular/plural paradigm
+    /// as demonstrative determiners (`hau` / `hauek`, `hori` / `horiek`).
+    /// Personal, intensive, interrogative, indefinite and reciprocal pronouns
+    /// omit `determination`.
     Pronoun {
         lemma: String,
         pronoun_type: BasquePronounType,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        determination: Option<BasqueDetermination>,
         case: BasqueCase,
         #[serde(skip_serializing_if = "Option::is_none")]
         agreement: Option<BasquePersonNumber>,
@@ -632,6 +638,7 @@ impl BasqueMorphology {
             | Self::Determiner { determination, .. }
             | Self::Noun { determination, .. }
             | Self::Numeral { determination, .. }
+            | Self::Pronoun { determination, .. }
             | Self::ProperNoun { determination, .. }
             | Self::Verb { determination, .. } => determination,
             _ => return None,
@@ -1455,7 +1462,7 @@ impl LinguisticDefinition for Basque {
          7. Polypersonal agreement — this is the core of the language. Fill `absolutive_agreement` (NOR), `dative_agreement` (NORI) and `ergative_agreement` (NORK) independently, each only when the form actually indexes that argument. da = absolutive third_singular. dut = absolutive third_singular + ergative first_singular. ditut = absolutive third_plural + ergative first_singular. zaizkit = absolutive third_plural + dative first_singular. diot = absolutive third_singular + dative third_singular + ergative first_singular. gaituzte = absolutive first_plural + ergative third_plural.\n\
          8. `paradigm` names exactly which slots the form has: `nor`, `nor_nori`, `nor_nork`, `nor_nori_nork`; it must agree with the agreement slots. Paradigm and mood together select the auxiliary. Indicative and hypothetical conditional/consequential forms use izan for nor/nor_nori and *edun for nor_nork/nor_nori_nork. Potential, subjunctive and imperative forms instead use *edin for nor/nor_nori and *ezan for nor_nork/nor_nori_nork. Thus naiteke is *edin + nor + potential, while dezaket is *ezan + nor_nork + potential. In an indicative clause, an ergative subject still requires *edun even when the meaning looks intransitive (dirua behar dut, euskaraz dakit).\n\
          9. `allocutive` (hitanoa) is the ADDRESSEE indexed on a finite verb outside its argument structure: `masculine_familiar` for the toka forms (duk, diat, zakiat, ziok), `feminine_familiar` for the noka forms (dun, dinat, zakinat, zionat), `respectful` for the xuka forms of Zuberoa and Nafarroa Beherea. OMIT the field entirely for ordinary zuka speech and for every non-finite form. Read it off the verb form itself — never infer it from hi appearing in the sentence, and never from a second-person argument: hi as an argument fills an agreement slot, allocutive marking does not.\n\
-         10. Pronouns: give `pronoun_type` and `case`, plus `agreement` for a personal or intensive pronoun (ni → first_singular, hi → second_singular_familiar, zu → second_singular, hura → third_singular, gu → first_plural, zuek → second_plural, haiek → third_plural). Note zu is a SINGULAR polite address despite its historic plural origin, and hi is the familiar singular.\n\
+         10. Pronouns: give `pronoun_type` and `case`, plus `agreement` for a personal or intensive pronoun (ni → first_singular, hi → second_singular_familiar, zu → second_singular, hura → third_singular, gu → first_plural, zuek → second_plural, haiek → third_plural). A demonstrative pronoun instead takes `determination`: definite_singular for hau, hori, hura and their oblique forms; definite_plural for hauek, horiek, haiek and theirs. Other pronoun types omit it. Note zu is a SINGULAR polite address despite its historic plural origin, and hi is the familiar singular.\n\
          11. Particles: give `particle_type`. al is `interrogative`, ote is `dubitative`, omen and ei are `evidential`, bide is `inferential`, ez and ezin are `negative`, ere is `additive`, bai is `affirmative`. Attached emphatic ba- is not a separate token: keep the whole form as a verb and record ba- only in morpheme segmentation as particle:affirmative. Conditional ba- is instead subordination:conditional, and the finite verb under it keeps its ordinary indicative mood unless its own form is hypothetical (badator = indicative; balitz = conditional).\n\
          12. Guardrails for the confusions this language actually provokes:\n\
          - Final -ak is TWO different things. gizonak is the ergative singular \"the man (as agent)\" (-a + -k) and the absolutive plural \"the men\". Decide from the verb: if the finite form indexes a NORK, the -ak phrase is ergative singular; if the clause is a nor form, it is absolutive plural. Never decide from the suffix alone.\n\
@@ -1465,7 +1472,7 @@ impl LinguisticDefinition for Basque {
          - The absolutive is the ZERO case and it covers both the subject of an intransitive verb and the direct object of a transitive one. Basque has no accusative: never tag a direct object `accusative`, tag it `absolutive`.\n\
          - Do not strip a lexical final -a. gizona lemmatizes to gizon, but euskara, gauza, eliza, arrosa, denbora and neska end in -a lexically and lemmatize to themselves.\n\
          - The NOR of a transitive clause is the OBJECT. In `nik liburua irakurri dut` the absolutive is liburua (third_singular) and the ergative is nik (first_singular), never the reverse.\n\
-         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`. In `zer moduz`, zer is determiner_type `interrogative` with no case or determination, while moduz is noun lemma modu + instrumental + indefinite. In `eskerrik asko`, asko is determiner_type `quantifier`, not `indefinite`, and has no case or determination. In `leku askotan`, however, askotan is the phrase-final determiner lemma asko, determiner_type `quantifier`, case `inessive`, determination `indefinite`; it is not the lexical adverb askotan and not definite plural.\n\
+         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative + definite_singular, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`. In `zer moduz`, zer is determiner_type `interrogative` with no case or determination, while moduz is noun lemma modu + instrumental + indefinite. In `eskerrik asko`, asko is determiner_type `quantifier`, not `indefinite`, and has no case or determination. In `leku askotan`, however, askotan is the phrase-final determiner lemma asko, determiner_type `quantifier`, case `inessive`, determination `indefinite`; it is not the lexical adverb askotan and not definite plural.\n\
          13. Basque has no grammatical gender and no gender agreement anywhere in the noun phrase. The only masculine/feminine distinction in the language is `allocutive`."
     }
 
@@ -1754,6 +1761,34 @@ mod tests {
         assert_eq!(
             BasqueMorphology::PIVOT_DECLENSION_CASE.value(&batek),
             Some("ergative".to_string())
+        );
+    }
+
+    #[test]
+    fn demonstrative_pronouns_preserve_number() {
+        let singular = BasqueMorphology::Pronoun {
+            lemma: "hau".to_string(),
+            pronoun_type: BasquePronounType::Demonstrative,
+            determination: Some(BasqueDetermination::DefiniteSingular),
+            case: BasqueCase::Absolutive,
+            agreement: None,
+        };
+        let plural = BasqueMorphology::Pronoun {
+            lemma: "hau".to_string(),
+            pronoun_type: BasquePronounType::Demonstrative,
+            determination: Some(BasqueDetermination::DefinitePlural),
+            case: BasqueCase::Absolutive,
+            agreement: None,
+        };
+
+        assert_ne!(singular, plural);
+        assert_eq!(
+            BasqueMorphology::PIVOT_DETERMINATION.value(&singular),
+            Some("definite_singular".to_string())
+        );
+        assert_eq!(
+            BasqueMorphology::PIVOT_DETERMINATION.value(&plural),
+            Some("definite_plural".to_string())
         );
     }
 
