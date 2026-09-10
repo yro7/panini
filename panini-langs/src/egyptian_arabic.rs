@@ -77,7 +77,7 @@ pub enum EgyptianArabicAdjectiveForm {
 /// `form_vii_in` is the inherited `infa3al` pattern. `form_vii_it` is the
 /// Egyptian `itfa3al` passive/reflexive pattern sometimes called VIIt in
 /// descriptions of the dialect. Only the two surviving quadriliteral patterns
-/// are represented; obsolete Classical patterns are deliberately absent.
+/// are represented.
 #[derive(
     Debug,
     Clone,
@@ -120,9 +120,9 @@ pub enum EgyptianArabicVerbPattern {
 
 /// The five finite paradigms a learner must distinguish in Egyptian Arabic.
 ///
-/// Unlike Modern Standard Arabic, Egyptian Arabic does not retain inflectional
-/// case or the indicative/subjunctive/jussive ending system. Its imperfective
-/// stem instead contrasts a bare form with `b-` and future `ha-/ḥa-` series.
+/// Egyptian Arabic has no inflectional case and no
+/// indicative/subjunctive/jussive ending system. Its imperfective stem
+/// contrasts a bare form with `b-` and future `ha-/ḥa-` series.
 #[derive(
     Debug,
     Clone,
@@ -147,7 +147,7 @@ pub enum EgyptianArabicVerbForm {
 /// Diathesis as expressed by an Egyptian Arabic verb in context.
 ///
 /// Passive and middle/reflexive meanings are normally built with derived
-/// patterns rather than the productive internal passive of Standard Arabic.
+/// patterns.
 #[derive(
     Debug,
     Clone,
@@ -274,10 +274,9 @@ pub enum EgyptianArabicParticleFunction {
 
 /// Morphological features of contemporary Egyptian Arabic (`arz`).
 ///
-/// This is intentionally not a reduced copy of the former Standard Arabic
-/// definition. Egyptian has no productive nominal case endings or finite mood
-/// endings, no dual or gender-distinct plural verb agreement, and its everyday
-/// finite system is organized around perfective and three imperfective series.
+/// Egyptian has no productive nominal case endings or finite mood endings,
+/// no dual or gender-distinct plural verb agreement, and its everyday finite
+/// system is organized around perfective and three imperfective series.
 #[derive(
     Debug,
     Clone,
