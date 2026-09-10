@@ -7,9 +7,9 @@ use panini_core::traits::{
 
 /// The four productive cases of Standard Modern Greek.
 ///
-/// The inherited dative survives only inside fixed learned expressions. It is
-/// not a productive cell of the modern declension and therefore has no value
-/// here; such frozen forms are analyzed according to their current lexical use.
+/// The inherited dative survives only inside fixed learned expressions and
+/// has no value here; such frozen forms are analyzed according to their
+/// current lexical use.
 #[derive(
     Debug,
     Clone,
@@ -101,8 +101,8 @@ pub enum GreekTense {
 
 /// The morphological opposition between the two Modern Greek conjugations.
 ///
-/// `Mediopassive` deliberately names form rather than semantic voice: the
-/// `-μαι` conjugation includes passive, middle, reflexive and deponent verbs.
+/// `Mediopassive` names the form, not the meaning: the `-μαι` conjugation
+/// includes passive, middle, reflexive and deponent verbs.
 #[derive(
     Debug,
     Clone,
