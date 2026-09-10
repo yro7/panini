@@ -84,13 +84,11 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for MorphologyAnalysis {
         fragment
     }
 
-    fn prompt_fragment(&self, lang: &L, _ctx: &ComponentContext) -> String {
-        format!(
-            "Extract morphological features from every word in the sentence, following the JSON schema exactly.\n\
-             Language-specific extraction directives for {}:\n{}",
-            lang.name(),
-            lang.extraction_directives()
-        )
+    fn prompt_fragment(&self, _lang: &L, _ctx: &ComponentContext) -> String {
+        // The language's directives already sit in the composer's
+        // <extraction_directives> block; repeating them here doubled the prompt.
+        "Extract morphological features from every word in the sentence, following the JSON schema exactly."
+            .to_string()
     }
 
     fn output_instruction(&self) -> Option<&str> {
