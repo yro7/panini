@@ -7,11 +7,9 @@ use panini_core::traits::{
 
 /// The two agreement classes of contemporary Standard Dutch nouns.
 ///
-/// `Common` is the class selected by singular `de`; it contains the historical
-/// masculine and feminine genders, which no longer contrast in articles or
-/// attributive adjective endings. `Neuter` is selected by singular `het`.
-/// Personal pronouns retain a separate three-gender contrast, represented by
-/// `pronominal_gender` rather than by widening this genuinely binary system.
+/// `Common` is the class selected by singular `de`; `Neuter` is selected by
+/// singular `het`. Personal pronouns keep a separate three-gender contrast,
+/// represented by `pronominal_gender`.
 #[derive(
     Debug,
     Clone,
@@ -158,9 +156,9 @@ pub enum DutchVerbClass {
 
 /// Whether a complex verb separates under Dutch verb-second syntax.
 ///
-/// This is absent on a simplex verb. It is not predictable from the letters of
-/// the prefix alone: stress and meaning distinguish pairs such as separable
-/// `voorkomen` (occur) and inseparable `voorkomen` (prevent).
+/// Absent on a simplex verb. Stress and meaning decide it, not the prefix's
+/// letters: separable `voorkomen` (occur) against inseparable `voorkomen`
+/// (prevent).
 #[derive(
     Debug,
     Clone,
@@ -181,10 +179,9 @@ pub enum DutchSeparability {
 
 /// The living case opposition of Dutch pronouns.
 ///
-/// Nouns no longer have a productive case paradigm. Personal pronouns retain a
-/// subject form against an object/oblique form; the prescriptive `hen`/`hun`
-/// distinction lives inside that oblique domain rather than recreating a full
-/// nominal accusative/dative system.
+/// Nouns have no productive case paradigm. Personal pronouns retain a subject
+/// form against an object/oblique form; the prescriptive `hen`/`hun`
+/// distinction lives inside that oblique domain.
 #[derive(
     Debug,
     Clone,
@@ -203,10 +200,8 @@ pub enum DutchPronounCase {
     Oblique,
 }
 
-/// The syntactic role that selects an oblique personal-pronoun form.
-///
-/// This keeps the standard `hen`/`hun` opposition representable without
-/// pretending that Dutch nouns still have a productive case paradigm.
+/// The syntactic role that selects an oblique personal-pronoun form — the
+/// standard `hen`/`hun` opposition.
 #[derive(
     Debug,
     Clone,
