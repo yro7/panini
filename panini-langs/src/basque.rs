@@ -359,7 +359,7 @@ pub enum BasqueParticleType {
     Affirmative,   // bai, ba
 }
 
-/// Morpheme-level aspect: the three participle suffixes. Distinct from
+/// Morpheme-level aspect: the four participle constructions. Distinct from
 /// [`BasqueVerbForm`], which also has to name the two finite options.
 #[derive(
     Debug,
@@ -504,7 +504,9 @@ pub enum BasqueMorphology {
         lemma: String,
     },
     /// A determiner carries the phrase ending only when it is the final
-    /// element (`liburu horietan`); non-final `zer` in `zer moduz` omits it.
+    /// element (`liburu horietan`, `leku askotan`); non-final `zer` in
+    /// `zer moduz` omits it. Indefinite quantifiers remain indefinite when
+    /// declined: `askotan` in `leku askotan` is not definite plural.
     Determiner {
         lemma: String,
         determiner_type: BasqueDeterminerType,
@@ -590,6 +592,33 @@ pub enum BasqueMorphology {
 }
 
 impl BasqueMorphology {
+    /// Case belongs to the phrase-final word. Most hosts therefore expose an
+    /// optional field, while pronouns always carry one; the derived pivot only
+    /// sees the latter and would miss ordinary declined noun phrases.
+    fn __pivot_declension_case(&self) -> Option<String> {
+        let case = match self {
+            Self::Adjective { case, .. }
+            | Self::Determiner { case, .. }
+            | Self::Noun { case, .. }
+            | Self::Numeral { case, .. }
+            | Self::ProperNoun { case, .. }
+            | Self::Verb { case, .. } => case.as_ref(),
+            Self::Pronoun { case, .. } => Some(case),
+            _ => return None,
+        };
+
+        case.map(|c| panini_core::aggregable::ClosedValues::variant_str(c).to_string())
+    }
+
+    /// Typed pivot handle for phrase-final case.
+    pub const PIVOT_DECLENSION_CASE: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "case",
+            "Case",
+            <BasqueCase as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_declension_case,
+        );
+
     /// Determination is carried only by the phrase-final inflected word, so
     /// every POS that can host it exposes an optional slot.
     fn __pivot_determination(&self) -> Option<String> {
@@ -1352,7 +1381,9 @@ impl Agglutinative for Basque {
              particle:affirmative.\n\
              FIXED EXPRESSIONS: mesedez is synchronically a lexical adverb with lemma mesedez, \
              not a declined occurrence of mesede; do not segment its final z. In eskerrik asko, \
-             segment only the partitive -rik on eskerrik; asko has no suffix.\n\
+             segment only the partitive -rik on eskerrik; asko has no suffix. By contrast, in \
+             leku askotan, askotan is declined asko: segment its surface -tan as the inessive \
+             `-(e)an/-etan`.\n\
              Segment only words that have at least one affix worth annotating."
         )
     }
@@ -1368,7 +1399,7 @@ impl LinguisticDefinition for Basque {
 
     const ISO_LANG: IsoLang = IsoLang::Eus;
     const MORPHOLOGY_PIVOTS: &'static [panini_core::pivot::PivotField<Self::Morphology>] = &[
-        BasqueMorphology::PIVOT_CASE,
+        BasqueMorphology::PIVOT_DECLENSION_CASE,
         BasqueMorphology::PIVOT_DETERMINATION,
         BasqueMorphology::PIVOT_FORM,
         BasqueMorphology::PIVOT_PARADIGM,
@@ -1429,7 +1460,7 @@ impl LinguisticDefinition for Basque {
          - The absolutive is the ZERO case and it covers both the subject of an intransitive verb and the direct object of a transitive one. Basque has no accusative: never tag a direct object `accusative`, tag it `absolutive`.\n\
          - Do not strip a lexical final -a. gizona lemmatizes to gizon, but euskara, gauza, eliza, arrosa, denbora and neska end in -a lexically and lemmatize to themselves.\n\
          - The NOR of a transitive clause is the OBJECT. In `nik liburua irakurri dut` the absolutive is liburua (third_singular) and the ergative is nik (first_singular), never the reverse.\n\
-         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`. In `zer moduz`, zer is determiner_type `interrogative` with no case or determination, while moduz is noun lemma modu + instrumental + indefinite. In `eskerrik asko`, asko is determiner_type `quantifier`, not `indefinite`, and has no case or determination.\n\
+         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`. In `zer moduz`, zer is determiner_type `interrogative` with no case or determination, while moduz is noun lemma modu + instrumental + indefinite. In `eskerrik asko`, asko is determiner_type `quantifier`, not `indefinite`, and has no case or determination. In `leku askotan`, however, askotan is the phrase-final determiner lemma asko, determiner_type `quantifier`, case `inessive`, determination `indefinite`; it is not the lexical adverb askotan and not definite plural.\n\
          13. Basque has no grammatical gender and no gender agreement anywhere in the noun phrase. The only masculine/feminine distinction in the language is `allocutive`."
     }
 
@@ -1656,7 +1687,7 @@ mod tests {
             case: None,
             determination: None,
         };
-        assert_eq!(BasqueMorphology::PIVOT_CASE.value(&zer), None);
+        assert_eq!(BasqueMorphology::PIVOT_DECLENSION_CASE.value(&zer), None);
         assert_eq!(BasqueMorphology::PIVOT_DETERMINATION.value(&zer), None);
     }
 
@@ -1668,8 +1699,30 @@ mod tests {
             determination: None,
         };
 
-        assert_eq!(BasqueMorphology::PIVOT_CASE.value(&egun), None);
+        assert_eq!(
+            BasqueMorphology::PIVOT_DECLENSION_CASE.value(&egun),
+            None
+        );
         assert_eq!(BasqueMorphology::PIVOT_DETERMINATION.value(&egun), None);
+    }
+
+    #[test]
+    fn declined_indefinite_quantifier_remains_indefinite() {
+        let askotan = BasqueMorphology::Determiner {
+            lemma: "asko".to_string(),
+            determiner_type: BasqueDeterminerType::Quantifier,
+            case: Some(BasqueCase::Inessive),
+            determination: Some(BasqueDetermination::Indefinite),
+        };
+
+        assert_eq!(
+            BasqueMorphology::PIVOT_DECLENSION_CASE.value(&askotan),
+            Some("inessive".to_string())
+        );
+        assert_eq!(
+            BasqueMorphology::PIVOT_DETERMINATION.value(&askotan),
+            Some("indefinite".to_string())
+        );
     }
 
     #[test]
