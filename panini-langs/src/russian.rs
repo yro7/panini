@@ -7,10 +7,8 @@ use panini_core::traits::{
 
 /// The six productive cases of modern Russian.
 ///
-/// Six, not seven: the vocative remnants (Бо́же, отче) and the "second locative"
-/// (в лесу́, на краю́) are lexically restricted survivals, not productive cells of
-/// the paradigm, so they are reported as the case their syntax calls for rather
-/// than given a slot of their own.
+/// The vocative remnants (Бо́же, отче) and the "second locative" (в лесу́,
+/// на краю́) are reported as the case their syntax calls for.
 #[derive(
     Debug,
     Clone,
@@ -33,13 +31,11 @@ pub enum RussianCase {
     Prepositional, // предложный
 }
 
-/// Animacy (одушевлённость) — a morphosyntactic category in its own right.
+/// Animacy (одушевлённость), independent of gender.
 ///
-/// Kept orthogonal to gender rather than folded into it the way Polish folds it,
-/// because in Russian animacy cuts across all three genders: it decides the
-/// accusative of masculine singulars (вижу брата = genitive form) and of every
-/// gender in the plural (вижу сестёр), while leaving the rest of the paradigm
-/// untouched.
+/// It decides the accusative of masculine singulars (вижу брата = genitive
+/// form) and of every gender in the plural (вижу сестёр), and leaves the rest
+/// of the paradigm untouched.
 #[derive(
     Debug,
     Clone,
@@ -60,9 +56,9 @@ pub enum RussianAnimacy {
 
 /// Tense of a finite verb or a participle.
 ///
-/// Three cells, but they are distributed by aspect: an imperfective has all
-/// three (писа́л / пишу́ / бу́ду писа́ть), a perfective only past and future
-/// (написа́л / напишу́) — a perfective "present" form is a future.
+/// An imperfective has all three (писа́л / пишу́ / бу́ду писа́ть), a perfective
+/// only past and future (написа́л / напишу́) — a perfective "present" form is
+/// a future.
 #[derive(
     Debug,
     Clone,
@@ -104,10 +100,8 @@ pub enum RussianMood {
 
 /// Which slot of the verbal system a verb token occupies.
 ///
-/// Required on every verb: Russian's non-finite forms are not a fringe, they are
-/// where the case system and the verb system meet — participles decline like
-/// adjectives, verbal adverbs decline for nothing at all — and which fields
-/// apply follows entirely from this value.
+/// Required on every verb; which fields apply follows from it. Participles
+/// decline like adjectives, verbal adverbs decline for nothing at all.
 #[derive(
     Debug,
     Clone,
@@ -128,9 +122,8 @@ pub enum RussianVerbForm {
     VerbalAdverb, // деепричастие
 }
 
-/// Long vs short form — shared by adjectives and by participles, which is why
-/// it is not spelled "adjective form": написан is the short form of a passive
-/// participle by exactly the same mechanism that makes краси́в the short form of
+/// Long vs short form, shared by adjectives and by participles: написан is
+/// the short form of a passive participle just as краси́в is the short form of
 /// краси́вый.
 #[derive(
     Debug,
@@ -288,13 +281,11 @@ pub enum RussianMorphology {
     /// Verb — finite forms, infinitives, participles and verbal adverbs.
     ///
     /// Aspect and voice hold for every one of them; everything else is decided
-    /// by `verb_form`, and each `Option` below marks a cell Russian genuinely
-    /// does not have rather than one the model might not know.
+    /// by `verb_form`.
     Verb {
         lemma: String,
-        /// Perfective or imperfective — the axis the whole verbal system turns
-        /// on, and never a property of the token alone: писать and написать are
-        /// two lemmas, not two forms of one.
+        /// Perfective or imperfective — a property of the lemma: писать and
+        /// написать are two lemmas, not two forms of one.
         aspect: SlavicAspect,
         voice: BinaryVoice,
         verb_form: RussianVerbForm,
