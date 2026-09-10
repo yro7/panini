@@ -297,7 +297,7 @@ pub enum GermanPoliteness {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum GermanParticleType {
-    Modal,      // Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl
+    Modal, // Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl, and unstressed clause-internal bitte
     Negation,   // nicht
     Infinitival, // the zu of a zu-infinitive, written apart (ohne zu fragen)
     SeparatedVerbPrefix, // the stranded prefix of a separable verb (steht ... auf)
@@ -357,12 +357,17 @@ pub enum GermanMorphology {
     /// Adjective.
     Adverb {
         lemma: String,
-        /// Only for an adverb whose own form encodes degree (oft / öfter, gern
-        /// / lieber, bald / eher, gut / besser).
+        /// For an adverb that compares in its own form — regularly (früh /
+        /// früher, schnell / schneller) or suppletively (oft / öfter, gern /
+        /// lieber, bald / eher, gut / besser) — and then always, so the
+        /// positive is reported as `positive` rather than omitted. Absent on
+        /// an adverb that does not compare (heute, hier, nachts, vorbei).
         #[serde(skip_serializing_if = "Option::is_none")]
         degree: Option<GermanDegree>,
     },
-    /// Coordinating conjunction — und, oder, aber, denn, sondern.
+    /// Coordinating conjunction — und, oder, aber, denn, sondern — and the
+    /// als and wie of comparison (größer als ich, so groß wie er), which link
+    /// two constituents of equal rank rather than open a subordinate clause.
     CoordinatingConjunction {
         lemma: String,
     },
@@ -393,12 +398,16 @@ pub enum GermanMorphology {
     ///
     /// Plural class is deliberately not modelled — see the module-level note on
     /// `GermanMorphology` in the definition's report. Gender is, and it is
-    /// required even in the plural, where the article stops showing it.
+    /// reported even in the plural, where the article stops showing it; only a
+    /// plurale tantum has none to report.
     Noun {
         lemma: String,
-        /// Inherent and lexical. A compound takes the gender of its last
-        /// element (die Tür → die Haustür).
-        gender: TernaryGender,
+        /// Inherent and lexical, and reported in the plural too (die Bücher →
+        /// neuter). A compound takes the gender of its last element (die Tür
+        /// → die Haustür). Absent only on a plurale tantum — Leute, Eltern,
+        /// Ferien, Geschwister, Kosten — which has no singular to carry one.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gender: Option<TernaryGender>,
         number: BinaryNumber,
         case: GermanCase,
     },
@@ -500,6 +509,22 @@ impl GermanMorphology {
     /// because strong/weak/mixed is the dimension German most deserves a facet
     /// for: it is the one nominal contrast the learner cannot look up in a
     /// dictionary and has to drill against real determiner phrases.
+    /// Gender across every variant that carries it. Hand-written because
+    /// `Noun.gender` became `Option` for the pluralia tantum, and the derive
+    /// skips optional fields — while gender is the first facet a German
+    /// learner reaches for.
+    fn __pivot_gender(&self) -> Option<String> {
+        let gender = match self {
+            Self::Noun { gender, .. }
+            | Self::Adjective { gender, .. }
+            | Self::Determiner { gender, .. }
+            | Self::Pronoun { gender, .. }
+            | Self::ProperNoun { gender, .. } => gender.as_ref(),
+            _ => None,
+        };
+        gender.map(|g| panini_core::aggregable::ClosedValues::variant_str(g).to_string())
+    }
+
     fn __pivot_declension(&self) -> Option<String> {
         match self {
             Self::Adjective { declension, .. } => declension
@@ -550,6 +575,13 @@ impl GermanMorphology {
     /// Typed pivot handle for the adjective declension class. Defined manually
     /// because `declension` is optional (see
     /// [`GermanMorphology::__pivot_declension`]).
+    pub const PIVOT_GENDER: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "gender",
+            "Gender",
+            <TernaryGender as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_gender,
+        );
     pub const PIVOT_DECLENSION: panini_core::pivot::PivotField<Self> =
         panini_core::pivot::PivotField::closed(
             "declension",
@@ -665,7 +697,8 @@ impl LinguisticDefinition for German {
          `irregular` is a CLOSED LIST too: sein, haben, werden and tun, and nothing else. So weiß is \
          wissen and mixed, never irregular. `modal` is the six modals (dürfen, können, mögen, müssen, \
          sollen, wollen). A prefixed verb INHERITS its base's class: aufstehen is strong like stehen, \
-         erkennen is mixed like kennen, besuchen is weak like suchen.\n\
+         erkennen is mixed like kennen, besuchen is weak like suchen, übersetzen is weak like setzen \
+         (setzte, gesetzt) — a stem-vowel change in the present (setzt) is not ablaut.\n\
          7. politeness belongs to SECOND-PERSON forms only, on Pronouns AND on possessive \
          Determiners — du, dich, dir, ihr, euch, dein, euer are familiar; Sie, Ihnen and the \
          possessive Ihr are formal. This is the ONLY thing separating the formal Ihr Wörterbuch \
@@ -683,7 +716,21 @@ impl LinguisticDefinition for German {
          noun is capitalized: Haus, Freiheit and Auto are ordinary Nouns, as is a capitalized \
          nominalization (das Gute, das Essen, beim Laufen).\n\
          10. The suppletive adverbs lemmatize to their positive form: lieber and am liebsten → gern; \
-         besser and am besten → gut; öfter → oft; eher → bald; mehr → viel."
+         besser and am besten → gut; öfter → oft; eher → bald; mehr → viel.\n\
+         11. Unstressed bitte inside a clause (Nehmen Sie bitte Platz; Gib mir bitte das Buch) is a \
+         Particle, particle_type modal — the same family as mal and doch.\n\
+         12. After a comparative, or after so / genauso / ebenso, als and wie are \
+         CoordinatingConjunctions (größer als ich, so groß wie er), and the phrase after them takes \
+         the CASE of the constituent it is compared with: die alten Bäume sind größer als die jungen \
+         → die jungen is nominative like die alten Bäume; ich kenne ihn besser als dich → dich is \
+         accusative like ihn. The wie that opens a question (Wie geht es dir? Wie heißen Sie?) is an \
+         Adverb.\n\
+         13. A separable prefix stranded at the end of a main clause (Ich stehe früh auf; Paul kommt \
+         nicht mit; Er macht die Tür zu) is a Particle, particle_type separated_verb_prefix, with its \
+         own written form as the lemma (auf, mit, zu). The finite verb it belongs to is lemmatized \
+         to the WHOLE verb: stehe … auf → aufstehen, kommt … mit → mitkommen, macht … zu → \
+         zumachen, with separability separable. The stranded prefix is never an Adposition and never \
+         an Adverb."
     }
 }
 
@@ -755,6 +802,31 @@ mod tests {
         assert_eq!(
             GermanMorphology::PIVOT_TENSE.value(&separable),
             Some("past".to_string())
+        );
+    }
+
+    /// A plurale tantum has no gender to report, and the gender pivot — hand
+    /// written because the field is optional — must yield nothing for it while
+    /// still reading every other noun.
+    #[test]
+    fn a_plurale_tantum_has_no_gender_and_other_nouns_do() {
+        let leute = GermanMorphology::Noun {
+            lemma: "Leute".to_string(),
+            gender: None,
+            number: BinaryNumber::Plural,
+            case: GermanCase::Nominative,
+        };
+        let buecher = GermanMorphology::Noun {
+            lemma: "Buch".to_string(),
+            gender: Some(TernaryGender::Neuter),
+            number: BinaryNumber::Plural,
+            case: GermanCase::Nominative,
+        };
+
+        assert_eq!(GermanMorphology::PIVOT_GENDER.value(&leute), None);
+        assert_eq!(
+            GermanMorphology::PIVOT_GENDER.value(&buecher),
+            Some("neuter".to_string())
         );
     }
 
