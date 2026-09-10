@@ -7,9 +7,8 @@ use panini_core::traits::{
 /// The learner-relevant grammatical function of a Vietnamese adverb.
 ///
 /// Vietnamese temporal reference, aspect, negation and modality are expressed
-/// by independent words rather than by inflecting the lexical verb. Keeping
-/// those markers on the adverb token prevents an analytic construction from
-/// being misreported as a synthetic verb paradigm.
+/// by independent words. Those markers stay on the adverb token, with this
+/// function; the lexical verb carries no inflection.
 #[derive(
     Debug,
     Clone,
@@ -73,9 +72,9 @@ pub enum VietnameseParticleType {
 
 /// How an expression functioning as a Vietnamese pronoun establishes reference.
 ///
-/// `KinshipAddress` and `TitleAddress` are kept distinct from dedicated personal
-/// pronouns because person reference in Vietnamese is relational: the same term
-/// can denote the speaker, addressee or a third person according to context.
+/// `KinshipAddress` and `TitleAddress` are distinct from dedicated personal
+/// pronouns: the same term can denote the speaker, addressee or a third person
+/// according to context.
 #[derive(
     Debug,
     Clone,
