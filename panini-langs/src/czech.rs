@@ -40,12 +40,11 @@ use panini_core::traits::{
     Upos,
 };
 
-/// The seven cases of Czech, in the order Czech schools number them (1.–7. pád).
+/// The seven cases of Czech (1.–7. pád).
 ///
-/// Seven, and the vocative is a full member of the set — unlike Russian, where it
-/// survives only in frozen forms. Czech forms it productively on any masculine or
-/// feminine noun (Petr → Petře, pan doktor → pane doktore, Jana → Jano) and
-/// requires it in direct address.
+/// The vocative is a full member of the set: formed productively on any
+/// masculine or feminine noun (Petr → Petře, pan doktor → pane doktore,
+/// Jana → Jano) and required in direct address.
 #[derive(
     Debug,
     Clone,
@@ -71,16 +70,11 @@ pub enum CzechCase {
 
 /// The four declensional genders of Czech (*rody*).
 ///
-/// Local rather than [`panini_core::traits::TernaryGender`] because the masculine
-/// is split by animacy, and that split is not decoration: it decides the
-/// masculine singular accusative (vidím pána, genitive-shaped, against vidím
-/// hrad, nominative-shaped), the nominative plural (páni/pánové against hrady),
-/// and the written -i / -y of an agreeing adjective or *l*-participle (mladí muži
+/// The masculine is split by animacy, which decides the masculine singular
+/// accusative (vidím pána, genitive-shaped, against vidím hrad,
+/// nominative-shaped), the nominative plural (páni/pánové against hrady), and
+/// the written -i / -y of an agreeing adjective or *l*-participle (mladí muži
 /// psali against mladé hrady stály).
-///
-/// Not `PolishGender` either: Polish splits the masculine three ways (personal /
-/// animate / inanimate) because its plural agreement distinguishes male persons
-/// from everything else. Czech splits it twice.
 #[derive(
     Debug,
     Clone,
@@ -111,10 +105,9 @@ impl CzechGender {
 
 /// Tense of a finite verb or of the *l*-participle.
 ///
-/// Three cells, distributed by aspect exactly as in the other Slavic languages:
-/// an imperfective has all three (psal / píšu / budu psát), a perfective only
-/// past and future (napsal / napíšu) — a perfective present-shaped form *is* a
-/// future.
+/// An imperfective has all three (psal / píšu / budu psát), a perfective only
+/// past and future (napsal / napíšu) — a perfective present-shaped form *is*
+/// a future.
 #[derive(
     Debug,
     Clone,
@@ -136,10 +129,8 @@ pub enum CzechTense {
 
 /// Mood of a finite verb (*způsob*).
 ///
-/// The conditional is a mood here and not a tense: Czech builds it from a
-/// dedicated auxiliary paradigm (bych, bys, by, bychom, byste) plus the same
-/// *l*-participle the past uses, so it contrasts with the indicative on the same
-/// axis the imperative does, not with present against future.
+/// The conditional is the auxiliary paradigm bych, bys, by, bychom, byste
+/// plus the same *l*-participle the past uses.
 #[derive(
     Debug,
     Clone,
@@ -161,10 +152,9 @@ pub enum CzechMood {
 
 /// Which slot of the verbal system a verb token occupies.
 ///
-/// Required on every verb, because every other verbal field follows from it.
-/// Czech's two compound tenses are compound in the literal sense — two tokens —
-/// so the participle and its auxiliary are analysed separately and each gets the
-/// fields it actually carries.
+/// Required on every verb; every other verbal field follows from it. In the
+/// compound tenses the participle and its auxiliary are analysed separately,
+/// each with the fields it carries.
 #[derive(
     Debug,
     Clone,
@@ -200,10 +190,8 @@ pub enum CzechVerbForm {
 /// Verbal polarity (*kladný / záporný*).
 ///
 /// Czech negates a verb by prefixing ne- to the form itself — nevím, nechtěl,
-/// nebudu — so unlike Russian's separate не there is no token to carry it. The
-/// lemma stays positive (nevím → vědět, so the learner keeps one mastery record
-/// per verb), and this field is where the negation the prefix expresses is
-/// recorded instead of being thrown away.
+/// nebudu. The lemma stays positive (nevím → vědět); the negation is recorded
+/// here.
 #[derive(
     Debug,
     Clone,
@@ -224,11 +212,9 @@ pub enum CzechPolarity {
 
 /// Which paradigm an adjective's endings come from.
 ///
-/// The hard/soft split is the first thing a Czech course teaches about
-/// adjectives, because it decides the whole table: mladý has twelve distinct
-/// endings, jarní has three. The possessive declension (otcův, matčin) is a third
-/// paradigm, mixing nominal and adjectival endings, and `Indeclinable` is the
-/// small closed class of borrowings that take no ending at all.
+/// Hard: mladý; soft: jarní. The possessive declension (otcův, matčin) is a
+/// third paradigm, mixing nominal and adjectival endings, and `Indeclinable`
+/// is the small closed class of borrowings that take no ending at all.
 #[derive(
     Debug,
     Clone,
@@ -291,13 +277,10 @@ pub enum CzechDegree {
 #[serde(rename_all = "snake_case")]
 pub enum CzechMorphology {
     /// Adjective — including ordinals (první, druhý) and long passive participles
-    /// (napsaný, otevřená), both of which inflect on the adjectival pattern and
-    /// are listed as adjectives by Czech dictionaries.
+    /// (napsaný, otevřená), both of which inflect on the adjectival pattern.
     ///
-    /// Every field is required, and that is the difference from German: a Czech
-    /// adjective agrees in the predicate as well as in the attribute (ten dům je
-    /// velký, ta kniha je velká), so there is no uninflected use to make the
-    /// agreement fields optional for.
+    /// Every field is required: a Czech adjective agrees in the predicate as
+    /// well as in the attribute (ten dům je velký, ta kniha je velká).
     Adjective {
         lemma: String,
         degree: CzechDegree,
@@ -308,21 +291,17 @@ pub enum CzechMorphology {
         number: BinaryNumber,
         case: CzechCase,
     },
-    /// Preposition, with the case it governs **in this instance**.
-    ///
-    /// Required, and the reason is the same as German's two-way prepositions:
-    /// na, v, o, po, za and pod each govern two or three cases and only the
-    /// occurrence settles which (na stole locative, na stůl accusative).
+    /// Preposition, with the case it governs **in this instance**: na, v, o,
+    /// po, za and pod each govern two or three cases and only the occurrence
+    /// settles which (na stole locative, na stůl accusative).
     Adposition {
         lemma: String,
         case: CzechCase,
     },
     /// Adverb.
     ///
-    /// `degree` is required rather than optional: Czech grades adverbs
-    /// productively (rychle → rychleji → nejrychleji, dobře → lépe → nejlépe),
-    /// and `positive` is the unmarked base form that a non-gradable adverb
-    /// (tady, včera, velmi) stands in.
+    /// `degree` is required: rychle → rychleji → nejrychleji, dobře → lépe →
+    /// nejlépe; a non-gradable adverb (tady, včera, velmi) is `positive`.
     Adverb {
         lemma: String,
         degree: CzechDegree,
@@ -333,8 +312,7 @@ pub enum CzechMorphology {
     },
     /// Determiner — demonstratives (ten, tento, onen), possessives (můj, tvůj,
     /// náš, svůj) and quantifiers (každý, všechen, žádný, nějaký, který) used
-    /// adnominally. Czech has no articles, so this class is smaller than its
-    /// Germanic equivalent and entirely declining.
+    /// adnominally. There are no articles.
     Determiner {
         lemma: String,
         /// Reported in the plural too: unlike German, the Czech plural
@@ -397,8 +375,7 @@ pub enum CzechMorphology {
         /// second position — mě, mi, tě, ti, ho, mu, ji, je, se, si — and false
         /// for the long stressed ones they alternate with (mne, mně, tebe, tobě,
         /// jeho, jemu, sebe, sobě) and for every pronoun that has no such
-        /// alternation. Czech clitic ordering is one of the hardest things about
-        /// its word order, which is why the distinction is a first-class field.
+        /// alternation.
         clitic: bool,
     },
     /// Proper noun — declines exactly like a common noun (Praha → v Praze,
@@ -420,12 +397,9 @@ pub enum CzechMorphology {
     /// Verb.
     ///
     /// `aspect` and `polarity` hold of the token whatever slot it occupies;
-    /// everything else follows from `verb_form`, and each `Option` below marks a
-    /// cell Czech genuinely does not have rather than one the model might not
-    /// know. The two that matter most, and the two that separate Czech from
-    /// Russian here: the *l*-participle has **no person** (its auxiliary carries
-    /// that) and it **does have gender in the plural** (psali against psaly
-    /// against psala).
+    /// everything else follows from `verb_form`. The *l*-participle has **no
+    /// person** (its auxiliary carries that) and it **does have gender in the
+    /// plural** (psali against psaly against psala).
     Verb {
         lemma: String,
         /// Perfective or imperfective — a property of the lemma, never of the
