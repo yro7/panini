@@ -25,17 +25,11 @@ use panini_core::traits::{
 )]
 #[serde(rename_all = "snake_case")]
 pub enum SpanishTense {
-    /// Presente — indicative `hablo`, subjunctive `hable`.
-    Present,
-    /// Pretérito perfecto simple, the indefinido: `hablé`, `fue`.
-    Preterite,
-    /// Pretérito imperfecto — indicative `hablaba`, and the subjunctive
-    /// `hablara` / `hablase`, which are two paradigms of this one tense.
-    Imperfect,
-    /// Futuro simple `hablaré`, and the residual future subjunctive `hablare`.
-    Future,
-    /// Condicional simple `hablaría` — a tense of the indicative.
-    Conditional,
+    Present,     // presente: indicative `hablo`, subjunctive `hable`
+    Preterite,   // pretérito perfecto simple, the indefinido: `hablé`, `fue`
+    Imperfect,   // pretérito imperfecto: `hablaba`, and the subjunctive `hablara` / `hablase`
+    Future,      // futuro simple `hablaré`, and the residual future subjunctive `hablare`
+    Conditional, // condicional simple `hablaría`, a tense of the indicative
 }
 
 /// The form a Spanish verb token is in.
