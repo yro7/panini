@@ -366,15 +366,9 @@ pub enum GermanMorphology {
     CoordinatingConjunction {
         lemma: String,
     },
-    /// Determiner — articles, demonstratives, quantifiers, and every POSSESSIVE
-    /// standing before a noun.
-    ///
-    /// The possessives belong here in all their inflected forms — mein, meine,
-    /// meinen, meinem, meiner, meines and likewise dein-, sein-, ihr-, unser-,
-    /// euer-, Ihr-. `seinem` in `mit seinem alten Fahrrad` is a Determiner,
-    /// dative neuter singular; it is NOT a Noun and NOT a ProperNoun. A
-    /// possessive is a Pronoun only when it stands alone in place of the noun
-    /// (Das ist meins).
+    /// Determiner — the articles (der, die, das, ein), the demonstratives
+    /// (dieser, jener), the possessives before a noun (mein, sein, Ihr, in
+    /// every inflected form), and the quantifiers.
     Determiner {
         lemma: String,
         /// The plural article and the plural possessive do not distinguish it.
@@ -679,19 +673,15 @@ impl LinguisticDefinition for German {
          decide it from whether the clause addresses the interlocutor. OMIT politeness everywhere \
          else: a first-person or third-person form (ich, wir, er, sie, es, sein, ihr = her) never \
          carries it.\n\
-         8. A POSSESSIVE standing before a noun is a DETERMINER — never a Pronoun, never a Noun and \
-         never a ProperNoun. This holds for every INFLECTED form, not just the citation form: mein, \
-         meine, meinen, meinem, meiner, meines and likewise dein-, sein-, ihr-, unser-, euer- and the \
-         formal Ihr- (mit seinem alten Fahrrad → seinem is a Determiner, dative neuter singular; \
-         Ohne Ihr Wörterbuch → Determiner, politeness formal; ihr Buch → Determiner, no politeness \
-         when it means her or their). A possessive is a Pronoun only when it stands alone in place of \
-         the noun (Das ist meins).\n\
-         9. ProperNoun is ONLY for an actual name of a person, place, organisation or work \
-         (Anna, Berlin, die Schweiz, der Rhein). Capitalization is NOT a proper-noun signal in \
-         German, because every common noun is capitalized: Haus, Freiheit and Auto are ordinary \
-         Nouns, and a capitalized nominalization is a Noun too (das Gute, das Essen, beim Laufen, \
-         der Angestellte). Nothing else may take it — a determiner such as seinem, meinem or dieser \
-         is a Determiner, never a ProperNoun.\n\
+         8. The articles der, die, das, ein, eine and their inflected forms (den, dem, des, einen, \
+         einem, einer, eines), the demonstratives (dieser, jener) and the possessives before a noun \
+         (mein, dein, sein, ihr, unser, euer, Ihr, in every inflected form: meinem, seinem, ihrer) \
+         are Determiners. A possessive is a Pronoun only when it stands alone in place of the noun \
+         (Das ist meins).\n\
+         9. ProperNoun is for an actual name of a person, place, organisation or work (Anna, Berlin, \
+         die Schweiz). Capitalization carries no information about it in German, where every common \
+         noun is capitalized: Haus, Freiheit and Auto are ordinary Nouns, as is a capitalized \
+         nominalization (das Gute, das Essen, beim Laufen).\n\
          10. The suppletive adverbs lemmatize to their positive form: lieber and am liebsten → gern; \
          besser and am besten → gut; öfter → oft; eher → bald; mehr → viel."
     }
