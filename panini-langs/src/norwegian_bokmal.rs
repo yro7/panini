@@ -31,9 +31,8 @@ pub enum NorwegianBokmalDefiniteness {
 /// The two productive written forms conventionally called case on Bokmål
 /// nouns and proper nouns.
 ///
-/// `Unmarked` is deliberately not called nominative: the same form serves as
-/// subject, object and prepositional complement. `Genitive` is the written
-/// phrasal `-s` form.
+/// `Unmarked` serves as subject, object and prepositional complement.
+/// `Genitive` is the written phrasal `-s` form.
 #[derive(
     Debug,
     Clone,
@@ -182,9 +181,8 @@ pub enum NorwegianBokmalReferentialGender {
 
 /// Whether a third-person possessive points back to the clause subject.
 ///
-/// This represents the learner-critical `sin/si/sitt/sine` versus
-/// `hans/hennes/hens/deres` contrast. First- and second-person possessives do
-/// not participate in it.
+/// `sin/si/sitt/sine` against `hans/hennes/hens/deres`. First- and
+/// second-person possessives do not participate in it.
 #[derive(
     Debug,
     Clone,
@@ -322,8 +320,8 @@ pub enum NorwegianBokmalVerbClass {
 
 /// Morphological active/`-s` diathesis.
 ///
-/// `SForm` names the written form, not just passive meaning: lexical deponents,
-/// reciprocals and middle readings also end in `-s`.
+/// `SForm` covers every `-s` form: passive, lexical deponent, reciprocal and
+/// middle readings alike.
 #[derive(
     Debug,
     Clone,
