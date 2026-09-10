@@ -1346,6 +1346,8 @@ impl Agglutinative for Basque {
              conditional badator or emphatic badakit → ba-). Resolve ba- from syntax: a real \
              condition is subordination:conditional, while assertion/emphasis is \
              particle:affirmative.\n\
+             FIXED EXPRESSIONS: mesedez is synchronically a lexical adverb with lemma mesedez, \
+             not a declined occurrence of mesede; do not segment its final z.\n\
              Segment only words that have at least one affix worth annotating."
         )
     }
@@ -1422,6 +1424,7 @@ impl LinguisticDefinition for Basque {
          - The absolutive is the ZERO case and it covers both the subject of an intransitive verb and the direct object of a transitive one. Basque has no accusative: never tag a direct object `accusative`, tag it `absolutive`.\n\
          - Do not strip a lexical final -a. gizona lemmatizes to gizon, but euskara, gauza, eliza, arrosa, denbora and neska end in -a lexically and lemmatize to themselves.\n\
          - The NOR of a transitive clause is the OBJECT. In `nik liburua irakurri dut` the absolutive is liburua (third_singular) and the ergative is nik (first_singular), never the reverse.\n\
+         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`.\n\
          13. Basque has no grammatical gender and no gender agreement anywhere in the noun phrase. The only masculine/feminine distinction in the language is `allocutive`."
     }
 
