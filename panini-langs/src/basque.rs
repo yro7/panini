@@ -525,6 +525,9 @@ pub enum BasqueMorphology {
         #[serde(skip_serializing_if = "Option::is_none")]
         determination: Option<BasqueDetermination>,
     },
+    /// Cardinal, ordinal or distributive numeral. `bat` remains a cardinal
+    /// when it follows the noun, including declined forms such as `batek`;
+    /// its articleless phrase carries `determination: indefinite`.
     Numeral {
         lemma: String,
         numeral_type: BasqueNumeralType,
@@ -1735,6 +1738,23 @@ mod tests {
 
         assert_eq!(letter.pos_label(), "Symbol");
         assert_eq!(letter.lemma(), Some("J".to_string()));
+    }
+
+    #[test]
+    fn postnominal_bat_is_a_cardinal_numeral() {
+        let batek = BasqueMorphology::Numeral {
+            lemma: "bat".to_string(),
+            numeral_type: BasqueNumeralType::Cardinal,
+            case: Some(BasqueCase::Ergative),
+            determination: Some(BasqueDetermination::Indefinite),
+        };
+
+        assert_eq!(batek.pos_label(), "Numeral");
+        assert_eq!(batek.lemma(), Some("bat".to_string()));
+        assert_eq!(
+            BasqueMorphology::PIVOT_DECLENSION_CASE.value(&batek),
+            Some("ergative".to_string())
+        );
     }
 
     #[test]
