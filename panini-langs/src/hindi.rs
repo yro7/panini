@@ -7,15 +7,11 @@ use panini_core::traits::{
 
 /// The three cases of the Hindi nominal.
 ///
-/// Hindi lost the inherited case system and rebuilt it as a two-layer one: a
-/// three-cell inflectional core (direct / oblique / vocative) plus a set of
-/// free-standing postpositions (`ने`, `को`, `से`, `में`, `पर`, `का`) that carry
-/// the actual semantic roles. Every postposition governs the oblique, so the
-/// oblique never appears alone — `लड़के` is oblique only because something
-/// follows it, or because it is an adverbial of time or place (`सुबह`, `इस साल`).
-///
-/// The vocative is a real, if small, cell: `लड़के!` (singular) and `लड़को!`
-/// (plural) are distinct from both direct and oblique in the plural.
+/// Every postposition (`ने`, `को`, `से`, `में`, `पर`, `का`) governs the
+/// oblique, so the oblique never appears alone — `लड़के` is oblique because
+/// something follows it, or because it is an adverbial of time or place
+/// (`सुबह`, `इस साल`). The vocative is its own cell: `लड़के!` (singular),
+/// `लड़को!` (plural).
 #[derive(
     Debug,
     Clone,
@@ -37,15 +33,10 @@ pub enum HindiCase {
 
 /// Whether a nominal or adjectival stem belongs to the inflecting class.
 ///
-/// One enum for nouns and adjectives because it is one phenomenon: a stem whose
-/// citation form ends in `-आ` (masculine `लड़का`, `अच्छा`) or in `-ई`
-/// (feminine `लड़की`) has a full paradigm, and every other stem (`घर`, `किताब`,
-/// `लाल`, `सुन्दर`, and the Perso-Arabic and English loans) is invariant and
-/// shows its case and number only on what follows it.
-///
-/// Learners meet this split on day one — it is what decides whether `बड़ा` or
-/// `बड़े` goes in front of the noun — so it is worth a dimension of its own
-/// rather than being left implicit in the ending.
+/// A stem whose citation form ends in `-आ` (masculine `लड़का`, `अच्छा`) or
+/// in `-ई` (feminine `लड़की`) has a full paradigm; every other stem (`घर`,
+/// `किताब`, `लाल`, `सुन्दर`, and the Perso-Arabic and English loans) is
+/// invariant and shows its case and number only on what follows it.
 #[derive(
     Debug,
     Clone,
@@ -71,16 +62,11 @@ pub enum HindiInflectionClass {
 
 /// Grammatical aspect, carried by the participle of a verb phrase.
 ///
-/// Hindi's finite verb is analytic: a participle carries aspect and agrees in
-/// gender and number, while a following copula carries tense and person. The
-/// three cells below are the participles the language actually builds; the
-/// forms that carry no aspect at all — the future (`करेगा`), the subjunctive
-/// (`करे`), the imperative (`करो`), the infinitive (`करना`) — omit the field
-/// rather than being given a fourth "simple" value they do not contrast with.
-///
-/// `Habitual` is the `-ता` participle, which the descriptive tradition also
-/// calls the *imperfective* participle: one form, one value here, so the model
-/// is never asked to choose between two names for the same cell.
+/// A participle carries aspect and agrees in gender and number, while a
+/// following copula carries tense and person. The future (`करेगा`), the
+/// subjunctive (`करे`), the imperative (`करो`) and the infinitive (`करना`)
+/// carry no aspect: omit the field there. `Habitual` is the `-ता`
+/// participle, also called the imperfective participle.
 #[derive(
     Debug,
     Clone,
@@ -105,9 +91,8 @@ pub enum HindiAspect {
 
 /// Tense, as carried by the copula or by the synthetic future.
 ///
-/// Only three cells, because Hindi's past/present/future distinctions beyond
-/// these are aspectual: `करता था` is habitual + past, not a separate "imperfect"
-/// tense.
+/// Finer distinctions are aspectual: `करता था` is habitual + past, not a
+/// separate "imperfect" tense.
 #[derive(
     Debug,
     Clone,
@@ -129,10 +114,9 @@ pub enum HindiTense {
 
 /// Mood of a finite verb.
 ///
-/// `Presumptive` is a genuine fourth cell, not a use of the future: `होगा` in
-/// `वह घर पर होगा` ("he must be at home") and `कर रहा होगा` ("he is probably
-/// working") is a present inference, and it is built from the future form of
-/// `होना` used as an auxiliary.
+/// `Presumptive`, not future: `होगा` in `वह घर पर होगा` ("he must be at home")
+/// and `कर रहा होगा` ("he is probably working") is a present inference built
+/// from the future form of `होना` used as an auxiliary.
 #[derive(
     Debug,
     Clone,
@@ -155,10 +139,10 @@ pub enum HindiMood {
 
 /// Which slot of the verbal system a verb token occupies.
 ///
-/// Required on every verb, because in Hindi it is the value that decides which
-/// of the other fields exist at all: a participle agrees in gender and number
-/// and has no person, a finite future has person and number and no gender in the
-/// way the copula does, and the bare stem in a compound verb agrees with nothing.
+/// Required on every verb; it decides which of the other fields exist: a
+/// participle agrees in gender and number and has no person, a finite future
+/// has person and number and no gender, and the bare stem in a compound verb
+/// agrees with nothing.
 #[derive(
     Debug,
     Clone,
@@ -194,14 +178,11 @@ pub enum HindiVerbForm {
 
 /// The three-way politeness scale of the second person.
 ///
-/// This is a closed grammatical dimension in Hindi, not a stylistic preference:
-/// each value takes its own verb agreement (`तू करता है` / `तुम करते हो` /
+/// Each value takes its own verb agreement (`तू करता है` / `तुम करते हो` /
 /// `आप करते हैं`), its own imperative (`कर` / `करो` / `कीजिए`), and its own
-/// oblique and possessive forms. Choosing the wrong one is a social error a
-/// learner needs drilled, which is why it is published as a pivot.
-///
-/// It reaches the third person too: `आप` agreement is what `वे`/`ये` do when a
-/// single respected person is referred to (`पिताजी आए हैं`).
+/// oblique and possessive forms. It reaches the third person too: `आप`
+/// agreement is what `वे`/`ये` do when a single respected person is referred
+/// to (`पिताजी आए हैं`).
 #[derive(
     Debug,
     Clone,
@@ -255,14 +236,10 @@ pub enum HindiMorphology {
         case: Option<HindiCase>,
     },
     /// Postposition — `ने`, `को`, `से`, `में`, `पर`, `तक`, `का/की/के`.
-    ///
-    /// Hindi has essentially no prepositions; the UD tag is still `ADP`.
     Adposition {
         lemma: String,
-        /// The case this postposition governs on the noun phrase to its left.
-        /// In practice always oblique — that government is the entire reason the
-        /// oblique exists — and it is reported per instance so the link between
-        /// the two is visible in the analysis rather than merely implied.
+        /// The case this postposition governs on the noun phrase to its left:
+        /// always oblique, reported on every instance.
         case: HindiCase,
         /// The genitive `का` alone agrees with the *possessed* noun, so it has a
         /// gender, a number and a case of its own (`राम की किताब`,
@@ -298,8 +275,7 @@ pub enum HindiMorphology {
     /// Noun.
     Noun {
         lemma: String,
-        /// Hindi has two genders. There is no neuter: the Sanskrit neuter was
-        /// redistributed, mostly into the masculine.
+        /// Hindi has two genders and no neuter.
         gender: BinaryGender,
         number: BinaryNumber,
         case: HindiCase,
@@ -320,8 +296,8 @@ pub enum HindiMorphology {
     /// Pronoun — personal, demonstrative in nominal use, relative, interrogative
     /// and reflexive.
     ///
-    /// No gender field: no Hindi pronoun distinguishes gender. `वह` covers "he",
-    /// "she" and "it" alike; the gender surfaces only on the verb.
+    /// No gender field: `वह` covers "he", "she" and "it" alike; the gender
+    /// surfaces only on the verb.
     Pronoun {
         lemma: String,
         /// Personal and demonstrative pronouns. `जो`, `कौन`, `क्या` and the
@@ -359,12 +335,10 @@ pub enum HindiMorphology {
     /// Verb — participles, copulas, synthetic futures, subjunctives,
     /// imperatives, infinitives, conjunctive participles and bare stems.
     ///
-    /// Which fields apply follows almost entirely from `verb_form`, and each
-    /// `Option` below marks a cell Hindi genuinely lacks rather than one the
-    /// model might not know. The agreement fields carry the language's most
-    /// distinctive syntax: with the ergative postposition `ने`, the verb agrees
-    /// with the *object*, so `gender` and `number` here are the features of
-    /// whatever the verb actually agrees with in this clause, not of the subject.
+    /// Which fields apply follows from `verb_form`. With the ergative
+    /// postposition `ने`, the verb agrees with the *object*, so `gender` and
+    /// `number` here are the features of whatever the verb agrees with in
+    /// this clause, not of the subject.
     Verb {
         lemma: String,
         verb_form: HindiVerbForm,
@@ -390,10 +364,9 @@ pub enum HindiMorphology {
         /// As above. `तुम हो` is grammatically plural even for one addressee.
         #[serde(skip_serializing_if = "Option::is_none")]
         person: Option<Person>,
-        /// Participles and the future, which agree in gender; never the copula
-        /// `है`/`था`… wait — `था`/`थी`/`थे` does agree, and is included. Absent
-        /// on `है`/`हैं`, on subjunctives, imperatives, conjunctive participles
-        /// and bare stems.
+        /// Participles, the future and the past copula `था`/`थी`/`थे`, which
+        /// agree in gender. Absent on `है`/`हैं`, on subjunctives, imperatives,
+        /// conjunctive participles and bare stems.
         #[serde(skip_serializing_if = "Option::is_none")]
         gender: Option<BinaryGender>,
         /// Which addressee level an imperative selects: `कर` / `करो` / `कीजिए`.
