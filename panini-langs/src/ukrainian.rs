@@ -47,18 +47,13 @@ use panini_core::traits::{
     TernaryGender, TypologicalFeature, Upos,
 };
 
-/// The seven cases of Ukrainian, in the order Ukrainian schools number them.
+/// The seven cases of Ukrainian.
 ///
-/// Seven, and the vocative is a full member of the paradigm rather than a
-/// survival: unlike Russian, where Бо́же and о́тче are frozen relics reported as
-/// the case their syntax calls for, Ukrainian forms the *кличний відмінок*
-/// productively on any masculine or feminine noun (Петро → Петре, Ганна → Ганно,
-/// пан Коваль → пане Ковалю, друг → друже) and requires it in direct address.
-/// Ukrainian is Polish and Czech here, not Russian.
-///
-/// The sixth case is the **locative** (*місцевий*), not the "prepositional". The
-/// name is not decoration: it is the case that never occurs without a
-/// preposition, and that is the rule which separates it from the dative.
+/// The vocative (*кличний відмінок*) is a full member of the paradigm: it is
+/// formed productively on any masculine or feminine noun (Петро → Петре,
+/// Ганна → Ганно, пан Коваль → пане Ковалю, друг → друже) and required in
+/// direct address. The locative (*місцевий*) never occurs without a
+/// preposition, which is what separates it from the dative.
 #[derive(
     Debug,
     Clone,
@@ -82,13 +77,11 @@ pub enum UkrainianCase {
     Vocative,     // кличний (звертання)
 }
 
-/// Animacy (*істота / неістота*) — a morphosyntactic category in its own right.
+/// Animacy (*істота / неістота*), independent of gender.
 ///
-/// Kept orthogonal to gender rather than folded into it the way Czech folds it,
-/// because in Ukrainian animacy cuts across all three genders. It decides the
-/// accusative of masculine singulars (бачу брата = the genitive form) and the
-/// accusative plural of every gender without exception (бачу сестер, бачу коней,
-/// бачу дітей), while leaving the rest of the paradigm untouched.
+/// It decides the accusative of masculine singulars (бачу брата = the
+/// genitive form) and the accusative plural of every gender (бачу сестер,
+/// бачу коней, бачу дітей), and leaves the rest of the paradigm untouched.
 #[derive(
     Debug,
     Clone,
@@ -109,17 +102,11 @@ pub enum UkrainianAnimacy {
 
 /// The four declensions of the Ukrainian noun (*відміни*).
 ///
-/// Modelled where Czech's fourteen *vzory* were not, and the difference is that
-/// these four are readable off the citation form together with the gender rather
-/// than being a lexical lookup: a noun in -а/-я is first, a masculine with a zero
-/// ending or -о and a neuter in -о/-е/-я is second, a feminine with a zero ending
-/// is third, and a neuter that grows -ат-/-ят-/-ен- in the oblique cases is
-/// fourth. Every Ukrainian course organises nominal morphology by them, which
-/// makes them the facet a learner navigates the lexicon with.
-///
-/// The last two values are the nouns that stand outside the system entirely,
-/// and they are here so that those nouns are not silently filed under a
-/// declension they do not belong to.
+/// Readable off the citation form together with the gender: a noun in -а/-я
+/// is first, a masculine with a zero ending or -о and a neuter in -о/-е/-я
+/// is second, a feminine with a zero ending is third, and a neuter that
+/// grows -ат-/-ят-/-ен- in the oblique cases is fourth. The last two values
+/// are for the nouns that stand outside the system.
 #[derive(
     Debug,
     Clone,
@@ -161,11 +148,9 @@ pub enum UkrainianDeclension {
 
 /// Which of the two adjectival paradigms a form's endings come from.
 ///
-/// The hard/soft split is the first thing a Ukrainian course teaches about
-/// adjectives because it decides the whole table, and unlike the noun groups it
-/// is a clean binary read straight off the citation form: -ий is hard (новий,
-/// добрий, великий), -ій is soft (синій, вечірній, ранній, безкраїй). Ordinals
-/// and long participles follow the same split.
+/// Read off the citation form: -ий is hard (новий, добрий, великий), -ій is
+/// soft (синій, вечірній, ранній, безкраїй). Ordinals and long participles
+/// follow the same split.
 #[derive(
     Debug,
     Clone,
@@ -192,11 +177,9 @@ pub enum UkrainianStemGroup {
 
 /// Tense of a finite verb or of a participle.
 ///
-/// Three cells, distributed by aspect as everywhere in Slavic: an imperfective
-/// has all three (писав / пишу / писатиму), a perfective only past and future
-/// (написав / напишу) — a perfective present-shaped form *is* a future.
-///
-/// The pluperfect (був написав) gets no value here: see the module doc.
+/// An imperfective has all three (писав / пишу / писатиму), a perfective only
+/// past and future (написав / напишу) — a perfective present-shaped form *is*
+/// a future. The pluperfect (був написав) gets no value of its own.
 #[derive(
     Debug,
     Clone,
@@ -218,11 +201,8 @@ pub enum UkrainianTense {
 
 /// Mood of a finite verb (*спосіб*).
 ///
-/// The conditional is a mood and not a tense: Ukrainian builds it from the same
-/// form the past tense uses plus the invariable particle би/б, so it contrasts
-/// with the indicative on the axis the imperative does, not with present against
-/// future. Unlike Czech, the particle conjugates for nothing, so the mood is
-/// carried by the verb token and би/б is analysed as the particle it is.
+/// The conditional is the past-tense form plus the invariable particle би/б:
+/// the mood is carried by the verb token, and би/б is analysed as a particle.
 #[derive(
     Debug,
     Clone,
@@ -244,11 +224,9 @@ pub enum UkrainianMood {
 
 /// Which slot of the verbal system a verb token occupies.
 ///
-/// Required on every verb, because every other verbal field follows from it.
-/// Ukrainian school grammar calls the participle and the adverbial participle
-/// *особливі форми дієслова* — special forms of the verb, not separate parts of
-/// speech — which is why both live here rather than under `Adjective` and
-/// `Adverb`.
+/// Required on every verb; every other verbal field follows from it. The
+/// participle and the adverbial participle are verb forms here, not
+/// `Adjective` or `Adverb`.
 #[derive(
     Debug,
     Clone,
@@ -286,12 +264,7 @@ pub enum UkrainianVerbForm {
 
 /// How a future-tense form is built (*форми майбутнього часу*).
 ///
-/// Ukrainian grammars teach three, and the three-way contrast is the single
-/// feature that most sharply separates Ukrainian verbal morphology from Russian:
-/// no other Slavic standard has the synthetic future at all.
-///
-/// Only future-tense finite forms carry this, so the field is optional and its
-/// pivot handle is written by hand.
+/// Only future-tense finite forms carry this.
 #[derive(
     Debug,
     Clone,
@@ -322,10 +295,8 @@ pub enum UkrainianFutureFormation {
 
 /// Degree of comparison (*ступінь порівняння*), for adjectives and adverbs alike.
 ///
-/// Ukrainian, unlike Russian, has no indeclinable simple comparative on the
-/// adjective: вищий, кращий and новіший decline exactly like any other soft
-/// adjective, and it is the *adverb* that has the invariable вище, краще,
-/// швидше.
+/// The adjective comparative declines like any other soft adjective (вищий,
+/// кращий, новіший); the invariable вище, краще, швидше are adverbs.
 #[derive(
     Debug,
     Clone,
@@ -360,10 +331,8 @@ pub enum UkrainianDegree {
 #[serde(rename_all = "snake_case")]
 pub enum UkrainianMorphology {
     /// Adjective — including ordinals (перший, другий), which inflect on the
-    /// adjectival pattern and are listed as adjectives by Ukrainian dictionaries.
-    ///
-    /// Participles are **not** here: Ukrainian grammar files написаний and
-    /// почорнілий under the verb (see [`UkrainianVerbForm::Participle`]).
+    /// adjectival pattern. Participles (написаний, почорнілий) are verbs, not
+    /// adjectives.
     Adjective {
         lemma: String,
         degree: UkrainianDegree,
@@ -376,22 +345,17 @@ pub enum UkrainianMorphology {
         number: BinaryNumber,
         case: UkrainianCase,
     },
-    /// Preposition, with the case it governs **in this instance**.
-    ///
-    /// Required, because the commonest Ukrainian prepositions govern two or
-    /// three cases and only the occurrence settles which: на столі is locative
-    /// and на стіл accusative, за домом instrumental and за дім accusative,
-    /// з Києва genitive and з другом instrumental.
+    /// Preposition, with the case it governs **in this instance**: на столі
+    /// is locative and на стіл accusative, за домом instrumental and за дім
+    /// accusative, з Києва genitive and з другом instrumental.
     Adposition {
         lemma: String,
         case: UkrainianCase,
     },
     /// Adverb.
     ///
-    /// `degree` is required rather than optional: Ukrainian grades adverbs
-    /// productively (швидко → швидше → найшвидше, добре → краще → найкраще), and
-    /// `positive` is the unmarked base a non-gradable adverb (тут, учора, дуже)
-    /// stands in.
+    /// `degree` is required: швидко → швидше → найшвидше, добре → краще →
+    /// найкраще; a non-gradable adverb (тут, учора, дуже) is `positive`.
     Adverb {
         lemma: String,
         degree: UkrainianDegree,
@@ -402,8 +366,7 @@ pub enum UkrainianMorphology {
     },
     /// Determiner — demonstratives (цей, той), possessives (мій, твій, наш,
     /// свій) and quantifiers (кожен, весь, жодний, який, котрий, деякий) used
-    /// adnominally. Ukrainian has no articles, so this class is small and
-    /// entirely declining.
+    /// adnominally. There are no articles.
     Determiner {
         lemma: String,
         /// Absent in the plural: the Ukrainian plural levels gender (ці, ті,
@@ -488,11 +451,9 @@ pub enum UkrainianMorphology {
     /// Verb.
     ///
     /// `aspect` and `voice` hold of the token whatever slot it occupies;
-    /// everything else follows from `verb_form`, and each `Option` below marks a
-    /// cell Ukrainian genuinely does not have rather than one the model might
-    /// not know. The two that matter most: the past is **finite and has no
-    /// person** (писав is masculine singular whether the subject is я, ти or
-    /// він), and the impersonal -но/-то form has none of these fields at all.
+    /// everything else follows from `verb_form`. The past is **finite and has
+    /// no person** (писав is masculine singular whether the subject is я, ти
+    /// or він), and the impersonal -но/-то form has none of these fields.
     Verb {
         lemma: String,
         /// Perfective or imperfective — a property of the lemma, never of the
