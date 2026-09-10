@@ -404,7 +404,7 @@ pub enum BasqueDerivation {
     Adjectivizing,  // -garri, -kor, -ezin (ikusgarri, hauskor)
     Verbalizing,    // -tu (handitu, zuritu)
     Adverbializing, // -ki, -ro (ederki, astiro)
-    Diminutive,     // -txo / -txu, -ño (etxetxo)
+    Diminutive,     // -txo / -txu, -to / -tto, -ño (etxetxo, liburutto)
     Pejorative,     // -keria (zikinkeria)
     Relational,     // -tar (donostiarra, europar)
     Collective,     // -di, -eria (pinudi, jenderia)
@@ -1318,7 +1318,14 @@ static BASQUE_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         functions: &[F::Derivation {
             value: BasqueDerivation::Diminutive,
         }],
-        applies_to: &[P::Noun, P::Adjective, P::ProperNoun],
+        applies_to: &[P::Noun, P::Adjective, P::ProperNoun, P::Pronoun],
+    },
+    MorphemeDefinition {
+        base_form: "-to/-tto",
+        functions: &[F::Derivation {
+            value: BasqueDerivation::Diminutive,
+        }],
+        applies_to: &[P::Noun, P::Adjective, P::ProperNoun, P::Pronoun],
     },
     MorphemeDefinition {
         base_form: "-ño",
@@ -1839,6 +1846,12 @@ mod tests {
             definition.base_form == "-ari"
                 && definition.functions.contains(&F::Derivation {
                     value: BasqueDerivation::AgentNoun,
+                })
+        }));
+        assert!(inventory.iter().any(|definition| {
+            definition.base_form == "-to/-tto"
+                && definition.functions.contains(&F::Derivation {
+                    value: BasqueDerivation::Diminutive,
                 })
         }));
         assert!(inventory.iter().any(|definition| {
