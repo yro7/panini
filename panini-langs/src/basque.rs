@@ -967,16 +967,26 @@ static BASQUE_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     // === Mugatzailea — the article ===
     MorphemeDefinition {
         base_form: "-a",
-        functions: &[F::Determination {
-            value: BasqueDetermination::DefiniteSingular,
-        }],
+        functions: &[
+            F::Determination {
+                value: BasqueDetermination::DefiniteSingular,
+            },
+            F::Aspect {
+                value: BasqueAspect::Resultative,
+            },
+        ],
         applies_to: &[P::Noun, P::ProperNoun, P::Adjective, P::Numeral, P::Verb],
     },
     MorphemeDefinition {
         base_form: "-ak",
-        functions: &[F::Determination {
-            value: BasqueDetermination::DefinitePlural,
-        }],
+        functions: &[
+            F::Determination {
+                value: BasqueDetermination::DefinitePlural,
+            },
+            F::Aspect {
+                value: BasqueAspect::Resultative,
+            },
+        ],
         applies_to: &[
             P::Noun,
             P::ProperNoun,
@@ -1808,6 +1818,15 @@ mod tests {
             definition.base_form == "-ta/-da"
                 && definition.functions.contains(&F::Aspect {
                     value: BasqueAspect::Resultative,
+                })
+        }));
+        assert!(inventory.iter().any(|definition| {
+            definition.base_form == "-a"
+                && definition.functions.contains(&F::Aspect {
+                    value: BasqueAspect::Resultative,
+                })
+                && definition.functions.contains(&F::Determination {
+                    value: BasqueDetermination::DefiniteSingular,
                 })
         }));
         assert!(inventory.iter().any(|definition| {
