@@ -397,7 +397,7 @@ pub enum BasqueAspect {
 pub enum BasqueDerivation {
     AbstractNoun,   // -tasun, -tza (edertasun, nekazaritza)
     ActionNoun,     // -keta, -pen, -aldi, -t(z)e (garbiketa, ikuste)
-    AgentNoun,      // -le / -tzaile, -gile (irakasle, saltzaile)
+    AgentNoun,      // -le / -tzaile, -gile, -ari (irakasle, saltzaile, bertsolari)
     PlaceNoun,      // -tegi, -toki (liburutegi, lantoki)
     Possessional,   // -dun, -tsu (euskaldun, indartsu)
     Privative,      // -gabe (etxegabe)
@@ -1220,6 +1220,13 @@ static BASQUE_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
         applies_to: &[P::Noun],
     },
     MorphemeDefinition {
+        base_form: "-ari",
+        functions: &[F::Derivation {
+            value: BasqueDerivation::AgentNoun,
+        }],
+        applies_to: &[P::Noun, P::Verb],
+    },
+    MorphemeDefinition {
         base_form: "-tegi",
         functions: &[F::Derivation {
             value: BasqueDerivation::PlaceNoun,
@@ -1807,6 +1814,12 @@ mod tests {
             definition.base_form == "-(r)engandik"
                 && definition.functions.contains(&F::Case {
                     value: BasqueCase::Ablative,
+                })
+        }));
+        assert!(inventory.iter().any(|definition| {
+            definition.base_form == "-ari"
+                && definition.functions.contains(&F::Derivation {
+                    value: BasqueDerivation::AgentNoun,
                 })
         }));
         assert!(inventory.iter().any(|definition| {
