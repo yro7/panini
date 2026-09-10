@@ -7,12 +7,9 @@ use panini_core::traits::{
 
 /// The four cases of modern German.
 ///
-/// Four, not five: the vocative has no forms of its own (direct address takes
-/// the nominative), and the instrumental survives only in frozen adverbs
-/// (deswegen, meinetwegen) that are lexicalised rather than paradigm cells.
-///
-/// Declaration order follows the order German paradigm tables are printed and
-/// learned in — nominative, accusative, dative, genitive — not the alphabet.
+/// The vocative has no forms of its own (direct address takes the
+/// nominative); frozen adverbs such as deswegen, meinetwegen are lexicalised,
+/// not an instrumental.
 #[derive(
     Debug,
     Clone,
@@ -35,11 +32,9 @@ pub enum GermanCase {
 
 /// Which of the three adjective paradigms an attributive adjective inflects by.
 ///
-/// The single most distinctive fact about German nominal morphology, and the
-/// one no Romance or Slavic language has: the ending on an attributive
-/// adjective is not decided by its own gender, number and case alone, but by
-/// how much of that information the *preceding determiner* has already
-/// spelled out.
+/// The ending on an attributive adjective is decided by how much of its
+/// gender, number and case the *preceding determiner* has already spelled
+/// out.
 ///
 /// - `Strong` — no determiner, or one with no ending of its own (guter Wein,
 ///   kaltes Wasser, viel frisches Obst): the adjective carries the full
@@ -97,14 +92,11 @@ pub enum GermanDegree {
 ///
 /// Perfekt, Plusquamperfekt, Futur I and Futur II are periphrastic — an
 /// inflected form of haben / sein / werden plus a participle or an infinitive —
-/// so they are analysed as the two verb tokens they are written as, exactly as
-/// English does with its perfect and progressive. Nothing in the German verb
-/// inflects for them.
+/// so they are analysed as the two verb tokens they are written as.
 ///
-/// The value is morphological, not semantic: it names the stem the finite form
-/// is built on. That is why Konjunktiv I, built on the present stem, is
-/// `Present` and Konjunktiv II, built on the preterite stem, is `Past`, whatever
-/// time either one refers to.
+/// The value names the stem the finite form is built on: Konjunktiv I, built
+/// on the present stem, is `Present`; Konjunktiv II, built on the preterite
+/// stem, is `Past`, whatever time either one refers to.
 #[derive(
     Debug,
     Clone,
@@ -125,14 +117,11 @@ pub enum GermanTense {
 
 /// Mood of a finite verb.
 ///
-/// The two Konjunktive are kept apart because they are two paradigms with two
-/// jobs, not two uses of one. Konjunktiv I is built on the present stem and is
-/// the mood of reported speech (der Minister sagte, er habe nichts gewusst);
-/// Konjunktiv II is built on the preterite stem, usually with umlaut, and is
-/// the mood of the counterfactual, the wish and the polite request (wenn ich
-/// Zeit hätte; ich könnte). Collapsing them into one `subjunctive` would erase
-/// the only formal contrast a learner has to work from, and would make the
-/// indirect-speech register unlearnable.
+/// Konjunktiv I is built on the present stem and is the mood of reported
+/// speech (der Minister sagte, er habe nichts gewusst); Konjunktiv II is built
+/// on the preterite stem, usually with umlaut, and is the mood of the
+/// counterfactual, the wish and the polite request (wenn ich Zeit hätte; ich
+/// könnte).
 #[derive(
     Debug,
     Clone,
@@ -160,11 +149,10 @@ pub enum GermanMood {
 
 /// Which slot of the verbal system a verb token occupies.
 ///
-/// Required on every verb, because which of the remaining fields apply follows
-/// entirely from it. Only the *uninflected* participles are verbs here: an
-/// attributive participle (der lachende Mann, das gebaute Haus) takes adjective
-/// endings by the very paradigm above and is analysed as an adjective, which is
-/// also what Universal Dependencies does with it.
+/// Required on every verb; which of the remaining fields apply follows from
+/// it. Only the *uninflected* participles are verbs here: an attributive
+/// participle (der lachende Mann, das gebaute Haus) takes adjective endings
+/// and is analysed as an adjective.
 #[derive(
     Debug,
     Clone,
@@ -187,11 +175,9 @@ pub enum GermanVerbForm {
 
 /// The inflection class of a verb lexeme.
 ///
-/// A lexical property of the lemma rather than a feature of the token, on the
-/// same footing as Slavic aspect: it is invisible in the present tense
-/// (ich singe, ich mache) and decides the whole preterite and participle, which
-/// is precisely why German courses hand out a list of it to memorise. Reported
-/// on every token of the lemma so the learner can facet on it.
+/// A property of the lemma, not of the token: it is invisible in the present
+/// tense (ich singe, ich mache) and decides the preterite and the participle.
+/// Reported on every token of the lemma.
 #[derive(
     Debug,
     Clone,
@@ -224,9 +210,7 @@ pub enum GermanVerbClass {
 
 /// Whether a prefixed verb strands its prefix or keeps it attached.
 ///
-/// Genuinely optional: a verb with no prefix (gehen, machen, singen) has no
-/// separability at all, which is why this is an `Option` rather than a
-/// three-valued enum with a `none` member.
+/// A verb with no prefix (gehen, machen, singen) has no separability at all.
 ///
 /// The variable prefixes — durch-, hinter-, über-, um-, unter-, voll-, wider-,
 /// wieder- — are separable or inseparable by *sense*, so the value describes the
@@ -252,11 +236,8 @@ pub enum GermanSeparability {
 
 /// The address register a second-person form belongs to.
 ///
-/// German's formal Sie borrows third-person-plural morphology to address a
-/// second person, which makes sie / sie / Sie the one genuinely ambiguous
-/// pronoun of the language. Marking the register lets the formal form be
-/// reported as what it *is* — second person with plural agreement — instead of
-/// forcing a choice between losing its address value and losing its agreement.
+/// The formal Sie borrows third-person-plural morphology to address a second
+/// person: report it as second person with plural agreement, `formal`.
 #[derive(
     Debug,
     Clone,
@@ -277,12 +258,11 @@ pub enum GermanPoliteness {
 
 /// What a particle token is doing.
 ///
-/// Required, and it earns its place twice over. It gives the stranded half of a
-/// separable verb somewhere to live — without it the `auf` of steht ... auf is
-/// indistinguishable from the preposition auf — and it names the
-/// Modalpartikeln, the unstressed flavouring words (doch, mal, ja, halt, eben)
-/// that are a hallmark of spoken German and that every one of which doubles as
-/// an adverb, a conjunction or an interjection with a wholly different meaning.
+/// Required. The stranded half of a separable verb (the `auf` of steht ... auf)
+/// is a particle, not the preposition auf. The Modalpartikeln are the
+/// unstressed flavouring words (doch, mal, ja, halt, eben), each of which also
+/// exists as an adverb, a conjunction or an interjection with a different
+/// meaning.
 #[derive(
     Debug,
     Clone,
@@ -343,9 +323,9 @@ pub enum GermanMorphology {
     },
     /// Preposition or postposition, with the case it governs in this instance.
     ///
-    /// Required, and the reason it is: the nine two-way prepositions govern the
-    /// accusative for a change of place and the dative for a location, so only
-    /// the occurrence settles which (in die Stadt vs in der Stadt).
+    /// Required: the nine two-way prepositions govern the accusative for a
+    /// change of place and the dative for a location, so only the occurrence
+    /// settles which (in die Stadt vs in der Stadt).
     Adposition {
         lemma: String,
         case: GermanCase,
@@ -381,12 +361,10 @@ pub enum GermanMorphology {
         gender: Option<TernaryGender>,
         number: BinaryNumber,
         case: GermanCase,
-        /// Possessive determiners of the second person only, and the reason it
-        /// is here at all: the formal `Ihr` and the third-person `ihr` are the
-        /// same four letters with the same gender, number and case, so without
-        /// this field `Ihr Wörterbuch` (your, formal) and `ihr Wörterbuch`
-        /// (her / their) are one indistinguishable record. `dein` and `euer`
-        /// are familiar; every other determiner omits it.
+        /// Possessive determiners of the second person only: `Ihr Wörterbuch`
+        /// (your, formal) is `formal`, `dein` and `euer` are `familiar`. The
+        /// third-person `ihr Wörterbuch` (her / their) and every other
+        /// determiner omit it.
         #[serde(skip_serializing_if = "Option::is_none")]
         politeness: Option<GermanPoliteness>,
     },
@@ -396,10 +374,8 @@ pub enum GermanMorphology {
     },
     /// Noun.
     ///
-    /// Plural class is deliberately not modelled — see the module-level note on
-    /// `GermanMorphology` in the definition's report. Gender is, and it is
-    /// reported even in the plural, where the article stops showing it; only a
-    /// plurale tantum has none to report.
+    /// Gender is reported even in the plural, where the article stops showing
+    /// it; only a plurale tantum has none to report.
     Noun {
         lemma: String,
         /// Inherent and lexical, and reported in the plural too (die Bücher →
@@ -413,10 +389,9 @@ pub enum GermanMorphology {
     },
     /// Cardinal numeral.
     ///
-    /// Bare, because modern German cardinals above one are indeclinable. The
-    /// declining members of the numeral system are elsewhere: ein before a noun
-    /// is a determiner, and the ordinals inflect exactly like adjectives and are
-    /// analysed as such.
+    /// Cardinals above one are indeclinable. ein before a noun is a
+    /// determiner; ordinals inflect like adjectives and are analysed as
+    /// adjectives.
     Numeral {
         lemma: String,
     },
@@ -466,15 +441,9 @@ pub enum GermanMorphology {
     /// Verb.
     ///
     /// `verb_class` and `separability` describe the lemma and hold on every
-    /// token of it; everything else is decided by `verb_form`, and each
-    /// `Option` below marks a cell German genuinely does not have.
-    ///
-    /// There is no voice field, and that is a decision rather than an omission:
-    /// German has no synthetic passive whatsoever. Both the werden-passive and
-    /// the sein-passive are an inflected auxiliary plus a Partizip II that is
-    /// the very same form used in the perfect, so a voice value would have to be
-    /// a syntactic judgement about a neighbouring token rather than a feature of
-    /// the one being analysed.
+    /// token of it; everything else is decided by `verb_form`. There is no
+    /// voice field: the werden- and sein-passives are an auxiliary plus a
+    /// Partizip II, analysed as the two tokens they are written as.
     Verb {
         lemma: String,
         verb_class: GermanVerbClass,
