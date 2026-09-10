@@ -12,8 +12,10 @@ use panini_core::components::{
     PedagogicalExplanation, TranslationAlignment,
 };
 use panini_core::traits::IsoLang;
+use panini_engine::prompts::BatchExtractionRequest;
 use panini_engine::{
-    ExtractionOptions, ExtractionRequest, extract_with_components, extract_with_components_executor,
+    BatchItemError, ExtractionOptions, ExtractionRequest, extract_batch_with_components_executor,
+    extract_with_components, extract_with_components_executor,
 };
 
 /// Helper: build the component list for a concrete language and dispatch.
@@ -137,6 +139,68 @@ where
     Ok(extract_with_components_executor(lang, executor, request, &selected, options).await?)
 }
 
+/// Batched twin of [`extract_for_language_executor`]: one LLM call per
+/// component subset for every card of the request.
+async fn extract_batch_for_language_executor<L, E>(
+    lang: &L,
+    executor: &E,
+    request: &BatchExtractionRequest,
+    component_keys: Option<&[&str]>,
+    options: ExtractionOptions<'_>,
+) -> Result<Vec<Result<ExtractionResult, BatchItemError>>>
+where
+    L: panini_core::LinguisticDefinition + Send + Sync,
+    L::Morphology: std::fmt::Debug
+        + Clone
+        + PartialEq
+        + std::hash::Hash
+        + Eq
+        + serde::Serialize
+        + for<'de> serde::Deserialize<'de>
+        + schemars::JsonSchema
+        + panini_core::MorphologyInfo
+        + Send
+        + Sync,
+    L::MorphemeFunction: std::fmt::Debug
+        + Clone
+        + PartialEq
+        + serde::Serialize
+        + for<'de> serde::Deserialize<'de>
+        + schemars::JsonSchema
+        + Send
+        + Sync,
+    E: panini_engine::structured_llm::StructuredLlmExecutor,
+{
+    let pedagogical = PedagogicalExplanation;
+    let morphology = MorphologyAnalysis;
+    let multiword = MultiwordExpressions;
+    let morpheme_seg = MorphemeSegmentation;
+    let leipzig = LeipzigGloss;
+    let translation = TranslationAlignment;
+
+    let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
+        ("pedagogical_explanation", &pedagogical),
+        ("morphology", &morphology),
+        ("multiword_expressions", &multiword),
+        ("morpheme_segmentation", &morpheme_seg),
+        ("leipzig_gloss", &leipzig),
+        ("translation_alignment", &translation),
+    ];
+
+    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
+        || all_components.iter().map(|(_, c)| *c).collect(),
+        |keys| {
+            all_components
+                .iter()
+                .filter(|(k, _)| keys.contains(k))
+                .map(|(_, c)| *c)
+                .collect()
+        },
+    );
+
+    Ok(extract_batch_with_components_executor(lang, executor, request, &selected, options).await?)
+}
+
 fn project_morphology_for_language<L>(section: &serde_json::Value) -> Result<serde_json::Value>
 where
     L: panini_core::LinguisticDefinition,
@@ -202,6 +266,37 @@ macro_rules! generate_registry {
                 $(
                     s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG => {
                         extract_for_language_executor(
+                            &$crate::$lang,
+                            executor,
+                            request,
+                            component_keys,
+                            options,
+                        )
+                        .await
+                    }
+                )*
+                _ => Err(anyhow!("Unsupported language: {}", lang.to_639_3())),
+            }
+        }
+
+        /// Batched twin of [`extract_erased_with_components_executor`]: every card
+        /// of the request goes through one LLM call per component subset, and the
+        /// result carries one entry per card, in order.
+        ///
+        /// # Errors
+        /// Returns an error if the language code is unsupported, or if the whole
+        /// batch fails; per-card failures are the `Err` entries of the vector.
+        pub async fn extract_batch_erased_with_components_executor<E: panini_engine::structured_llm::StructuredLlmExecutor>(
+            lang: IsoLang,
+            executor: &E,
+            request: &BatchExtractionRequest,
+            component_keys: Option<&[&str]>,
+            options: ExtractionOptions<'_>,
+        ) -> Result<Vec<Result<ExtractionResult, BatchItemError>>> {
+            match lang {
+                $(
+                    s if s == <$crate::$lang as panini_core::LinguisticDefinition>::ISO_LANG => {
+                        extract_batch_for_language_executor(
                             &$crate::$lang,
                             executor,
                             request,
