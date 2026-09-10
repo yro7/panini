@@ -6,10 +6,9 @@ use panini_core::traits::{
 
 /// The two noun classes of contemporary Standard Swedish.
 ///
-/// `Common` is *utrum* (the `en` class), historically the merger of masculine
-/// and feminine. `Neuter` is *neutrum* (the `ett` class). Natural gender in
-/// personal pronouns is a different system and is represented separately by
-/// [`SwedishReferentialGender`].
+/// `Common` is *utrum* (the `en` class). `Neuter` is *neutrum* (the `ett`
+/// class). Natural gender in personal pronouns is a different system,
+/// represented separately by [`SwedishReferentialGender`].
 #[derive(
     Debug,
     Clone,
@@ -49,9 +48,8 @@ pub enum SwedishDefiniteness {
 
 /// The two forms conventionally called case on contemporary Swedish nouns.
 ///
-/// `Nominative` is the traditional label for the unmarked *grundform*, used
-/// for objects as well as subjects. The genitive `-s` is phrasal in its
-/// distribution, but it is still an overt form that a learner must produce.
+/// `Nominative` is the unmarked *grundform*, used for objects as well as
+/// subjects. `Genitive` is the overt `-s` form.
 #[derive(
     Debug,
     Clone,
@@ -92,9 +90,8 @@ pub enum SwedishPronounCase {
 
 /// A noun's productive plural pattern.
 ///
-/// Svenska Akademiens grammatik distinguishes seven declensions by their
-/// plural suffix. Naming the values after the suffix is more useful to a
-/// learner than exposing the arbitrary traditional numbers.
+/// The seven declensions of Svenska Akademiens grammatik, named after their
+/// plural suffix.
 #[derive(
     Debug,
     Clone,
@@ -260,11 +257,10 @@ pub enum SwedishPossessiveRelation {
     NonReflexive,
 }
 
-/// The limited singular address contrast between ordinary, unmarked `du` and
-/// marked formal `ni`. Calling `du` "familiar" would misrepresent modern
-/// Swedish: it is also the normal respectful form with strangers and in
-/// official communication. Plural `ni` has no register value because it is
-/// simply the plural second-person pronoun.
+/// The singular address contrast between ordinary, unmarked `du` — also the
+/// normal respectful form with strangers and in official communication — and
+/// marked formal `ni`. Plural `ni` is simply the plural second-person pronoun
+/// and has no register value.
 #[derive(
     Debug,
     Clone,
@@ -347,9 +343,9 @@ pub enum SwedishMood {
 
 /// Slots in the Swedish verb paradigm.
 ///
-/// The supine is deliberately distinct from the past participle: `skrivit` is
-/// invariant after `ha`, while `skriven/skrivet/skrivna` agrees like an
-/// adjective or participates in a `bli` passive.
+/// The supine is distinct from the past participle: `skrivit` is invariant
+/// after `ha`, while `skriven/skrivet/skrivna` agrees like an adjective or
+/// participates in a `bli` passive.
 #[derive(
     Debug,
     Clone,
@@ -409,8 +405,8 @@ pub enum SwedishVerbClass {
 /// Morphological diathesis of forms that participate in the active/`-s`
 /// opposition.
 ///
-/// `SForm` is intentionally not named `Passive`: Swedish `-s` also marks
-/// deponent, reciprocal and middle readings (`hoppas`, `mötas`, `trivas`).
+/// `SForm` covers every `-s` form: passive, deponent, reciprocal and middle
+/// readings alike (`hoppas`, `mötas`, `trivas`).
 #[derive(
     Debug,
     Clone,
