@@ -514,8 +514,10 @@ pub enum BasqueMorphology {
     },
     Noun {
         lemma: String,
-        case: BasqueCase,
-        determination: BasqueDetermination,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        case: Option<BasqueCase>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        determination: Option<BasqueDetermination>,
     },
     Numeral {
         lemma: String,
@@ -538,8 +540,10 @@ pub enum BasqueMorphology {
     },
     ProperNoun {
         lemma: String,
-        case: BasqueCase,
-        determination: BasqueDetermination,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        case: Option<BasqueCase>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        determination: Option<BasqueDetermination>,
     },
     SubordinatingConjunction {
         lemma: String,
@@ -582,6 +586,33 @@ pub enum BasqueMorphology {
 }
 
 impl BasqueMorphology {
+    /// Determination is carried only by the phrase-final inflected word, so
+    /// every POS that can host it exposes an optional slot.
+    fn __pivot_determination(&self) -> Option<String> {
+        let determination = match self {
+            Self::Adjective { determination, .. }
+            | Self::Determiner { determination, .. }
+            | Self::Noun { determination, .. }
+            | Self::Numeral { determination, .. }
+            | Self::ProperNoun { determination, .. }
+            | Self::Verb { determination, .. } => determination,
+            _ => return None,
+        };
+
+        determination
+            .as_ref()
+            .map(|d| panini_core::aggregable::ClosedValues::variant_str(d).to_string())
+    }
+
+    /// Typed pivot handle for phrase-final determination.
+    pub const PIVOT_DETERMINATION: panini_core::pivot::PivotField<Self> =
+        panini_core::pivot::PivotField::closed(
+            "determination",
+            "Determination",
+            <BasqueDetermination as panini_core::aggregable::ClosedValues>::all_variants,
+            Self::__pivot_determination,
+        );
+
     /// `tense` is `Option` — a participle carries none — so the derive skips it
     /// for pivot generation. Written by hand to keep the facet available.
     fn __pivot_tense(&self) -> Option<String> {
@@ -1374,8 +1405,8 @@ impl LinguisticDefinition for Basque {
     fn extraction_directives(&self) -> &'static str {
         "1. Lemmatization: lexical verbs take the PERFECTIVE PARTICIPLE, which is the Basque dictionary form (ikusi, hartu, jan, etorri, izan, egon, jakin) — never the verbal noun (ikustea) and never a finite form. Finite auxiliaries have four distinct lemmas: indicative forms use izan for nor/nor_nori and *edun for nor_nork/nor_nori_nork; potential, subjunctive and imperative forms use *edin for nor/nor_nori and *ezan for nor_nork/nor_nori_nork (da → izan, dut → *edun, nadin/naiteke/zaitez → *edin, dezan/dezaket/ezazu → *ezan). A synthetic lexical form lemmatizes to its own participle (dator → etorri, dakit → jakin, nago → egon, doa → joan). Nouns, proper nouns, adjectives, determiners and numerals take the bare stem with the article and every case suffix stripped (etxeetan → etxe, mendiaren → mendi, handiagoak → handi, honetan → hau).\n\
          2. Tokenization: Basque case suffixes and the article are SUFFIXES, not words. Never split them into separate tokens — etxean is ONE noun token (case inessive, determination definite_singular), lagunarekin is ONE noun token (comitative), Bilbokoa is ONE proper-noun token. Tag `adposition` only for a genuinely separate postposition word (gainean, azpian, ondoan, aurrean, buruz, arte, bidez, kontra); record the case its complement carries on that complement, not on the postposition. The subordinating -(e)la / -(e)n / -(e)lako and the prefixes ba- / bait- likewise attach to the finite verb: record them in the verb's `subordination` field, never as their own tokens.\n\
-         3. Nouns and proper nouns: always give `case` and `determination`. `determination` is a single fused slot — `indefinite` for a bare or articleless paradigm (etxe, liburu bat, zenbat lagun, Jon, ez dut dirurik), `definite_singular` for -a, `definite_plural` for -ak and plural oblique endings (etxeetan, gizonei), `proximate_plural` for -ok (gu euskaldunok). Do NOT report number as a separate feature: Basque fuses number into the determiner paradigm and an indefinite noun phrase carries no number at all.\n\
-         4. Adjectives, determiners and numerals: give `case` and `determination` ONLY when that word closes the phrase and carries its ending. In `etxe handian` the noun etxe is bare and adjective handi carries inessive + definite_singular; in `hiru liburu horietan`, demonstrative hori carries inessive + definite_plural; an independently declined numeral such as hirurekin carries comitative + indefinite. Omit both fields on a bare, non-final modifier. Give `degree` on every adjective and `numeral_type` on every numeral.\n\
+         3. Nominal phrase endings: on nouns, proper nouns, adjectives, determiners and numerals, give `case` and `determination` ONLY when that token closes its noun phrase and carries the phrase ending. In `etxe handian`, omit both from the bare non-final noun etxe and give inessive + definite_singular to adjective handi. In `egun on`, likewise omit both from egun and give absolutive + indefinite to phrase-final on. In `hiru liburu horietan`, omit both from liburu and give inessive + definite_plural to demonstrative hori. An independently declined numeral such as hirurekin carries comitative + indefinite. A noun or proper noun that is itself phrase-final still receives both fields: etxe = absolutive + indefinite, etxea = absolutive + definite_singular, Jon = absolutive + indefinite, Jonek = ergative + indefinite.\n\
+         4. `determination` is a single fused slot — `indefinite` for a bare or articleless paradigm (etxe, liburu bat, zenbat lagun, Jon, ez dut dirurik), `definite_singular` for -a, `definite_plural` for -ak and plural oblique endings (etxeetan, gizonei), `proximate_plural` for -ok (gu euskaldunok). Do NOT report number as a separate feature: Basque fuses number into the determiner paradigm and an indefinite noun phrase carries no number at all. Give `degree` on every adjective and `numeral_type` on every numeral.\n\
          5. Verbs — decide finite against non-finite first. `form` is `synthetic` for a finite form of the lexical verb itself (dator, dakit, nago, dabil, dakar); `auxiliary` for a finite izan / *edun / *edin / *ezan (naiz, da, dira, dut, ditu, zen, zuen, zaio, diot, dezaket, nadin); `perfective_participle` for -tu / -du / -i / -n (ikusi, hartu, jakin, esan); `imperfective_participle` for -t(z)en (ikusten, hartzen); `future_participle` for -ko / -go (ikusiko, joango); `radical` for the bare aditzoina used before subjunctive, potential and imperative auxiliaries (ikus, jan, sar); `verbal_noun` for -t(z)e and its declined forms (ikustea, ikusteko, ikustera); `resultative_participle` for -ta/-da, -(r)ik or agreeing -a(k) forms (eginda, ikusirik, apurtua, behartuak).\n\
          6. Give `mood`, `paradigm` and the agreement slots ONLY on a finite form (`synthetic` or `auxiliary`), and give them all there. Give `tense` on finite indicative, conditional, consequential, potential and subjunctive forms: `present`, `past`, or the distinct `hypothetical` series (banu, balitz, nuke, litzateke, ledin, lezan). Omit `tense` on an imperative. Omit all four finite dimensions on a participle, radical or verbal noun. `case` and `determination` are a separate option: give them only when a verbal noun or a nominalized finite relative carries the phrase ending (ikustea = verbal_noun + absolutive + definite_singular; etorri denak = auxiliary + relative + ergative + definite_singular). `polarity` is required on every verb: `negative` whenever the predicate is under ez or ezin, `affirmative` otherwise. ez is its own particle token, but the verb it scopes still carries `polarity: negative`.\n\
          7. Polypersonal agreement — this is the core of the language. Fill `absolutive_agreement` (NOR), `dative_agreement` (NORI) and `ergative_agreement` (NORK) independently, each only when the form actually indexes that argument. da = absolutive third_singular. dut = absolutive third_singular + ergative first_singular. ditut = absolutive third_plural + ergative first_singular. zaizkit = absolutive third_plural + dative first_singular. diot = absolutive third_singular + dative third_singular + ergative first_singular. gaituzte = absolutive first_plural + ergative third_plural.\n\
@@ -1541,8 +1572,8 @@ mod tests {
     fn determination_fuses_definiteness_and_number() {
         let indefinite = BasqueMorphology::Noun {
             lemma: "etxe".to_string(),
-            case: BasqueCase::Absolutive,
-            determination: BasqueDetermination::Indefinite,
+            case: Some(BasqueCase::Absolutive),
+            determination: Some(BasqueDetermination::Indefinite),
         };
 
         assert_eq!(
@@ -1610,6 +1641,18 @@ mod tests {
             assert!(json.get("case").is_some());
             assert!(json.get("determination").is_some());
         }
+    }
+
+    #[test]
+    fn non_final_nouns_carry_no_phrase_ending() {
+        let egun = BasqueMorphology::Noun {
+            lemma: "egun".to_string(),
+            case: None,
+            determination: None,
+        };
+
+        assert_eq!(BasqueMorphology::PIVOT_CASE.value(&egun), None);
+        assert_eq!(BasqueMorphology::PIVOT_DETERMINATION.value(&egun), None);
     }
 
     #[test]
