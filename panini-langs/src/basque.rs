@@ -554,6 +554,8 @@ pub enum BasqueMorphology {
     SubordinatingConjunction {
         lemma: String,
     },
+    /// A letter named as a letter is a symbol (`J letra`, foreign `c`, `q`,
+    /// `v`, `w`, `y`), not a proper noun.
     Symbol {
         lemma: String,
     },
@@ -1723,6 +1725,16 @@ mod tests {
             BasqueMorphology::PIVOT_DETERMINATION.value(&askotan),
             Some("indefinite".to_string())
         );
+    }
+
+    #[test]
+    fn metalinguistic_letters_are_symbols() {
+        let letter = BasqueMorphology::Symbol {
+            lemma: "J".to_string(),
+        };
+
+        assert_eq!(letter.pos_label(), "Symbol");
+        assert_eq!(letter.lemma(), Some("J".to_string()));
     }
 
     #[test]
