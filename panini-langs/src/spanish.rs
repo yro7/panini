@@ -82,6 +82,26 @@ pub enum SpanishDegree {
     Superlative, // `riquísimo`, `altísimo`, `celebérrimo`
 }
 
+/// The two second-person singular paradigms. Only a second-person singular
+/// finite form has one; a boolean here drew a `false` onto every other form.
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    schemars::JsonSchema,
+    panini_macro::ClosedValues,
+)]
+#[serde(rename_all = "snake_case")]
+pub enum SpanishAddress {
+    Tuteo, // `hablas`, `tienes`, `ven`
+    Voseo, // `hablás`, `tenés`, `vení`
+}
+
 /// The case-like contrast carried by the pronoun system — the only corner of
 /// Spanish nominal morphology that has one.
 #[derive(
@@ -263,11 +283,10 @@ pub enum SpanishMorphology {
         /// compound.
         #[serde(skip_serializing_if = "Option::is_none")]
         gender: Option<BinaryGender>,
-        /// Second-person singular finite forms only: `true` for the voseo
-        /// form (`hablás`, `tenés`, `vení`), `false` for the tuteo form
-        /// (`hablas`, `tienes`, `ven`). Absent on every other form.
+        /// Second-person singular finite forms only — `hablas` tuteo,
+        /// `hablás` voseo. Absent on every other person and number.
         #[serde(skip_serializing_if = "Option::is_none")]
-        voseo: Option<bool>,
+        address: Option<SpanishAddress>,
     },
     /// Other, for unanalyzable tokens.
     Other {
@@ -366,13 +385,13 @@ impl LinguisticDefinition for Spanish {
          6. Tense values cover the simple synthetic paradigms only: presente -> present; pretérito perfecto simple / indefinido ('hablé', 'fue') -> preterite; pretérito imperfecto ('hablaba') -> imperfect; futuro simple ('hablaré') -> future; condicional simple ('hablaría') -> conditional. The condicional is a TENSE OF THE INDICATIVE, not a mood: tag 'hablaría' as tense conditional, mood indicative. There is no conditional mood value and no pluperfect tense value. Mood imperative covers every command whatever form it borrows: tú 'ven', vos 'vení', vosotros 'hablad', and the usted, ustedes, nosotros and negative commands built on subjunctive forms — 'disculpe' and 'hágalo' are imperative third singular, 'hablemos' imperative first plural, 'no salgan' imperative third plural, 'no me lo des' imperative second singular. Subjunctive is the mood of the subordinate and optative clauses ('para que nos ayude', 'ojalá venga').\n\
          7. The imperfect subjunctive has two paradigms and one identity: 'hablara' and 'hablase', 'fuera' and 'fuese' are all mood subjunctive, tense imperfect. Never read an -ra form as an indicative pluperfect. The future subjunctive ('hablare', 'fuere'), confined to legal formulas and proverbs, is mood subjunctive, tense future.\n\
          8. Compound tenses and verbal periphrases are always more than one verb token, each analyzed on its own: 'he hablado' -> 'haber' (present, indicative, first, singular) + 'hablado' (participle), and likewise for 'había hablado', 'habré hablado', 'habría hablado', 'hube hablado' and every compound subjunctive. 'voy a comer' -> 'ir' + 'a' + 'comer'; 'estoy comiendo' -> 'estar' + 'comiendo'; 'acabo de llegar' -> 'acabar' + 'de' + 'llegar'. Only a simple synthetic form is a single verb token.\n\
-         9. Address across the Spanish-speaking world — tag a verb by the agreement it actually carries, never by who is being addressed. 'hablas' (tú) and the voseo forms 'hablás', 'tenés', 'venís' are second person singular, as are the voseo imperatives 'hablá', 'tené', 'vení'; every second person singular finite form also carries the voseo flag — true for 'hablás', 'tenés', 'sos', 'vení', false for 'hablas', 'tienes', 'eres', 'ven' — and no other form carries it. 'habláis' and the imperative 'hablad' (vosotros) are second person plural. But 'usted habla' and 'ustedes hablan' carry THIRD person agreement on the verb — tag the verb third singular and third plural — while the pronouns 'usted' and 'ustedes' are second-person address forms and take person second with their own number. 'os' is second person plural; the object clitics used with 'usted' and 'ustedes' ('lo', 'la', 'los', 'las', 'le', 'les') are third person.\n\
+         9. Address across the Spanish-speaking world — tag a verb by the agreement it actually carries, never by who is being addressed. 'hablas' (tú) and the voseo forms 'hablás', 'tenés', 'venís' are second person singular, as are the voseo imperatives 'hablá', 'tené', 'vení'; a second person singular finite form also carries its address paradigm — voseo for 'hablás', 'tenés', 'sos', 'vení', tuteo for 'hablas', 'tienes', 'eres', 'ven' — and a first or third person form ('hablo', 'habla', 'estoy', 'llegué') carries none. 'habláis' and the imperative 'hablad' (vosotros) are second person plural. But 'usted habla' and 'ustedes hablan' carry THIRD person agreement on the verb — tag the verb third singular and third plural — while the pronouns 'usted' and 'ustedes' are second-person address forms and take person second with their own number. 'os' is second person plural; the object clitics used with 'usted' and 'ustedes' ('lo', 'la', 'los', 'las', 'le', 'les') are third person.\n\
          10. Pronouns: give the type, the clitic flag, and the case wherever the form has one. Set clitic true for every unstressed form — me, te, se, lo, la, le, nos, os, los, las, les — proclitic, enclitic or doubled alike, and false for the stressed forms (yo, tú, vos, usted, ustedes, él, ella, nosotros, vosotros, mí, ti, sí, conmigo, contigo, consigo) and for every demonstrative, relative, interrogative, possessive and indefinite pronoun. Case is subject for 'yo', 'tú', 'vos', 'él'; direct_object for 'lo', 'la', 'los', 'las'; indirect_object for 'le', 'les'; reflexive for 'se' and 'sí' in reflexive or reciprocal use; prepositional for 'mí', 'ti', 'sí' and any stressed pronoun governed by a preposition, including a doubled object ('a él lo vi'). 'me', 'te', 'nos' and 'os' take whichever of direct_object, indirect_object or reflexive their function in the sentence gives them. Every personal pronoun carries Person and every one but 'se' carries Number ('me voy' -> 'me' first singular); 'se' is third person in every use and carries neither Number nor Gender. Omit Person for non-personal pronouns, and omit Gender for forms that do not distinguish it ('me', 'te', 'se', 'nos', 'os', 'le', 'les', 'yo', 'tú').\n\
          11. Do not silently repair leísmo, laísmo or loísmo: tag the case by the syntactic function the pronoun has in the sentence as written, so 'le vi' with a direct object is a direct_object 'le' and 'la dije la verdad' is an indirect_object 'la'. In 'se lo di', 'se' is the dative allomorph of 'le' before another third-person clitic — tag it indirect_object, never reflexive. Impersonal, pasiva refleja and accidental 'se' ('se vive bien', 'se venden pisos', 'se dice que', 'se me olvidaron las llaves') take case reflexive like reflexive and reciprocal 'se'; the 'me' of the accidental construction is indirect_object.\n\
          12. Tokenization: split an enclitic cluster into the verb and each clitic, each keeping its own lemma, and drop the accent that enclisis adds — 'dámelo' -> 'dar' (imperative, second, singular) + 'me' + 'lo'; 'diciéndoselo' -> 'decir' (gerund) + 'se' + 'lo'; 'vámonos' -> 'ir' (imperative, first, plural) + 'nos'; 'sentaos' -> 'sentar' (imperative, second, plural) + 'os' (reflexive), exactly two tokens, since the -d vosotros drops before 'os' is not a token; 'hacerlo' -> 'hacer' + 'lo'. Spanish has exactly two contractions and both are split: 'del' -> 'de' + 'el', 'al' -> 'a' + 'el'. Both entries keep the contraction itself as their word — 'del barrio' is word 'del' Adposition 'de', word 'del' Determiner 'el', then word 'barrio' Noun — and every piece of an enclitic cluster keeps the whole cluster as its word; the article is never filed under the noun that follows it.\n\
          13. Value guardrails for the confusions that actually occur: the personal 'a' ('veo a María') is an Adposition; 'no' is an Adverb; there is no Particle category in this model at all, so route anything you would have tagged a particle to Adverb, Pronoun, Adposition or Subordinating Conjunction by its function. 'que' is a Subordinating Conjunction when it introduces a completive clause ('dice que viene') and a relative Pronoun when it has an antecedent ('el libro que leí'). 'se' is always a Pronoun, whether reflexive, reciprocal, impersonal, pasiva refleja or dative allomorph. 'hasta', 'incluso', 'excepto' and 'salvo' before a subject form ('hasta yo lo vi', 'incluso yo') are Adverbs and the pronoun is case subject. Separate the accented homographs from the unaccented ones by their written form and syntax: él/el, tú/tu, mí/mi, sí/si, sé/se, dé/de, té/te, más/mas, qué/que, cómo/como, dónde/donde. Never put a gender value in the number field or a number value in the gender field.\n\
          14. 'cómo', 'dónde', 'adónde' and 'cuándo' are interrogative Adverbs ('¿cómo estás?' -> Adverb 'cómo'); 'donde', 'cuando' and 'como' with an antecedent are relative Adverbs ('la universidad donde estudia', 'en diciembre, cuando termina', 'así es como lo hicimos'); opening a clause with no antecedent they are Subordinating Conjunctions ('cuando vamos al parque', 'como si lo supiera'). 'qué', 'quién', 'cuál' and 'cuánto' are interrogative Pronouns standing alone and interrogative Determiners before a noun, exclamations included ('¿qué hora es?', '¿cuántos años tienes?', '¡qué desastre!' -> Determiner 'qué').\n\
-         15. The quantifiers that stand before a noun and agree with it — mucho, poco, tanto, demasiado, bastante, todo, otro, varios, cada, alguno, ninguno, cualquier — are Determiners of type indefinite ('mucho viento', 'mucha paciencia', 'varios amigos', 'toda América'); standing alone they are indefinite Pronouns ('todos están nerviosos'), and 'mucho' next to a verb or an adjective is an Adverb ('trabajas mucho'). 'un', 'una', 'unos', 'unas' before a noun are the indefinite article — Determiner, article, lemma 'un' ('un amigo') — and a Numeral with lemma 'uno' only when they count against other numbers ('veintiún años', 'treinta y una personas'). 'varios' keeps the lemma 'varios', and a possessive determiner keeps its own unaccented lemma ('tu casa' -> 'tu', never 'tú'). The speaker labels of a dialogue ('A:', 'B:') are Symbols."
+         15. The quantifiers that stand before a noun and agree with it — mucho, poco, tanto, demasiado, bastante, todo, otro, varios, cada, alguno, ninguno, cualquier — are Determiners of type indefinite ('mucho viento', 'mucha paciencia', 'varios amigos', 'toda América'); standing alone they are indefinite Pronouns ('todos están nerviosos'), and 'mucho' next to a verb or an adjective is an Adverb ('trabajas mucho'). 'un', 'una', 'unos', 'unas' before a noun are the indefinite article — Determiner, article, lemma 'un' ('un amigo') — and a Numeral only when they count against other numbers ('treinta y una personas' -> 'uno'); the compounds keep their own lemma ('veintiún años', 'veintiuna mesas' -> 'veintiuno'). 'varios' keeps the lemma 'varios', and a possessive determiner keeps its own unaccented lemma ('tu casa' -> 'tu', never 'tú'). The speaker labels of a dialogue ('A:', 'B:') are Symbols."
     }
 }
 
@@ -405,7 +424,7 @@ mod tests {
             person: Some(Person::Second),
             number: Some(BinaryNumber::Plural),
             gender: None,
-            voseo: None,
+            address: None,
         };
         let hablas_voseo = SpanishMorphology::Verb {
             lemma: "hablar".to_string(),
@@ -414,7 +433,7 @@ mod tests {
             person: Some(Person::Second),
             number: Some(BinaryNumber::Singular),
             gender: None,
-            voseo: Some(true),
+            address: Some(SpanishAddress::Voseo),
         };
         let hablas_tuteo = SpanishMorphology::Verb {
             lemma: "hablar".to_string(),
@@ -423,7 +442,7 @@ mod tests {
             person: Some(Person::Second),
             number: Some(BinaryNumber::Singular),
             gender: None,
-            voseo: Some(false),
+            address: Some(SpanishAddress::Tuteo),
         };
         // `ustedes hablan`: the verb carries third-person agreement, the pronoun
         // is a second-person address form.
@@ -434,13 +453,13 @@ mod tests {
             person: Some(Person::Third),
             number: Some(BinaryNumber::Plural),
             gender: None,
-            voseo: None,
+            address: None,
         };
 
         assert_ne!(hablais, hablas_voseo);
         assert_ne!(hablais, hablan_ustedes);
         // `vos hablás` and `tú hablas` share every agreement feature; the
-        // voseo flag is what keeps them two records.
+        // address paradigm is what keeps them two records.
         assert_ne!(hablas_voseo, hablas_tuteo);
         for form in [&hablais, &hablas_voseo, &hablas_tuteo, &hablan_ustedes] {
             assert_eq!(
@@ -460,7 +479,7 @@ mod tests {
             person: None,
             number: None,
             gender: None,
-            voseo: None,
+            address: None,
         };
         let le = SpanishMorphology::Pronoun {
             lemma: "él".to_string(),
