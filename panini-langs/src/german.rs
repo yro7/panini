@@ -300,6 +300,7 @@ pub enum GermanParticleType {
     Modal,      // Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl
     Negation,   // nicht
     Infinitival, // the zu of a zu-infinitive, written apart (ohne zu fragen)
+    SeparatedVerbPrefix, // the stranded prefix of a separable verb (steht ... auf)
 }
 
 #[derive(
