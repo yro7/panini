@@ -493,6 +493,8 @@ pub enum BasqueMorphology {
     Adposition {
         lemma: String,
     },
+    /// Lexical adverbs include fixed forms such as `mesedez`; a final string
+    /// resembling a case suffix does not turn one into an adposition.
     Adverb {
         lemma: String,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -501,6 +503,8 @@ pub enum BasqueMorphology {
     CoordinatingConjunction {
         lemma: String,
     },
+    /// A determiner carries the phrase ending only when it is the final
+    /// element (`liburu horietan`); non-final `zer` in `zer moduz` omits it.
     Determiner {
         lemma: String,
         determiner_type: BasqueDeterminerType,
@@ -1347,7 +1351,8 @@ impl Agglutinative for Basque {
              condition is subordination:conditional, while assertion/emphasis is \
              particle:affirmative.\n\
              FIXED EXPRESSIONS: mesedez is synchronically a lexical adverb with lemma mesedez, \
-             not a declined occurrence of mesede; do not segment its final z.\n\
+             not a declined occurrence of mesede; do not segment its final z. In eskerrik asko, \
+             segment only the partitive -rik on eskerrik; asko has no suffix.\n\
              Segment only words that have at least one affix worth annotating."
         )
     }
@@ -1424,7 +1429,7 @@ impl LinguisticDefinition for Basque {
          - The absolutive is the ZERO case and it covers both the subject of an intransitive verb and the direct object of a transitive one. Basque has no accusative: never tag a direct object `accusative`, tag it `absolutive`.\n\
          - Do not strip a lexical final -a. gizona lemmatizes to gizon, but euskara, gauza, eliza, arrosa, denbora and neska end in -a lexically and lemmatize to themselves.\n\
          - The NOR of a transitive clause is the OBJECT. In `nik liburua irakurri dut` the absolutive is liburua (third_singular) and the ergative is nik (first_singular), never the reverse.\n\
-         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`.\n\
+         - A demonstrative used without a following noun is a `pronoun`, including its declined forms: horregatik is pronoun lemma hori + motivative, never a proper noun. Mesedez is an ungradable lexical `adverb` with lemma mesedez: omit `degree`. In the fixed expressions `zer moduz` and `eskerrik asko`, zer is an interrogative determiner and asko an indefinite quantifier; both are non-inflected, so omit their `case` and `determination`.\n\
          13. Basque has no grammatical gender and no gender agreement anywhere in the noun phrase. The only masculine/feminine distinction in the language is `allocutive`."
     }
 
@@ -1644,6 +1649,15 @@ mod tests {
             assert!(json.get("case").is_some());
             assert!(json.get("determination").is_some());
         }
+
+        let zer = BasqueMorphology::Determiner {
+            lemma: "zer".to_string(),
+            determiner_type: BasqueDeterminerType::Interrogative,
+            case: None,
+            determination: None,
+        };
+        assert_eq!(BasqueMorphology::PIVOT_CASE.value(&zer), None);
+        assert_eq!(BasqueMorphology::PIVOT_DETERMINATION.value(&zer), None);
     }
 
     #[test]
