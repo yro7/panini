@@ -365,7 +365,15 @@ pub enum GermanMorphology {
     CoordinatingConjunction {
         lemma: String,
     },
-    /// Determiner — articles, demonstratives, possessives, quantifiers.
+    /// Determiner — articles, demonstratives, quantifiers, and every POSSESSIVE
+    /// standing before a noun.
+    ///
+    /// The possessives belong here in all their inflected forms — mein, meine,
+    /// meinen, meinem, meiner, meines and likewise dein-, sein-, ihr-, unser-,
+    /// euer-, Ihr-. `seinem` in `mit seinem alten Fahrrad` is a Determiner,
+    /// dative neuter singular; it is NOT a Noun and NOT a ProperNoun. A
+    /// possessive is a Pronoun only when it stands alone in place of the noun
+    /// (Das ist meins).
     Determiner {
         lemma: String,
         /// The plural article and the plural possessive do not distinguish it.
@@ -373,6 +381,14 @@ pub enum GermanMorphology {
         gender: Option<TernaryGender>,
         number: BinaryNumber,
         case: GermanCase,
+        /// Possessive determiners of the second person only, and the reason it
+        /// is here at all: the formal `Ihr` and the third-person `ihr` are the
+        /// same four letters with the same gender, number and case, so without
+        /// this field `Ihr Wörterbuch` (your, formal) and `ihr Wörterbuch`
+        /// (her / their) are one indistinguishable record. `dein` and `euer`
+        /// are familiar; every other determiner omits it.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        politeness: Option<GermanPoliteness>,
     },
     /// Interjection.
     Interjection {
