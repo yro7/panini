@@ -10,9 +10,8 @@ use panini_core::traits::{
 
 /// Case marked by a 격조사 (case particle) cliticised to the nominal.
 ///
-/// `Unmarked` is the honest value for a bare nominal: Korean drops case
-/// particles freely in speech, and the slot being empty is information, not a
-/// missing extraction.
+/// `Unmarked` is the value for a bare nominal: Korean drops case particles
+/// freely in speech.
 #[derive(
     Debug,
     Clone,
@@ -43,8 +42,7 @@ pub enum KoreanCase {
 }
 
 /// Information-structure marking by a 보조사 (auxiliary particle). Stacks on
-/// top of, and often replaces, the case particle — which is why it is a
-/// dimension of its own rather than a `KoreanCase` value.
+/// top of, and often replaces, the case particle.
 #[derive(
     Debug,
     Clone,
@@ -190,8 +188,7 @@ pub enum KoreanPolarity {
     Negative, // 부정 (안, 못, -지 않다, -지 못하다)
 }
 
-/// Which slot the predicate's ending fills — the single most consequential
-/// choice in a Korean clause, because it decides whether the predicate ends the
+/// Which slot the predicate's ending fills: whether the predicate ends the
 /// sentence, links to another clause, modifies a noun, or becomes one.
 #[derive(
     Debug,
@@ -215,8 +212,7 @@ pub enum KoreanVerbForm {
 }
 
 /// Korean runs two full numeral series; which one a phrase takes is fixed by
-/// the counter, and getting it wrong is the most common learner error in the
-/// whole numeral system.
+/// the counter.
 #[derive(
     Debug,
     Clone,
