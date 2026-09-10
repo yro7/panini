@@ -607,6 +607,17 @@ mod tests {
     }
 
     #[test]
+    fn morphology_prompt_carries_the_directives_once() {
+        use panini_core::components::MorphologyAnalysis;
+        let m: &dyn AnalysisComponent<TestLang> = &MorphologyAnalysis;
+        let prompt = compose_prompt(&TestLang, &test_request(), &test_prompts(), &[m])
+            .expect("prompt should compose");
+
+        assert_eq!(prompt.matches("Test directives").count(), 1);
+        assert!(prompt.contains("<extraction_directives>\nTest directives\n</extraction_directives>"));
+    }
+
+    #[test]
     fn pedagogical_component_prompt_keeps_context_blocks() {
         // FakeComponentA keeps the default (needs pedagogical context).
         let a: &dyn AnalysisComponent<TestLang> = &FakeComponentA;
