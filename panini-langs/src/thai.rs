@@ -6,12 +6,9 @@ use panini_core::traits::{
 
 /// The level of speech a Thai lexeme belongs to.
 ///
-/// Thai lexicalises social relation rather than inflecting for it: whole
-/// lexemes are paired across registers (`หมา` / `สุนัข`, `หัว` / `ศีรษะ`,
-/// `กิน` / `รับประทาน` / `เสวย` / `ฉัน`), so choosing the register-appropriate
-/// word is a per-token decision a learner has to make and the place Thai's
-/// register diglossia actually lives. `Neutral` is the honest unmarked value,
-/// not a missing extraction.
+/// Whole lexemes are paired across registers (`หมา` / `สุนัข`, `หัว` /
+/// `ศีรษะ`, `กิน` / `รับประทาน` / `เสวย` / `ฉัน`), so the register is a
+/// per-token value. `Neutral` is the unmarked value.
 #[derive(
     Debug,
     Clone,
@@ -42,10 +39,9 @@ pub enum ThaiRegister {
 
 /// What kind of counting unit a Thai ลักษณนาม is.
 ///
-/// Deliberately functional rather than semantic. Which classifier a given noun
-/// takes is captured by the open `classifier` pivot on `Noun`; this dimension
-/// answers the orthogonal question of what sort of unit the classifier counts,
-/// where the boundaries are crisp enough to be extracted reliably.
+/// Functional, not semantic: which classifier a given noun takes is the
+/// `classifier` field on `Noun`; this dimension says what sort of unit the
+/// classifier counts.
 #[derive(
     Debug,
     Clone,
@@ -79,9 +75,8 @@ pub enum ThaiClassifierType {
 /// The learner-relevant grammatical function of a Thai adverb.
 ///
 /// Thai marks tense, aspect, negation, degree and epistemic stance with free
-/// words standing before or after the verb. Keeping those markers on their own
-/// token, dimensioned here, stops an analytic construction from being
-/// misreported as verb inflection Thai does not have.
+/// words standing before or after the verb. Those markers stay on their own
+/// token, with this function; the verb carries no inflection.
 #[derive(
     Debug,
     Clone,
