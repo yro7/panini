@@ -149,16 +149,13 @@ pub enum GermanTense {
 pub enum GermanMood {
     Indicative, // Indikativ
     Imperative, // Imperativ
-    /// Konjunktiv I — present stem, reported speech.
-    ///
-    /// Renamed explicitly: serde's snake_case rule inserts a separator before
-    /// every uppercase letter, so `SubjunctiveII` would serialise as
-    /// `subjunctive_i_i`.
+    // Both are renamed explicitly: serde's snake_case rule inserts a separator
+    // before every uppercase letter, so `SubjunctiveII` would otherwise
+    // serialise as `subjunctive_i_i`.
     #[serde(rename = "subjunctive_i")]
-    SubjunctiveI,
-    /// Konjunktiv II — preterite stem, counterfactual and polite.
+    SubjunctiveI, // Konjunktiv I — present stem, reported speech
     #[serde(rename = "subjunctive_ii")]
-    SubjunctiveII,
+    SubjunctiveII, // Konjunktiv II — preterite stem, counterfactual and polite
 }
 
 /// Which slot of the verbal system a verb token occupies.
@@ -209,20 +206,19 @@ pub enum GermanVerbForm {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum GermanVerbClass {
-    /// Schwach — dental suffix, no stem-vowel change: machen, machte, gemacht.
+    // Schwach — dental suffix, no stem-vowel change: machen, machte, gemacht.
     Weak,
-    /// Stark — ablaut in the preterite, participle in -en: singen, sang,
-    /// gesungen.
+    // Stark — ablaut in the preterite, participle in -en: singen, sang, gesungen.
     Strong,
-    /// Gemischt — dental suffix *and* a stem-vowel change. A closed list:
-    /// brennen, bringen, denken, kennen, nennen, rennen, senden, wenden,
-    /// wissen, and their prefixed derivatives.
+    // Gemischt — dental suffix *and* a stem-vowel change. A closed list:
+    // brennen, bringen, denken, kennen, nennen, rennen, senden, wenden, wissen,
+    // and their prefixed derivatives.
     Mixed,
-    /// The six modal verbs, whose present tense inflects like a strong
-    /// preterite (ich kann, er kann) and whose preterite is weak.
+    // The six modal verbs, whose present tense inflects like a strong preterite
+    // (ich kann, er kann) and whose preterite is weak.
     Modal,
-    /// sein, haben, werden and tun, whose paradigms none of the classes above
-    /// describes.
+    // sein, haben, werden and tun, whose paradigms none of the classes above
+    // describes.
     Irregular,
 }
 
@@ -301,12 +297,9 @@ pub enum GermanPoliteness {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum GermanParticleType {
-    /// Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl.
-    Modal,
-    /// nicht.
-    Negation,
-    /// The zu of a zu-infinitive, written as its own word (ohne zu fragen).
-    Infinitival,
+    Modal,      // Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl
+    Negation,   // nicht
+    Infinitival, // the zu of a zu-infinitive, written apart (ohne zu fragen)
 }
 
 #[derive(
@@ -325,10 +318,13 @@ pub enum GermanParticleType {
 pub enum GermanMorphology {
     /// Adjective — attributive, predicative, or an inflected participle.
     ///
+    /// A PREDICATIVE adjective, the complement of sein, werden or bleiben
+    /// (der Wein ist gut, sie wird müde, der Biergarten ist voll), belongs here
+    /// and NOT under `Adverb`, even though it carries no ending.
+    ///
     /// Everything but `degree` is optional together: an attributive adjective
-    /// inflects and carries all four fields, while a predicative or adverbially
-    /// used one (der Wein ist gut, er läuft schnell) is bare and carries none
-    /// of them.
+    /// inflects and carries all four fields, while a predicative one is bare
+    /// and carries none of them.
     Adjective {
         lemma: String,
         degree: GermanDegree,
@@ -353,7 +349,11 @@ pub enum GermanMorphology {
         lemma: String,
         case: GermanCase,
     },
-    /// Adverb.
+    /// Adverb — a word modifying a verb, an adjective or the whole clause
+    /// (er läuft schnell, sie kommt heute).
+    ///
+    /// Never the complement of sein, werden or bleiben: that is a predicative
+    /// Adjective.
     Adverb {
         lemma: String,
         /// Only for an adverb whose own form encodes degree (oft / öfter, gern
