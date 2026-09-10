@@ -643,142 +643,56 @@ impl LinguisticDefinition for German {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "1. Lemmatization: nouns to the nominative singular, keeping the capital letter (Häusern → Haus); \
-         pluralia tantum stay plural (Eltern, Leute, Ferien, Geschwister). Verbs to the infinitive WITH the \
-         separable prefix reattached — see directive 10. Adjectives and ordinals to the uninflected positive \
-         form (guten → gut, besser → gut, am größten → groß); ordinals are the one exception and lemmatize \
-         to their dictionary form in -te / -ste (zweiten → zweite). Determiners and pronouns to the \
-         masculine nominative singular citation form (dem → der, meiner → mein, ihn → er, uns → wir). \
-         Prepositions to the uncontracted preposition (im → in, zur → zu). Lemmas use post-1996 reformed \
-         orthography (dass, muss) and the ß spelling even when the input is Swiss and writes ss \
-         (Strasse → Straße), so one lexeme keeps one record.\n\
-         2. CAPITALIZATION IS NOT A PROPER-NOUN SIGNAL IN GERMAN. Every common noun is capitalized, so a \
-         capital letter says nothing at all: Haus, Freiheit and Auto are ordinary Nouns. Tag a proper noun \
-         only for an actual name of a person, place, organisation or work. Conversely, a capitalized \
-         nominalization IS a Noun: das Gute, das Essen, etwas Schönes, beim Laufen, der Angestellte — \
-         lemmatize these to the form that follows the definite article (Gute, Essen, Angestellte). The one \
-         place a capital does carry information is the polite Sie / Ihnen / Ihr — see directive 9.\n\
-         3. Nouns: always give gender, number and case. Gender is inherent and lexical, so report it in the \
-         PLURAL too, where the article no longer shows it (die Bücher → neuter, die Männer → masculine). A \
-         compound takes the gender of its LAST element (die Tür → die Haustür feminine; der Wagen → der \
-         Kinderwagen masculine); never guess the gender from the first element or from the ending alone.\n\
-         4. Case is SYNTACTIC and must never be read off the ending, because the German endings are massively \
-         syncretic. der is nominative singular masculine, but also genitive singular feminine, dative \
-         singular feminine and genitive plural; die is nominative and accusative, singular feminine and \
-         plural alike; den is accusative singular masculine and dative plural; dem is dative singular \
-         masculine and neuter. Work from the function: subject and predicate nominal → nominative; direct \
-         object → accusative; indirect object and the object of a dative verb (helfen, danken, gefallen, \
-         gehören, folgen) → dative; adnominal possessor → genitive. A noun ending in -n in the plural after \
-         a preposition or as an indirect object (mit den Kindern, den Freunden) is a reliable dative plural.\n\
-         5. Prepositions: report the case governed IN THIS INSTANCE, never the preposition's whole range. \
-         The nine two-way prepositions — an, auf, hinter, in, neben, über, unter, vor, zwischen — take the \
-         accusative for a change of place answering wohin (in die Stadt, auf den Tisch) and the dative for a \
-         location answering wo (in der Stadt, auf dem Tisch). With a non-spatial governing verb the case is \
-         lexical, not directional: denken an and sich erinnern an take the accusative, Angst vor and teilnehmen \
-         an take the dative. Fixed-case prepositions still get their case reported: durch, für, gegen, ohne, \
-         um, bis are accusative; aus, bei, mit, nach, seit, von, zu, gegenüber, außer are dative; während, \
-         wegen, trotz, statt, innerhalb, außerhalb are genitive.\n\
-         6. The genitive is receding in speech in favour of von plus dative, and of the dative after \
-         prepositions. REPORT THE CASE THE TEXT ACTUALLY REALIZES, never the prescriptive one: das Auto von \
-         meinem Vater is von governing the DATIVE, not a genitive; wegen dem Regen is wegen governing the \
-         DATIVE even though the standard asks for the genitive. Do not silently normalize either way.\n\
-         7. Adjectives — the declension class is decided by the PRECEDING DETERMINER, not by the ending and \
-         not by the adjective itself:\n\
-         - after a der-word (der/die/das, dieser, jener, jeder, welcher, solcher, mancher, alle, beide, \
-         derselbe) → weak.\n\
-         - after an ein-word (ein, kein, mein, dein, sein, ihr, unser, euer, Ihr) → mixed, across the WHOLE \
-         paradigm and not only in the three endingless cells where the strong ending surfaces (ein guter \
-         Wein AND eines guten Weines are both mixed).\n\
-         - with no determiner at all, or after an endingless quantifier (viel, wenig, etwas, mehr, ein paar, \
-         a cardinal above one) → strong: guter Wein, kaltes Wasser, viel frisches Obst.\n\
-         An attributive adjective gets declension, gender, number and case. A predicative one (der Wein ist \
-         gut, sie wird müde) and an adverbially used one (er läuft schnell) are UNINFLECTED: report degree \
-         only and OMIT declension, gender, number and case. The am -sten superlative is likewise uninflected \
-         (am schnellsten → degree superlative, nothing else; am is a separate Adposition with case dative).\n\
-         8. An INFLECTED participle is an Adjective, not a Verb: der lachende Mann, das gebaute Haus, ein \
-         interessiertes Kind all get degree positive plus declension, gender, number and case. Only the \
-         uninflected participles are Verbs (hat gebaut, wird gebaut, kam singend herein).\n\
-         9. sie / sie / Sie is the one genuinely ambiguous German pronoun and must be resolved from \
-         agreement and context, never from the spelling alone:\n\
-         - sie with a SINGULAR verb → third person, singular, feminine (sie geht).\n\
-         - sie with a PLURAL verb → third person, plural; omit gender (sie gehen).\n\
-         - Sie capitalized MID-SENTENCE with a plural verb → second person, number plural, politeness \
-         formal (Können Sie mir helfen). Mid-sentence Ihnen and Ihr are the same register.\n\
-         - At the START of a sentence the capital is uninformative, because every sentence starts with one. \
-         Decide from whether the clause addresses the interlocutor, and from the possessives and reflexives \
-         around it (Ihr / sich versus ihr).\n\
-         ihr is three different words: the second person plural nominative pronoun (ihr geht → person second, \
-         plural, politeness familiar), the third person singular feminine DATIVE pronoun (ich gebe ihr das \
-         Buch), and the possessive Determiner (ihr Buch = her or their). Give politeness only on \
-         second-person forms: du, dich, dir, ihr, euch → familiar; Sie, Ihnen → formal. Omit it everywhere \
-         else.\n\
-         10. Verbs — SEPARABLE PREFIXES. In a main clause the prefix is stranded at the end of the clause \
-         (Ich stehe früh auf; Er macht die Tür zu), and in a subordinate clause, an infinitive or a \
-         participle it is attached (dass ich früh aufstehe; aufgestanden; aufzustehen). ALWAYS LEMMATIZE THE \
-         STRANDED CASE BACK TO THE WHOLE VERB: steht ... auf → aufstehen, machte ... zu → zumachen, \
-         ruft ... an → anrufen. The stranded prefix is emitted as its own Particle token with \
-         particle_type separated_verb_prefix and its own written form as the lemma (auf, not aufstehen), so \
-         the verb and the prefix are never counted as one lexeme twice. The zu infixed inside a separable \
-         infinitive (aufzustehen, anzurufen) is NOT a separate token — one Verb token, verb_form infinitive.\n\
-         Report separability on every prefixed verb. Always separable: ab-, an-, auf-, aus-, bei-, ein-, \
-         mit-, nach-, vor-, zu-, zurück-, weg-, los-, fest-, her-, hin- and their compounds (herunter-, \
-         hinein-). Always inseparable: be-, emp-, ent-, er-, ge-, miss-, ver-, zer-. The variable prefixes \
-         durch-, hinter-, über-, um-, unter-, voll-, wider-, wieder- go by sense — separable when the prefix \
-         keeps its literal spatial meaning (Er setzt uns über = ferries us across), inseparable when the \
-         verb is figurative (Er übersetzt den Text = translates it). Verb-plus-verb and noun-plus-verb \
-         compounds behave as separable: teilnehmen, kennenlernen, stattfinden, spazieren gehen. OMIT \
-         separability entirely for a verb with no prefix (gehen, machen, singen).\n\
-         11. Verbs — verb_class is a property of the LEMMA and must be identical on every token of it, \
-         including the present tense where the class is invisible (ich singe → strong, ich mache → weak). \
-         Weak: dental suffix, no stem-vowel change (machen, machte, gemacht). Strong: ablaut in the \
-         preterite and a participle in -en (singen, sang, gesungen; gehen, ging, gegangen; stehen, stand, \
-         gestanden). Mixed is a CLOSED LIST — brennen, bringen, denken, kennen, nennen, rennen, senden, \
-         wenden, wissen — and nothing else. Modal is the six modals: dürfen, können, mögen, müssen, sollen, \
-         wollen. Irregular is sein, haben, werden and tun, and nothing else. A prefixed verb INHERITS the \
-         class of its base: verstehen and aufstehen are strong like stehen, erkennen is mixed like kennen, \
-         besuchen is weak like suchen.\n\
-         12. Verbs — which fields apply follows from verb_form, and each omission is a cell German does not \
-         have:\n\
-         - finite indicative, Konjunktiv I or Konjunktiv II: mood, tense, person and number.\n\
-         - imperative: mood imperative, person and number, NO TENSE. The du-form is second singular (Geh!), \
-         the ihr-form second plural (Geht!), the Sie-form second plural with the obligatory Sie pronoun \
-         carrying the formal register (Gehen Sie!), and the adhortative wir-form is first plural \
-         (Gehen wir!).\n\
-         - infinitive: verb_class and separability only; no mood, tense, person or number.\n\
-         - present_participle and past_participle: verb_class and separability only. If the participle is \
-         inflected it is an Adjective instead (directive 8).\n\
-         Tense names the STEM, not the time referred to: Konjunktiv I is built on the present stem and takes \
-         tense present (er habe, er sei, er komme), Konjunktiv II on the preterite stem and takes tense past \
-         (er hätte, er wäre, er käme, er würde, er könnte).\n\
-         DISTINGUISH KONJUNKTIV II FROM THE PRETERITE INDICATIVE BY THE UMLAUT, not by the ending: konnte, \
-         hatte, wurde, war, musste are indicative past; könnte, hätte, würde, wäre, müsste are Konjunktiv II. \
-         Where Konjunktiv I is homophonous with the indicative (ich habe, wir haben, sie haben) German \
-         substitutes Konjunktiv II — tag the form actually written, so hätten in reported speech is \
-         Konjunktiv II, not Konjunktiv I.\n\
-         13. Every compound tense is TWO tokens, never one value: hat gesagt is haben (finite, present, \
-         indicative) plus sagen (past_participle); wird kommen is werden (finite, present, indicative) plus \
-         kommen (infinitive); würde kommen is werden (finite, past, Konjunktiv II) plus kommen (infinitive); \
-         wird gebaut is werden plus bauen (past_participle). German has no synthetic future and no synthetic \
-         passive. There is no voice field in this model, so never try to encode the passive anywhere — \
-         the Partizip II of wird gebaut and of hat gebaut is the same form and is analysed identically.\n\
-         14. Particles: nicht is negation; the free-standing zu of a zu-infinitive is infinitival; a \
-         stranded verb prefix is separated_verb_prefix (directive 10); an unstressed flavouring word is \
-         modal. Modal particles are ambiguous with their literal homographs and must be decided from the \
-         reading: denn is a CoordinatingConjunction in Ich bleibe, denn es regnet but a modal particle in \
-         Was machst du denn; ja is an Interjection when it answers a question but a modal particle in Das ist \
-         ja toll; doch, mal, schon, eben and nur likewise alternate between Adverb and modal particle. Words \
-         that merely look like particles are not: kein is a Determiner, sich is a Pronoun, expletive es is a \
-         Pronoun, and the am of am schnellsten is an Adposition.\n\
-         15. Tokenization: a preposition contracted with its article (im, ins, am, ans, aufs, beim, vom, zum, \
-         zur, fürs, durchs, übers) stays ONE Adposition token, lemma the bare preposition and case the one \
-         the fused article marks — never emit a separate determiner for it. Compounds are ONE token with ONE \
-         lemma (Geschwindigkeitsbegrenzung, Handschuh, Kindergarten): never split them and never lemmatize to \
-         the head alone. In a suspended compound (Ein- und Ausgang) the fragment is a Noun whose lemma is the \
-         compound it stands for (Ein- → Eingang). A reflexive sich, mich or dir is a separate Pronoun token \
-         and the verb keeps its bare lemma (sich freuen → the verb lemma is freuen). The genitive -s of a \
-         proper noun belongs to that token and is case genitive, not a separate particle (Annas → lemma Anna, \
-         genitive). Split a written enclitic into its constituents (gibt's → gibt plus 's with lemma es). \
-         Never emit punctuation as a token."
+        "1. A DETERMINER lemmatizes to the masculine nominative singular citation form: die, das, den, \
+         dem, der (any cell but masc.nom.sg) → der; eine, einen, einem → ein; meine, meiner → mein; \
+         dieses, diese → dieser. A PERSONAL pronoun lemmatizes to the nominative of its OWN person and number, never to \
+         another one: ihn and ihm → er, ihr (dative) → sie, uns → wir, mich and mir → ich, dich and \
+         dir → du, euch → ihr, sich → sich. A form that is already nominative is its own lemma \
+         (ich → ich, wir → wir, du → du, es → es) — never lemmatize it to a different pronoun.\n\
+         2. The noun is the ONLY part of speech that keeps gender in the plural. A plural determiner, \
+         adjective, pronoun or proper noun does not distinguish it and must OMIT gender entirely \
+         (meine Hausaufgaben → the determiner is number plural, case accusative, no gender; die Bücher → \
+         the determiner has no gender while the noun is neuter).\n\
+         3. A PREDICATIVE adjective after sein, werden or bleiben is an Adjective, not an Adverb \
+         (der Biergarten ist voll, sie wird müde, das ist teuer). It is uninflected, so report degree \
+         and OMIT declension, gender, number and case. Tag Adverb only for a word modifying a verb, an \
+         adjective or the whole clause (er läuft schnell).\n\
+         4. `other` is for genuinely unanalyzable tokens only. A word with an ordinary part of speech \
+         NEVER gets it: the adverbs nachts, morgens, vorbei, hier, dort and gern are Adverbs.\n\
+         5. A preposition contracted with its article (im, ins, am, ans, aufs, beim, vom, zum, zur, \
+         fürs, durchs, übers) stays ONE Adposition token, lemma the bare preposition, case the one the \
+         fused article marks. That article is still a DEFINITE article for everything that follows, so \
+         an adjective after it takes the WEAK declension (ans andere Ufer → andere is weak, not mixed; \
+         im neuen Haus → neuen is weak).\n\
+         6. verb_class is a property of the LEMMA, identical on every token of it, including the \
+         present tense where the class is invisible. `mixed` is a CLOSED LIST — brennen, bringen, \
+         denken, kennen, nennen, rennen, senden, wenden, wissen and their prefixed derivatives — and \
+         `irregular` is a CLOSED LIST too: sein, haben, werden and tun, and nothing else. So weiß is \
+         wissen and mixed, never irregular. `modal` is the six modals (dürfen, können, mögen, müssen, \
+         sollen, wollen). A prefixed verb INHERITS its base's class: aufstehen is strong like stehen, \
+         erkennen is mixed like kennen, besuchen is weak like suchen.\n\
+         7. politeness belongs to SECOND-PERSON forms only, on Pronouns AND on possessive \
+         Determiners — du, dich, dir, ihr, euch, dein, euer are familiar; Sie, Ihnen and the \
+         possessive Ihr are formal. This is the ONLY thing separating the formal Ihr Wörterbuch \
+         (your) from the third-person ihr Wörterbuch (her / their), which are otherwise identical, so \
+         decide it from whether the clause addresses the interlocutor. OMIT politeness everywhere \
+         else: a first-person or third-person form (ich, wir, er, sie, es, sein, ihr = her) never \
+         carries it.\n\
+         8. A POSSESSIVE standing before a noun is a DETERMINER — never a Pronoun, never a Noun and \
+         never a ProperNoun. This holds for every INFLECTED form, not just the citation form: mein, \
+         meine, meinen, meinem, meiner, meines and likewise dein-, sein-, ihr-, unser-, euer- and the \
+         formal Ihr- (mit seinem alten Fahrrad → seinem is a Determiner, dative neuter singular; \
+         Ohne Ihr Wörterbuch → Determiner, politeness formal; ihr Buch → Determiner, no politeness \
+         when it means her or their). A possessive is a Pronoun only when it stands alone in place of \
+         the noun (Das ist meins).\n\
+         9. ProperNoun is ONLY for an actual name of a person, place, organisation or work \
+         (Anna, Berlin, die Schweiz, der Rhein). Capitalization is NOT a proper-noun signal in \
+         German, because every common noun is capitalized: Haus, Freiheit and Auto are ordinary \
+         Nouns, and a capitalized nominalization is a Noun too (das Gute, das Essen, beim Laufen, \
+         der Angestellte). Nothing else may take it — a determiner such as seinem, meinem or dieser \
+         is a Determiner, never a ProperNoun.\n\
+         10. The suppletive adverbs lemmatize to their positive form: lieber and am liebsten → gern; \
+         besser and am besten → gut; öfter → oft; eher → bald; mehr → viel."
     }
 }
 
