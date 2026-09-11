@@ -287,9 +287,12 @@ pub enum BasqueDegree {
 )]
 #[serde(rename_all = "snake_case")]
 pub enum BasquePronounType {
-    Personal,      // ni, hi, gu, zu, zuek; Basque has no dedicated third-person personal pronoun
-    Intensive,     // indartuak — neu, heu, geu, zeu
-    Demonstrative, // hau, hori, hura, hauek
+    /// ni, hi, gu, zu, zuek; Basque has no neutral third-person personal pronoun.
+    Personal,
+    /// Contrastive forms neu, heu, geu, zeu, zeuek and third-person bera.
+    Intensive,
+    /// Deictic hau, hori, hura and their plurals.
+    Demonstrative,
     Interrogative, // nor, zer; independent zein
     Indefinite,    // norbait, zerbait, inor, ezer, bakoitza
     Reciprocal,    // elkar
@@ -1830,6 +1833,20 @@ mod tests {
             BasqueMorphology::PIVOT_DETERMINATION.value(&plural),
             Some("definite_plural".to_string())
         );
+    }
+
+    #[test]
+    fn contrastive_bera_is_a_third_person_intensive() {
+        let bera = BasqueMorphology::Pronoun {
+            lemma: "bera".to_string(),
+            pronoun_type: BasquePronounType::Intensive,
+            determination: None,
+            case: BasqueCase::Absolutive,
+            agreement: Some(BasquePersonNumber::ThirdSingular),
+        };
+
+        assert_eq!(bera.pos_label(), "Pronoun");
+        assert_eq!(bera.lemma(), Some("bera".to_string()));
     }
 
     #[test]
