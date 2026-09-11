@@ -1450,6 +1450,7 @@ impl LinguisticDefinition for Basque {
         BasqueMorphemeFunction::PIVOT_DETERMINATION,
         BasqueMorphemeFunction::PIVOT_ASPECT,
         BasqueMorphemeFunction::PIVOT_SUBORDINATION,
+        BasqueMorphemeFunction::PIVOT_DERIVATION,
     ];
 
     fn supported_scripts(&self) -> &[Script] {
@@ -1876,5 +1877,12 @@ mod tests {
                     value: BasqueSubordination::Conditional,
                 })
         }));
+    }
+
+    #[test]
+    fn derivation_is_a_morpheme_analytics_pivot() {
+        assert!(Basque::MORPHEME_PIVOTS
+            .iter()
+            .any(|pivot| pivot.key == "derivation"));
     }
 }
