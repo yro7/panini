@@ -290,7 +290,7 @@ pub enum BasquePronounType {
     Personal,      // ni, hi, gu, zu, zuek; Basque has no dedicated third-person personal pronoun
     Intensive,     // indartuak — neu, heu, geu, zeu
     Demonstrative, // hau, hori, hura, hauek
-    Interrogative, // nor, zer, zein, non, noiz
+    Interrogative, // nor, zer; independent zein
     Indefinite,    // norbait, zerbait, inor, ezer, bakoitza
     Reciprocal,    // elkar
 }
@@ -494,7 +494,8 @@ pub enum BasqueMorphology {
     Adposition {
         lemma: String,
     },
-    /// Lexical adverbs include fixed forms such as `mesedez`; a final string
+    /// Adverbs include interrogative place and time forms (`non`, `nora`,
+    /// `nondik`, `noiz`) and fixed forms such as `mesedez`; a final string
     /// resembling a case suffix does not turn one into an adposition.
     Adverb {
         lemma: String,
@@ -1771,6 +1772,19 @@ mod tests {
 
         assert_eq!(letter.pos_label(), "Symbol");
         assert_eq!(letter.lemma(), Some("J".to_string()));
+    }
+
+    #[test]
+    fn interrogative_place_and_time_words_are_adverbs() {
+        for lemma in ["non", "noiz"] {
+            let word = BasqueMorphology::Adverb {
+                lemma: lemma.to_string(),
+                degree: None,
+            };
+
+            assert_eq!(word.pos_label(), "Adverb");
+            assert_eq!(word.lemma(), Some(lemma.to_string()));
+        }
     }
 
     #[test]
