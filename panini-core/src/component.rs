@@ -22,7 +22,6 @@ pub enum ProficiencyLevel {
     Native,
 }
 
-/// TODO: refactor avec l'imp de Panglotive
 impl ProficiencyLevel {
     #[must_use]
     pub const fn as_str(self) -> &'static str {
