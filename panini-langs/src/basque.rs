@@ -399,7 +399,8 @@ pub enum BasqueDerivation {
     ActionNoun,     // -keta, -pen, -aldi, -t(z)e (garbiketa, ikuste)
     AgentNoun,      // -le / -tzaile, -gile, -ari (irakasle, saltzaile, bertsolari)
     PlaceNoun,      // -tegi, -toki (liburutegi, lantoki)
-    Possessional,   // -dun, -tsu (euskaldun, indartsu)
+    Possessional,   // -dun (euskaldun)
+    Abundant,       // -tsu (indartsu, menditsu)
     Privative,      // -gabe (etxegabe)
     Adjectivizing,  // -garri, -kor, -ezin (ikusgarri, hauskor)
     Verbalizing,    // -tu (handitu, zuritu)
@@ -1260,7 +1261,7 @@ static BASQUE_MORPHEMES: &[MorphemeDefinition<F, P>] = &[
     MorphemeDefinition {
         base_form: "-tsu",
         functions: &[F::Derivation {
-            value: BasqueDerivation::Possessional,
+            value: BasqueDerivation::Abundant,
         }],
         applies_to: &[P::Noun, P::Adjective],
     },
@@ -1852,6 +1853,18 @@ mod tests {
             definition.base_form == "-to/-tto"
                 && definition.functions.contains(&F::Derivation {
                     value: BasqueDerivation::Diminutive,
+                })
+        }));
+        assert!(inventory.iter().any(|definition| {
+            definition.base_form == "-dun"
+                && definition.functions.contains(&F::Derivation {
+                    value: BasqueDerivation::Possessional,
+                })
+        }));
+        assert!(inventory.iter().any(|definition| {
+            definition.base_form == "-tsu"
+                && definition.functions.contains(&F::Derivation {
+                    value: BasqueDerivation::Abundant,
                 })
         }));
         assert!(inventory.iter().any(|definition| {
