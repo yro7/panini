@@ -621,9 +621,7 @@ mod tests {
         );
     }
 
-    /// Moroccan marks habitual/progressive with `كا-` and future with `غا-`.
-    /// An Egyptian `bi_`/`ha_` value reaching this inventory would mean the
-    /// dialect's own preverbs had been copied over from the wrong grammar.
+    /// Moroccan's preverbs are `كا-` and `غا-`; a `bi_`/`ha_` here means the wrong grammar was copied.
     #[test]
     fn verb_form_inventory_is_moroccan_not_egyptian() {
         assert_eq!(
@@ -638,10 +636,7 @@ mod tests {
         );
     }
 
-    /// The Moroccan measure system: t-stems are Ia/IIa/IIIa, and Forms IV, V,
-    /// VI and VII are not living patterns. The frontend labels these values by
-    /// name, and a numeral mangled by `rename_all` (`form_i_i` for Form II)
-    /// reaches the UI unlabelled.
+    /// Moroccan t-stems are Ia/IIa/IIIa, and Forms IV to VII are not living patterns.
     #[test]
     fn verb_pattern_inventory_uses_the_moroccan_measures() {
         assert_eq!(
@@ -673,8 +668,7 @@ mod tests {
         );
     }
 
-    /// `هاد` is invariable for gender and number, unlike the eastern
-    /// demonstratives it is usually glossed with.
+    /// `هاد` is invariable for gender and number.
     #[test]
     fn the_invariable_proximal_demonstrative_carries_no_agreement() {
         let proximal = MoroccanArabicMorphology::Determiner {
