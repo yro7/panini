@@ -22,8 +22,7 @@ Each linguistic category (Case, Gender, Tense) must be a Rust enum.
 
 ```rust
 // Language-specific enum
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, schemars::JsonSchema, panini_macro::ClosedValues)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum PolishCase {
     Nominative, Genitive, Dative, Accusative, Instrumental, Locative, Vocative,
 }

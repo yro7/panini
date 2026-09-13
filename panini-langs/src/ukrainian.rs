@@ -54,19 +54,7 @@ use panini_core::traits::{
 /// Ганна → Ганно, пан Коваль → пане Ковалю, друг → друже) and required in
 /// direct address. The locative (*місцевий*) never occurs without a
 /// preposition, which is what separates it from the dative.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianCase {
     Nominative,   // називний (хто? що?)
     Genitive,     // родовий (кого? чого?)
@@ -82,19 +70,7 @@ pub enum UkrainianCase {
 /// It decides the accusative of masculine singulars (бачу брата = the
 /// genitive form) and the accusative plural of every gender (бачу сестер,
 /// бачу коней, бачу дітей), and leaves the rest of the paradigm untouched.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianAnimacy {
     Animate,   // істота — людина, кінь, дитина
     Inanimate, // неістота — стіл, книга, місто
@@ -107,19 +83,7 @@ pub enum UkrainianAnimacy {
 /// is second, a feminine with a zero ending is third, and a neuter that
 /// grows -ат-/-ят-/-ен- in the oblique cases is fourth. The last two values
 /// are for the nouns that stand outside the system.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianDeclension {
     // I відміна — nouns in -а/-я of any gender: жінка, земля, Микола, суддя.
     #[serde(rename = "first_declension")]
@@ -151,19 +115,7 @@ pub enum UkrainianDeclension {
 /// Read off the citation form: -ий is hard (новий, добрий, великий), -ій is
 /// soft (синій, вечірній, ранній, безкраїй). Ordinals and long participles
 /// follow the same split.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianStemGroup {
     // Тверда група — новий, нова, нове, нового, новим…
     Hard,
@@ -180,19 +132,7 @@ pub enum UkrainianStemGroup {
 /// An imperfective has all three (писав / пишу / писатиму), a perfective only
 /// past and future (написав / напишу) — a perfective present-shaped form *is*
 /// a future. The pluperfect (був написав) gets no value of its own.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianTense {
     Past,    // минулий час
     Present, // теперішній час
@@ -203,19 +143,7 @@ pub enum UkrainianTense {
 ///
 /// The conditional is the past-tense form plus the invariable particle би/б:
 /// the mood is carried by the verb token, and би/б is analysed as a particle.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianMood {
     Indicative,  // дійсний спосіб
     Imperative,  // наказовий спосіб
@@ -227,19 +155,7 @@ pub enum UkrainianMood {
 /// Required on every verb; every other verbal field follows from it. The
 /// participle and the adverbial participle are verb forms here, not
 /// `Adjective` or `Adverb`.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianVerbForm {
     // Дієвідмінювана форма — a conjugated form, including the past: пишу,
     // писатиму, буду, пиши, писав, писала б.
@@ -265,19 +181,7 @@ pub enum UkrainianVerbForm {
 /// How a future-tense form is built (*форми майбутнього часу*).
 ///
 /// Only future-tense finite forms carry this.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianFutureFormation {
     // Проста форма — a perfective conjugated on the present pattern: напишу,
     // зроблю, прочитаєш.
@@ -297,19 +201,7 @@ pub enum UkrainianFutureFormation {
 ///
 /// The adjective comparative declines like any other soft adjective (вищий,
 /// кращий, новіший); the invariable вище, краще, швидше are adverbs.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum UkrainianDegree {
     Positive,    // звичайний ступінь — високий, швидко
     Comparative, // вищий ступінь — вищий, швидше

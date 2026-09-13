@@ -9,38 +9,14 @@ use panini_core::traits::{
 /// `Common` is *utrum* (the `en` class). `Neuter` is *neutrum* (the `ett`
 /// class). Natural gender in personal pronouns is a different system,
 /// represented separately by [`SwedishReferentialGender`].
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishNominalGender {
     Common,
     Neuter,
 }
 
 /// Morphological definiteness (*species*) on Swedish nominals.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishDefiniteness {
     Indefinite,
     Definite,
@@ -50,38 +26,14 @@ pub enum SwedishDefiniteness {
 ///
 /// `Nominative` is the unmarked *grundform*, used for objects as well as
 /// subjects. `Genitive` is the overt `-s` form.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishNominalCase {
     Nominative,
     Genitive,
 }
 
 /// The living case paradigm of contemporary Swedish personal pronouns.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishPronounCase {
     Nominative,
     Accusative,
@@ -92,19 +44,7 @@ pub enum SwedishPronounCase {
 ///
 /// The seven declensions of Svenska Akademiens grammatik, named after their
 /// plural suffix.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishNounDeclension {
     /// First declension: `gata` -> `gator`.
     PluralOr,
@@ -126,19 +66,7 @@ pub enum SwedishNounDeclension {
     Other,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishDegree {
     Positive,
     Comparative,
@@ -147,37 +75,13 @@ pub enum SwedishDegree {
 
 /// Participles used adjectivally, where their agreement belongs to the
 /// adjective system rather than to the finite verb paradigm.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishParticipleKind {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishDeterminerType {
     Article,
     Demonstrative,
@@ -187,19 +91,7 @@ pub enum SwedishDeterminerType {
     Relative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishPronounType {
     Personal,
     Possessive,
@@ -216,19 +108,7 @@ pub enum SwedishPronounType {
 ///
 /// `Epicene` is the sex/gender-neutral personal `hen`; it must not be folded
 /// into grammatical neuter, which is the separate `det` class.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishReferentialGender {
     Masculine,
     Feminine,
@@ -239,19 +119,7 @@ pub enum SwedishReferentialGender {
 ///
 /// This is the contrast between `sin/sitt/sina` and the non-reflexive
 /// `hans/hennes/hens/deras`, not a general semantic property of possession.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishPossessiveRelation {
     Reflexive,
     NonReflexive,
@@ -261,37 +129,13 @@ pub enum SwedishPossessiveRelation {
 /// normal respectful form with strangers and in official communication — and
 /// marked formal `ni`. Plural `ni` is simply the plural second-person pronoun
 /// and has no register value.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishAddressRegister {
     Unmarked,
     Formal,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishParticleType {
     Infinitival,
     Negation,
@@ -300,37 +144,13 @@ pub enum SwedishParticleType {
 
 /// The two synthetic tenses of contemporary Swedish. Perfect, pluperfect and
 /// future constructions are periphrastic and are analysed token by token.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishTense {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishMood {
     Indicative,
     Imperative,
@@ -346,19 +166,7 @@ pub enum SwedishMood {
 /// The supine is distinct from the past participle: `skrivit` is invariant
 /// after `ha`, while `skriven/skrivet/skrivna` agrees like an adjective or
 /// participates in a `bli` passive.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishVerbForm {
     Finite,
     Infinitive,
@@ -368,18 +176,7 @@ pub enum SwedishVerbForm {
 }
 
 /// The learner-facing conjugation class of a Swedish verb lemma.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
+#[panini_macro::closed_enum]
 pub enum SwedishVerbClass {
     /// Weak verbs in `-ar, -ade, -at`: `tala`.
     #[serde(rename = "group_1")]
@@ -407,19 +204,7 @@ pub enum SwedishVerbClass {
 ///
 /// `SForm` covers every `-s` form: passive, deponent, reciprocal and middle
 /// readings alike (`hoppas`, `mötas`, `trivas`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwedishDiathesis {
     Active,
     SForm,

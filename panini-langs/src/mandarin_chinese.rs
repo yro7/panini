@@ -4,19 +4,7 @@ use panini_core::traits::{
     BinaryNumber, IsoLang, LinguisticDefinition, Person, Script, TypologicalFeature,
 };
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ChineseAspect {
     Perfective,   // 了 (le)
     Progressive,  // 着 (zhe) / 在 (zai)
@@ -24,19 +12,7 @@ pub enum ChineseAspect {
     Delimitative, // reduplicated verbs (e.g., 看看)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ChineseParticleType {
     Structural, // 的, 地, 得
     Aspect,     // 了, 着, 过
@@ -44,19 +20,7 @@ pub enum ChineseParticleType {
     Temporal,   // 以前, 以后
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ChinesePronounType {
     Personal,
     Demonstrative,

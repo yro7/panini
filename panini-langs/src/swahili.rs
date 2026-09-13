@@ -29,19 +29,7 @@ use panini_core::traits::{
 /// Classes pair singular with plural (1/2, 3/4, 5/6, 7/8, 9/10, 11/10), so the
 /// class of a token already states its number. Classes 14 (abstracts), 15
 /// (infinitives) and 16/17/18 (locatives) have no number partner.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliNounClass {
     Class1,  // m-/mw- singular persons: mtu, mwalimu, mtoto (+ the 1a loans: baba, rafiki)
     Class2,  // wa- plural of 1: watu, walimu, watoto
@@ -64,19 +52,7 @@ pub enum SwahiliNounClass {
 /// The concord paradigm — what a subject, object or relative slot can agree
 /// with. First and second person have their own markers; every third-person
 /// value is a noun class (class 1 and 2 doubling as third singular and plural).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliConcord {
     FirstSingular,  // ni- subject, -ni- object
     SecondSingular, // u- subject, -ku- object
@@ -104,19 +80,7 @@ pub enum SwahiliConcord {
 
 /// The single tense–aspect–mood slot of the Swahili verb, between the negation
 /// and the object marker. Exactly one marker occupies it.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliTam {
     Present,            // -na- : ninasoma (also the unmarked negative present, hasomi)
     PresentIndefinite,  // -a-  : twaona, aenda — literary, tenseless present
@@ -131,19 +95,7 @@ pub enum SwahiliTam {
 }
 
 /// Finite against non-finite, plus the mood the final vowel selects.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliVerbForm {
     Indicative,  // subject marker + TAM + root + final -a: anasoma, hakusoma
     Subjunctive, // subject marker + root + final -e: asome, usisome, tuende
@@ -153,19 +105,7 @@ pub enum SwahiliVerbForm {
 
 /// Polarity is marked on both ends of the verb — `ha-`/`si-` in front and a
 /// changed final vowel behind — so it is a category of the whole word.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliPolarity {
     Affirmative, // ninasoma, nimekula
     Negative,    // sisomi, hakusoma, sijala, asisome
@@ -174,19 +114,7 @@ pub enum SwahiliPolarity {
 /// The stackable derivational suffixes between the root and the final vowel.
 /// Modelled as morphemes rather than a morphology field because they compose:
 /// `kusomeshwa` carries the causative and the passive at once.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliExtension {
     Applicative, // -i-/-e-, -li-/-le- : soma → somea "read for/to"
     Causative,   // -ish-/-esh-, -iz-/-ez-, -y- : soma → somesha "teach"
@@ -197,19 +125,7 @@ pub enum SwahiliExtension {
 }
 
 /// Non-verbal derivation, and the two affixes that change a word's class.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliDerivation {
     Reflexive, // -ji- in the object slot: anajipenda "he loves himself"
     Agentive,  // -ji on a class 1/2 noun: imba → mwimbaji "singer"
@@ -219,19 +135,7 @@ pub enum SwahiliDerivation {
 
 // ─── Nominal-modifier categories ──────────────────────────────────────────────
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliDeterminerType {
     Demonstrative, // huyu, hiki, kile, hicho
     Possessive,    // -angu, -ako, -ake, -etu, -enu, -ao
@@ -240,19 +144,7 @@ pub enum SwahiliDeterminerType {
     Indefinite,    // -ingine "other, another"
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliPronounType {
     Personal,      // mimi, wewe, yeye, sisi, ninyi, wao
     Possessive,    // wangu, changu, yake used on their own
@@ -263,19 +155,7 @@ pub enum SwahiliPronounType {
 }
 
 /// The three-way Swahili deixis: near the speaker, already mentioned, far.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SwahiliDemonstrative {
     Proximal,    // huyu, hiki, hii — near the speaker
     Referential, // huyo, hicho, hiyo — the one already mentioned

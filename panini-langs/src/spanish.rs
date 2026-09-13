@@ -11,19 +11,7 @@ use panini_core::traits::{
 /// participio — and is analysed as two tokens, so no `perfect` or `pluperfect`
 /// value is needed. The `condicional` is a tense of the indicative, alongside
 /// the futuro it is built from, not a mood.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishTense {
     Present,     // presente: indicative `hablo`, subjunctive `hable`
     Preterite,   // pretérito perfecto simple, the indefinido: `hablé`, `fue`
@@ -37,19 +25,7 @@ pub enum SpanishTense {
 /// The first three are the finite moods; the last three are the *formas no
 /// personales*, which carry no person and no tense. Every verb token is in
 /// exactly one of the six.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishMood {
     Indicative,
     Subjunctive,
@@ -63,19 +39,7 @@ pub enum SpanishMood {
 /// their own shape: the suppletive comparatives `mejor`, `peor`, `mayor`,
 /// `menor`, and the synthetic absolute superlative in `-ísimo` / `-érrimo`.
 /// `más alto` is an Adverb plus a positive adjective.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishDegree {
     Positive,    // `rico`, `alto`
     Comparative, // `mejor`, `peor`, `mayor`, `menor`
@@ -84,19 +48,7 @@ pub enum SpanishDegree {
 
 /// The two second-person singular paradigms. Only a second-person singular
 /// finite form has one; a boolean here drew a `false` onto every other form.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishAddress {
     Tuteo, // `hablas`, `tienes`, `ven`
     Voseo, // `hablás`, `tenés`, `vení`
@@ -104,19 +56,7 @@ pub enum SpanishAddress {
 
 /// The case-like contrast carried by the pronoun system — the only corner of
 /// Spanish nominal morphology that has one.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishPronounCase {
     Subject,
     DirectObject,
@@ -125,19 +65,7 @@ pub enum SpanishPronounCase {
     Prepositional,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishPronounType {
     Personal,
     Possessive,
@@ -147,19 +75,7 @@ pub enum SpanishPronounType {
     Indefinite,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum SpanishDeterminerType {
     Article,
     Possessive,

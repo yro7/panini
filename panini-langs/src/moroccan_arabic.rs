@@ -12,19 +12,7 @@ use panini_core::traits::{
 /// is no indefinite article: `واحد ال-` is a specific-indefinite determiner whose
 /// noun keeps the definite article, so it is not an exponent of this dimension.
 /// A construct-state noun takes its definiteness from the following possessor.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicDefiniteness {
     Indefinite,
     Definite,
@@ -36,19 +24,7 @@ pub enum MoroccanArabicDefiniteness {
 /// `ديال`/`د`, so the construct state is a small residue: kinship terms, body
 /// parts, fixed compounds, and any host carrying a possessive suffix. The head
 /// of a `ديال` phrase is a free noun, not a construct one.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicNominalState {
     Free,
     Construct,
@@ -60,19 +36,7 @@ pub enum MoroccanArabicNominalState {
 /// as predicates but still agree like adjectives. The elative `كبر`/`حسن` is one
 /// form whose comparative or superlative reading comes from syntax, so those are
 /// not split here.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicAdjectiveForm {
     Lexical,
     ActiveParticiple,
@@ -89,19 +53,7 @@ pub enum MoroccanArabicAdjectiveForm {
 /// patterns and are deliberately absent from this inventory. Forms VIII, IX and
 /// X survive on closed lexical sets: `حتارم`, the colour/defect verbs `حمار`,
 /// and `ستاغرب`. Quadriliterals have their own base and t-stem.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicVerbPattern {
     // Roman numerals need explicit names: `rename_all = "snake_case"` starts a new
     // word at every capital, so `FormII` would serialize as `form_i_i`.
@@ -135,25 +87,14 @@ pub enum MoroccanArabicVerbPattern {
 /// required after a governor such as `بغيت`, `خاص` or `يمكن` — with the
 /// habitual/progressive `كا-` series and the future `غا-` series. There is no
 /// `بـ` imperfective and no `حـ` future: those are Egyptian, not Moroccan.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicVerbForm {
     Perfective,
     BareImperfective,
     // `كا-`; the southern `تا-` and the reduced `دا-` are the same value.
     KaImperfective,
-    // `غا-/غاد-/غادي` bound to the verb.
+    // `غا-/غاد-` bound to the verb, or the verb governed by a free-standing
+    // `غادي`, which is then also a `future` particle: `غادي نسافر`.
     GhaImperfective,
     Imperative,
 }
@@ -162,56 +103,20 @@ pub enum MoroccanArabicVerbForm {
 ///
 /// Passive and middle/reflexive readings are built with the t-stem measures,
 /// never with an internal-vowel passive.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicVoice {
     Active,
     Passive,
     MiddleReflexive,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicPolarity {
     Affirmative,
     Negative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicPronounType {
     Personal,
     Demonstrative,
@@ -225,19 +130,7 @@ pub enum MoroccanArabicPronounType {
 ///
 /// Moroccan stacks a direct and an indirect object on one host
 /// (`عطاهالي`), so both functions can occur in a single word.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicAttachmentFunction {
     Possessive,
     DirectObject,
@@ -246,42 +139,24 @@ pub enum MoroccanArabicAttachmentFunction {
 }
 
 /// Kind of determiner heading a Moroccan Arabic noun phrase.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+///
+/// Moroccan has two indefinite determiners and they contrast: `واحد ال-`
+/// introduces a specific referent the speaker has in mind, `شي` an
+/// unspecified one, and only the first keeps the article on its noun.
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicDeterminerType {
     DefiniteArticle,
     Demonstrative,
     // `واحد` heading a still-articled noun: `واحد الراجل`.
     SpecificIndefinite,
+    // `شي` heading a bare noun: `شي مشكلة`, `شي حاجة`, `شي واحد`.
+    Indefinite,
     Quantifier,
     Interrogative,
 }
 
 /// Function of a Moroccan Arabic particle or morphologically split clitic.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum MoroccanArabicParticleFunction {
     Negation,
     Interrogative,
@@ -564,20 +439,20 @@ impl LinguisticDefinition for MoroccanArabic {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "1. Scope and lemmatization: analyze contemporary Moroccan Arabic / Darija (`ary`), with the Casablanca–Rabat urban koine as the default, and NEVER silently normalize it into Modern Standard Arabic or into an eastern dialect. Lemmatize verbs to the third-person masculine singular perfective (كايكتب/غايكتب/كتب -> كتب; كايتكلم -> تكلم), nouns to the indefinite singular, adjectives to the masculine singular lexical or participial form, and pronouns/determiners to their independent citation form. There is no infinitive citation form.\n\
-         2. Canonical script: keep `word` exactly in the source script. Write every lemma and root in Arabic script so Arabic-script and Latin/Arabizi input aggregate to one lexicon, mapping Arabizi digits back to letters (3 -> ع, 7 -> ح, 9/q -> ق, 5/kh -> خ, gh -> غ, sh/ch -> ش). Write a root as hyphen-separated radicals (`ك-ت-ب`, `ت-ر-ج-م`, including four radicals when real). Preserve Moroccan spellings and NEVER replace a Moroccan lemma with an MSA or Egyptian cognate: `بغا` is not `أراد`, `شاف` is not `رأى`, `دابا` is not `الآن`, `بزاف` is not `كثيرا`.\n\
-         3. Roots: include `root` only when a synchronically transparent Arabic root exists. `كتاب` has `ك-ت-ب`; `مكالمة` has `ك-ل-م`. OMIT root for the Amazigh, French and Spanish layers of the Moroccan lexicon — `خيزو`, `موش`, `طوموبيل`, `تيليفزيون`, `فيشطة`, `كوزينة`, `سيمانة`, `بلاصة` — and never manufacture a root from every consonant in a loan. A loan verb fully assimilated to a Moroccan pattern does take the radicals of its assimilated stem, and every ordinary patterned verb must have a root, including a real quadriliteral such as `ترجم` (`ت-ر-ج-م`).\n\
+        "1. Scope and lemmatization: analyze contemporary Moroccan Arabic / Darija (`ary`), with the Casablanca–Rabat urban koine as the default, and NEVER silently normalize it into Modern Standard Arabic or into an eastern dialect. Lemmatize verbs to the third-person masculine singular perfective (كايكتب/غايكتب/كتب -> كتب; كايتكلم -> تكلم; the imperative خوذ/خود -> خدا; a defective verb ends its lemma in ا, never ى: مشا، شرا، بقا، قرا، بغا، كلا), nouns to the indefinite singular, adjectives to the masculine singular lexical or participial form, and pronouns/determiners to their independent citation form. A participle's lemma is its OWN masculine singular, never the verb it derives from: كاينين -> كاين (not كان), گالس -> گالس (not گلس), عارفة -> عارف. There is no infinitive citation form.\n\
+         2. Canonical script: keep `word` exactly in the source script. Write every lemma and root in Arabic script so Arabic-script and Latin/Arabizi input aggregate to one lexicon, mapping Arabizi digits back to letters (3 -> ع, 7 -> ح, 9/q -> ق, 5/kh -> خ, gh -> غ, sh/ch -> ش). Write a root as hyphen-separated radicals (`ك-ت-ب`, `ت-ر-ج-م`, including four radicals when real). Preserve Moroccan spellings and NEVER replace a Moroccan lemma with an MSA or Egyptian cognate: `بغا` is not `أراد`, `شاف` is not `رأى`, `دابا` is not `الآن`, `بزاف` is not `كثيرا`. Each preposition has ONE lemma whatever its written shape: ف and في -> `ف`, مع and معا -> `معا`, على and علي -> `على`, ب -> `ب`, ل -> `ل`.\n\
+         3. Roots: include `root` only when a synchronically transparent Arabic root exists. `كتاب` has `ك-ت-ب`; `مكالمة` has `ك-ل-م`. OMIT root for the Amazigh, French and Spanish layers of the Moroccan lexicon — `خيزو`, `موش`, `طوموبيل`, `تيليفزيون`, `فيشطة`, `كوزينة`, `سيمانة`, `بلاصة` — and never manufacture a root from every consonant in a loan. A loan verb fully assimilated to a Moroccan pattern does take the radicals of its assimilated stem, and every ordinary patterned verb must have a root, including a real quadriliteral such as `ترجم` (`ت-ر-ج-م`). Write the radicals with their conventional Arabic letters even when the word is spelled with گ: `گالس` has `ج-ل-س`, never `گ-ل-س`.\n\
          4. Nouns: always report lexical gender, number, definiteness and state. Moroccan has NO productive nominal dual: two of anything is `جوج` plus a plural (`جوج ديال الكتب`), and `dual` is reserved for the small frozen residue of measure, time and paired-body nouns — `يومين`, `عامين`, `شهرين`, `سيمانتين`, `مرتين`, `عينين`, `يدين`. NEVER coin a dual on an ordinary noun, and never emit dual agreement anywhere else. There are no nominal case endings and no nunation. `باب الدار` is construct and definite; a possessive suffix also puts its host in construct state and makes it definite (`كتابو`). The analytic genitive is the Moroccan default and does NOT create a construct: in `الكتاب ديال الولد` both `كتاب` and `ولد` are `state: free` and definite. Free nouns are `state: free`.\n\
          5. Adjectives and participles: tag active and passive participles as Adjective even when predicative (`أنا عارف`, `هي جايا`, `كاين`, `مقاد`), choosing `active_participle` or `passive_participle`; use `elative` for the single أفعل-type or CCeC-type comparative form (`كبر`, `حسن`, `قصر`) whether context makes it comparative or superlative, and OMIT agreement_gender on it because the elative does not inflect. Report agreement_number. Report agreement_gender on a contrasting singular (`كبير` masculine versus `كبيرة` feminine), but OMIT it on a plural form such as `كبار` or `مزيانين`. An inanimate plural in Moroccan normally takes plural adjective agreement, not the eastern feminine-singular agreement. Attributive adjectives copy definiteness; predicate adjectives are indefinite.\n\
-         6. Verbs: use exactly `perfective` (`كتب`), `bare_imperfective` (`يكتب` after بغيت/خاص/يمكن/باش/قبل ما or another governor), `ka_imperfective` (`كايكتب` for the ordinary present, habitual and progressive), `gha_imperfective` (`غايكتب`/`غادي يكتب` for future), or `imperative` (`كتب`). Moroccan has NO `بـ` imperfective and NO `حـ` future — those are Egyptian; never emit them and never read a Moroccan `بـ` as aspectual, since it is only the preposition `with/by`. The southern `تا-` and reduced `دا-` preverbs are `ka_imperfective`. Do not invent MSA tense or indicative/subjunctive/jussive ending values: Moroccan lost those endings. Always give pattern, person, agreement_number, voice and polarity; verb agreement is singular/plural only, never dual and never a distinct feminine plural.\n\
+         6. Verbs: use exactly `perfective` (`كتب`), `bare_imperfective` (`يكتب` after بغيت/خاص/يمكن/باش/قبل ما or another governor), `ka_imperfective` (`كايكتب` for the ordinary present, habitual and progressive), `gha_imperfective` (`غايكتب`, and equally `يكتب` governed by a free-standing `غادي`: in `غادي نسافر` and `غادي يكون` the verb is `gha_imperfective` and `غادي` is a `future` particle, never `bare_imperfective`), or `imperative` (`كتب`). Moroccan has NO `بـ` imperfective and NO `حـ` future — those are Egyptian; never emit them and never read a Moroccan `بـ` as aspectual, since it is only the preposition `with/by`. The southern `تا-` and reduced `دا-` preverbs are `ka_imperfective`. Do not invent MSA tense or indicative/subjunctive/jussive ending values: Moroccan lost those endings. Always give pattern, person, agreement_number, voice and polarity; verb agreement is singular/plural only, never dual and never a distinct feminine plural.\n\
          7. Verb gender: Moroccan's gender contrast is paradigm-specific and this is where eastern-Arabic habits go wrong. In the PERFECTIVE, set agreement_gender ONLY in the third singular — `هو كتب` masculine, `هي كتبات` feminine — and OMIT it for the second singular, because `كتبتي` is used for both `نتا` and `نتي`. In the IMPERFECTIVE (bare, `كا-` and `غا-`), set it in the second singular (`كاتكتب` masculine versus `كاتكتبي` feminine) and in the third singular (`كايكتب` versus `كاتكتب`). In the IMPERATIVE, set it in the singular (`كتب` versus `كتبي`). OMIT agreement_gender for every first person, for every plural, and for the second-person perfective. Note that the imperfective prefix `ن-` is FIRST PERSON SINGULAR (`كانكتب` = I write) and `ن-...-و` first person plural (`كانكتبو`): never read `ن-` as a plural-only marker.\n\
          8. Voice and pattern: determine voice from the construction — `كتب` active, `تكتب`/`تّكتب` passive, `تحرك` middle_reflexive — and do not label every t-stem passive merely from its shape. Use the Moroccan measures: `form_i` (`كتب`), `form_ia` for the `تّـ/تـ` medio-passive of Form I (`تّكتب`, `تّخلع`, and the eastern `نـ` variant), `form_ii` (`بدل`, `علم`), `form_iia` for its t-stem (`تبدل`, `تعلم`), `form_iii` (`سافر`, `قابل`), `form_iiia` for its t-stem (`تقابل`, `تسارع`), `form_viii` (`حتارم`, `ختار`), `form_ix` for colour and defect verbs (`حمار`, `صفار`, `زراق`), `form_x` (`ستاغرب`, `ستاعمل`), `quadriliteral` (`ترجم`, `سيفط`) and `quadriliteral_a` for its t-stem (`تّرجم`). Moroccan has NO living Form IV, V, VI or VII: never emit one, and never assign a pattern because an MSA cognate has it — a Standard Arabic Form V verb is Moroccan `form_iia`, a Form VI verb is `form_iiia`, and a Form VII verb is `form_ia`.\n\
-         9. Determiners: classify the attached article `ال-`, attributive demonstratives, the specific-indefinite `واحد`, quantifiers and interrogatives. The proximal `هاد` is INVARIABLE — `هاد الولد`, `هاد البنت`, `هاد الدراري` — so it MUST omit both referent_number and referent_gender; only the distal series inflects, `داك` masculine singular, `ديك` feminine singular, `دوك` plural, so `دوك` takes referent_number but omits referent_gender. The article `ال-` encodes neither and MUST omit both. `واحد` heading a still-articled noun (`واحد الراجل`) is `specific_indefinite`, not a numeral.\n\
-         10. Pronouns: `clitic` is true only for an attached pronoun. For `كتابو`, attachment_function is `possessive`; for `شفتو`, it is `direct_object`; for the dative `ل-` series in `كتبت ليه` it is `indirect_object`; for a preposition-hosted suffix such as `معاه` or `عليه` it is `prepositional`. When a host stacks both objects (`عطاهالي`), give each clitic its own analysis with its own function. OMIT attachment_function on independent `هو`. Set referent_person for personal forms (`أنا` first versus `نتا` second) and OMIT it for `اللي`; set referent_number for `أنا` singular versus `حنا` plural and OMIT it for `شكون`; set referent_gender for the independent forms that contrast it — `نتا` versus `نتي`, `هو` versus `هي` — and OMIT it for `أنا`, `حنا`, `نتوما`, `هوما`, `اللي` and any form without a gender contrast. Moroccan has no dual pronoun. The reflexive is `راس` plus a suffix (`راسي`, `راسو`): tag `راس` as `pronoun` with pronoun_type `reflexive` and split its suffix.\n\
+         9. Determiners: classify the attached article `ال-`, attributive demonstratives, the specific-indefinite `واحد`, quantifiers and interrogatives. The proximal `هاد` is INVARIABLE — `هاد الولد`, `هاد البنت`, `هاد الدراري` — so it MUST omit both referent_number and referent_gender; only the distal series inflects, `داك` masculine singular, `ديك` feminine singular, `دوك` plural, so `دوك` takes referent_number but omits referent_gender. The article `ال-` encodes neither and MUST omit both. `واحد` heading a still-articled noun (`واحد الراجل`) is `specific_indefinite`, not a numeral; `شي` heading a bare noun (`شي مشكلة`, `شي حاجة`, `شي واحد`) is `indefinite`, its non-specific counterpart, and never `specific_indefinite` or `quantifier`; `كل`, `گاع` and `بزاف د` are `quantifier`.\n\
+         10. Pronouns: `clitic` is true only for an attached pronoun. For `كتابو`, attachment_function is `possessive`; for `شفتو`, it is `direct_object`; for the `ل` + pronoun series it is ALWAYS `indirect_object` — `ليا`, `ليك`, `ليه`, `ليها`, `لينا`, `ليكم`, `ليهم`, whether written on the verb (`كتبتليه`) or apart (`سمح ليا`); for any other preposition-hosted suffix such as `معاه`, `عليه`, `فيك`, `عندي` it is `prepositional`. An attached pronoun's lemma is the independent pronoun of the same person and number: ني/ي/يا -> `أنا`, ك -> `نتا`, و/ه -> `هو`, ها -> `هي`, نا -> `حنا`, كم -> `نتوما`, هم -> `هوما` (never `هما`); the clitic itself is never a lemma. When a host stacks both objects (`عطاهالي`), give each clitic its own analysis with its own function. OMIT attachment_function on independent `هو`. Set referent_person for personal forms (`أنا` first versus `نتا` second) and OMIT it for `اللي`; set referent_number for `أنا` singular versus `حنا` plural and OMIT it for `شكون`; set referent_gender for the independent forms that contrast it — `نتا` versus `نتي`, `هو` versus `هي` — and OMIT it for `أنا`, `حنا`, `نتوما`, `هوما`, `اللي` and any form without a gender contrast. Moroccan has no dual pronoun. The reflexive is `راس` plus a suffix (`راسي`, `راسو`): tag `راس` as `pronoun` with pronoun_type `reflexive` and split its suffix.\n\
          11. Negation: verbal negation is the circumfix `ما ... ش` (`ما كتبش`, `ما كايكتبش`, `ما غاديش يكتب`), and unlike Egyptian it triggers no stress shift or vowel change on the host. Non-verbal predicates, nouns, adjectives and participles are negated with `ماشي` (`ماشي هو`, `ماشي مزيان`), which is a `particle` with particle_function `negation`, never a verb. `ما` also appears WITHOUT `ش` before an absolute negator — `ما شفت حتى واحد`, `ما عندي والو` — and that clause is still negative. Mark the governed verb negative even when the negative pieces are split. Do not rewrite any of this as MSA `لم/لن/ليس`.\n\
-         12. Tokenization: ALWAYS split these productive clitics into their own analyses, in every sentence and never only sometimes — conjunctions `و-/ف-`, prepositions `ب-/ل-/ف-` (`فالدار` is `ف` plus `ال` plus `دار`), the article `ال-`, the genitive `د-` when written bound (`دالولد` is `د` plus `ال` plus `ولد`), negative `ما-/-ش`, the presentative `را-/ها-`, and attached pronouns — while retaining their syntactic effect on the host. Do NOT split the aspect prefix `كا-/تا-` or the future prefix `غا-/غاد-`: those are recorded on the verb through `verb_form` as `ka_imperfective` and `gha_imperfective`, and must never also surface as a separate particle. Do NOT split person/number/gender inflection (`ن-/ت-/ي-`, `-ت`, `-تي`, `-ي`, `-و`). When you split a written token, each analysis's `word` is exactly the piece it analyses; the pieces must not overlap and must never restate the whole token, so `عليها` is `علي` plus `ها` and never `عليها` alongside `ها`. This applies to EVERY host, including ones that look like single words: `عليكم` is `علي` plus `كم`, `معاه` is `معا` plus `ه`, `كتابو` is `كتاب` plus `و`, `راني` is `را` plus `ني`. A host must always reach the lexicon under its bare surface, so never record `عليكم` or `راني` as a whole surface for the lemma `على` or `را`. Omit punctuation.\n\
+         12. Tokenization: ALWAYS split these productive clitics into their own analyses, in every sentence and never only sometimes — conjunctions `و-/ف-`, prepositions `ب-/ل-/ف-` (`فالدار` is `ف` plus `ال` plus `دار`), the article `ال-`, the genitive `د-` when written bound (`دالولد` is `د` plus `ال` plus `ولد`), negative `ما-/-ش`, the presentative `را-/ها-`, and attached pronouns — while retaining their syntactic effect on the host. Do NOT split the aspect prefix `كا-/تا-` or the future prefix `غا-/غاد-`: those are recorded on the verb through `verb_form` as `ka_imperfective` and `gha_imperfective`, and must never also surface as a separate particle. Do NOT split person/number/gender inflection (`ن-/ت-/ي-`, `-ت`, `-تي`, `-ي`, `-و`). When you split a written token, each analysis's `word` is exactly the piece it analyses; the pieces must not overlap and must never restate the whole token, so `عليها` is `علي` plus `ها` and never `عليها` alongside `ها`. This applies to EVERY host, including ones that look like single words: `عليكم` is `علي` plus `كم`, `معاه` is `معا` plus `ه`, `كتابو` is `كتاب` plus `و`, `راني` is `را` plus `ني`. A host must always reach the lexicon under its bare surface, so never record `عليكم` or `راني` as a whole surface for the lemma `على` or `را`. The article is split inside greeting formulas and day names too: `السلام عليكم` is `ال` plus `سلام`, `نهار الحد` is `نهار` plus `ال` plus `حد`. Three exceptions are lexicalized and stay whole: the time adverbs `البارح`, `اليوم` and `الليلة` (yesterday, today, tonight) are one `adverb` each with the written form as lemma, never `noun` and never split — `فالصباح` by contrast is `ف` plus `ال` plus `صباح`; and the conjunctions `ولا` (or) and `ولكن` (but) are single `coordinating_conjunction` tokens, never `و` plus `لا`/`لكن`. `كيداير`/`كيدايرة`/`كيدايرين` (how are you) is `كي` (`adverb`) plus the participle `داير` (`adjective`, `active_participle`, lemma `داير`), never an `interjection`. Omit punctuation.\n\
          13. Particles: every `particle` you emit MUST carry a `particle_function`. `ما`, `ش` and `ماشي` are `negation`; the yes/no question marker `واش` is `interrogative`; the vocative `آ` and `يا` are `vocative`; a free-standing `غادي`/`غادية`/`غاديين` immediately before a verb is `future`; the assertive `را-` series (`راني`, `راك`, `راه`) and the presentative `ها` are `presentative`. `كاين`/`كاينة`/`كاينين` is NOT a particle: it is the active participle of `كان`, so tag it as `adjective` with adjective_form `active_participle`. The genitive `ديال`/`د` is an `adposition`, never a particle and never a noun.\n\
-         14. Conjunctions, names and formulas: decide coordination versus subordination for every conjunction and emit the specific value. `coordinating_conjunction` covers و، ف، أو، ولا، بصح، ولكن; `subordinating_conjunction` covers ملي، فاش، باش، حيت، علاحقاش، إلا، واخا، بلا ما، قبل ما، من بعد ما، حتى. NEVER emit a bare `conjunction` or `conj`: an unspecific tag is filed as coordinating and silently mis-analyses Moroccan subordination. `اللي` is not a conjunction; it is a relative pronoun. A personal or place name is `proper_noun`, which takes only a lemma — `فاطمة`، `يوسف`، `المغرب`، `الدار البيضاء`، `مراكش` — and never a manufactured root. Greeting and reaction formulas — `أهلا`، `شكرا`، `صافي`، `يالله`، `واخا`، `الله يخليك`، `إن شاء الله` — are `interjection`, not nouns.\n\
+         14. Conjunctions, names and formulas: decide coordination versus subordination for every conjunction and emit the specific value. `coordinating_conjunction` covers و، ف، أو، ولا، بصح، ولكن; `subordinating_conjunction` covers ملي، فاش، باش، حيت، علاحقاش، إلا، واخا، بلا ما، قبل ما، من بعد ما، حتى. NEVER emit a bare `conjunction` or `conj`: an unspecific tag is filed as coordinating and silently mis-analyses Moroccan subordination. `اللي` is not a conjunction; it is a relative pronoun. A personal or place name is `proper_noun`, which takes only a lemma — `فاطمة`، `يوسف`، `المغرب`، `الدار البيضاء`، `مراكش` — and never a manufactured root. Terms of address are NOT proper nouns: `سيدي` is the noun `سيد` in construct state plus the possessive `ي`, `خويا` is `خو` plus `يا`, `ختي` is `خت` plus `ي`, and `لالة` is a free feminine noun. `بعد`, `قبل`, `قدام`, `حدا` and `عند` governing a noun or a suffix are `adposition` (`من بعد يومين`, `عندي`), not adverbs. Greeting and reaction formulas — `أهلا`، `شكرا`، `صافي`، `يالله`، `واخا`، `الله يخليك`، `إن شاء الله` — are `interjection`, not nouns.\n\
          15. VALUE RULES: noun `number` is exactly singular/dual/plural, with `dual` only on the frozen residue in rule 4; `agreement_number` and referent_number are only singular/plural. Gender values are only masculine/feminine and must never appear in a number field. Every `noun` MUST carry gender, number, definiteness and state. Never emit `case`, `mood`, MSA nunation, dual verb agreement, feminine-plural verb agreement, a `bi_imperfective`, a `ha_imperfective`, or a Form IV, V, VI or VII pattern."
     }
 }

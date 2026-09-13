@@ -10,19 +10,7 @@ use panini_core::traits::{
 /// The inherited dative survives only inside fixed learned expressions and
 /// has no value here; such frozen forms are analyzed according to their
 /// current lexical use.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekCase {
     Nominative,
     Genitive,
@@ -35,19 +23,7 @@ pub enum GreekCase {
 /// Perfect constructions are analytic (`έχω γράψει`), so "perfect" is not a
 /// third token-level value: the auxiliary and invariant perfective form are
 /// analyzed separately.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekAspect {
     Imperfective,
     Perfective,
@@ -58,19 +34,7 @@ pub enum GreekAspect {
 /// The traditional "subjunctive" is a construction headed by `να` or `ας`,
 /// not a third inflectional mood. Its following verb retains indicative-form
 /// morphology, while aspect supplies the contrast (`να γράφω` / `να γράψω`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekMood {
     Indicative,
     Imperative,
@@ -81,19 +45,7 @@ pub enum GreekMood {
 /// Past imperfective and past perfective forms are distinguished by
 /// [`GreekAspect`]. Future time is built with the separate particle `θα`; there
 /// is no synthetic future value on the lexical verb.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekTense {
     Present,
     Past,
@@ -103,38 +55,14 @@ pub enum GreekTense {
 ///
 /// `Mediopassive` names the form, not the meaning: the `-μαι` conjugation
 /// includes passive, middle, reflexive and deponent verbs.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekVoice {
     Active,
     Mediopassive,
 }
 
 /// The four verb forms used in contemporary Standard Modern Greek.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekVerbForm {
     Finite,
     /// The invariant perfective form used only after `έχω`, as in `έχω γράψει`.
@@ -146,19 +74,7 @@ pub enum GreekVerbForm {
 }
 
 /// Degrees distinguished in the contemporary adjective/adverb system.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekDegree {
     Positive,
     Comparative,
@@ -168,37 +84,13 @@ pub enum GreekDegree {
     AbsoluteSuperlative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekDefiniteness {
     Definite,
     Indefinite,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekDeterminerType {
     Article,
     Possessive,
@@ -210,19 +102,7 @@ pub enum GreekDeterminerType {
     Emphatic,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GreekPronounType {
     Personal,
     Possessive,

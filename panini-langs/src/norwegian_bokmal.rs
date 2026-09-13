@@ -10,19 +10,7 @@ use panini_core::traits::{
 /// This names the form of the token, not the definiteness of the whole noun
 /// phrase. A noun after a possessive is morphologically indefinite even though
 /// the phrase is referentially definite (`min bil`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalDefiniteness {
     Indefinite,
     Definite,
@@ -33,56 +21,20 @@ pub enum NorwegianBokmalDefiniteness {
 ///
 /// `Unmarked` serves as subject, object and prepositional complement.
 /// `Genitive` is the written phrasal `-s` form.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalNominalCase {
     Unmarked,
     Genitive,
 }
 
 /// The living subject/object opposition of Bokmål personal pronouns.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalPronounCase {
     Subject,
     Object,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalDegree {
     Positive,
     Comparative,
@@ -91,37 +43,13 @@ pub enum NorwegianBokmalDegree {
 
 /// Participles used adjectivally, whose agreement belongs to the adjective
 /// system rather than to an analytic verb phrase.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalParticipleKind {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalDeterminerType {
     Article,
     Demonstrative,
@@ -131,19 +59,7 @@ pub enum NorwegianBokmalDeterminerType {
     Relative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalPronounType {
     Personal,
     Possessive,
@@ -160,19 +76,7 @@ pub enum NorwegianBokmalPronounType {
 ///
 /// `Epicene` is the personal pronoun `hen`; grammatical neuter belongs to the
 /// separate nominal-gender system (`det`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalReferentialGender {
     Masculine,
     Feminine,
@@ -183,37 +87,13 @@ pub enum NorwegianBokmalReferentialGender {
 ///
 /// `sin/si/sitt/sine` against `hans/hennes/hens/deres`. First- and
 /// second-person possessives do not participate in it.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalPossessiveRelation {
     Reflexive,
     NonReflexive,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalParticleType {
     Infinitival,
     Negation,
@@ -224,37 +104,13 @@ pub enum NorwegianBokmalParticleType {
 ///
 /// Perfect, pluperfect and future constructions are analytic and are analyzed
 /// token by token.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalTense {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalMood {
     Indicative,
     Imperative,
@@ -265,19 +121,7 @@ pub enum NorwegianBokmalMood {
 /// `Supine` is the invariant form in analytic perfect and passive
 /// constructions (`har skrevet`, `blir skrevet`). An agreeing participle is
 /// instead analyzed as an adjective with `participle_kind = past`.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalVerbForm {
     Finite,
     Infinitive,
@@ -286,19 +130,7 @@ pub enum NorwegianBokmalVerbForm {
 }
 
 /// Learner-facing principal-parts classes for Bokmål verbs.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalVerbClass {
     /// Weak verbs with `-et`/accepted `-a` past and supine: `snakke`.
     #[serde(rename = "weak_group_1")]
@@ -322,19 +154,7 @@ pub enum NorwegianBokmalVerbClass {
 ///
 /// `SForm` covers every `-s` form: passive, lexical deponent, reciprocal and
 /// middle readings alike.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum NorwegianBokmalDiathesis {
     Active,
     SForm,
