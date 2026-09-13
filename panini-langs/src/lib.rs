@@ -22,6 +22,7 @@ macro_rules! with_languages {
             (korean, Korean),
             (mandarin_chinese, MandarinChinese),
             (modern_greek, ModernGreek),
+            (moroccan_arabic, MoroccanArabic),
             (norwegian_bokmal, NorwegianBokmal),
             (polish, Polish),
             (portuguese, Portuguese),
