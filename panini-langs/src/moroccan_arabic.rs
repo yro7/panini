@@ -126,16 +126,33 @@ pub enum MoroccanArabicPronounType {
     Indefinite,
 }
 
+/// Whether a Moroccan Arabic adverb is a question word.
+///
+/// The interrogative adverbs `فين`, `فوقاش`, `إمتى`, `علاش`, `كيفاش`, `منين`
+/// are a closed set that opens a content question, and a learner meets them
+/// as a paradigm beside `شكون`/`شنو` and `شحال`; every other adverb is lexical.
+#[panini_macro::closed_enum]
+pub enum MoroccanArabicAdverbType {
+    // `دابا`, `بزاف`, `ديما`, `هنا`, `البارح`, `غير`.
+    Lexical,
+    // `فين`, `فوقاش`, `إمتى`, `علاش`, `كيفاش`, `منين`.
+    Interrogative,
+}
+
 /// Syntactic function of an attached personal-pronoun clitic.
 ///
 /// Moroccan stacks a direct and an indirect object on one host
-/// (`عطاهالي`), so both functions can occur in a single word.
+/// (`عطاهالي`), so both functions can occur in a single word. The same
+/// object-shaped suffix supplies the *subject* of the assertive `را-` and of
+/// the pseudo-verb `خاص`, so that reading has its own value.
 #[panini_macro::closed_enum]
 pub enum MoroccanArabicAttachmentFunction {
     Possessive,
     DirectObject,
     IndirectObject,
     Prepositional,
+    // The suffix that is the subject of its host: `راني هنا`, `راه مشى`, `خاصني نمشي`.
+    Subject,
 }
 
 /// Kind of determiner heading a Moroccan Arabic noun phrase.
@@ -205,6 +222,7 @@ pub enum MoroccanArabicMorphology {
     },
     Adverb {
         lemma: String,
+        adverb_type: MoroccanArabicAdverbType,
     },
     CoordinatingConjunction {
         lemma: String,
@@ -418,6 +436,7 @@ impl LinguisticDefinition for MoroccanArabic {
         MoroccanArabicMorphology::PIVOT_REFERENT_NUMBER,
         MoroccanArabicMorphology::PIVOT_REFERENT_GENDER,
         MoroccanArabicMorphology::PIVOT_PARTICLE_FUNCTION,
+        MoroccanArabicMorphology::PIVOT_ADVERB_TYPE,
     ];
 
     fn supported_scripts(&self) -> &[Script] {
