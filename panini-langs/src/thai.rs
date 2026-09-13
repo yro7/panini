@@ -9,19 +9,7 @@ use panini_core::traits::{
 /// Whole lexemes are paired across registers (`หมา` / `สุนัข`, `หัว` /
 /// `ศีรษะ`, `กิน` / `รับประทาน` / `เสวย` / `ฉัน`), so the register is a
 /// per-token value. `Neutral` is the unmarked value.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ThaiRegister {
     // ราชาศัพท์ — ทรง, เสวย, บรรทม, พระราชทาน, เพคะ
     Royal,
@@ -42,19 +30,7 @@ pub enum ThaiRegister {
 /// Functional, not semantic: which classifier a given noun takes is the
 /// `classifier` field on `Noun`; this dimension says what sort of unit the
 /// classifier counts.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ThaiClassifierType {
     // คน, ตัว, เล่ม, ใบ, คัน, ลูก, แผ่น, อัน, ต้น, หลัง, ฉบับ
     Sortal,
@@ -77,19 +53,7 @@ pub enum ThaiClassifierType {
 /// Thai marks tense, aspect, negation, degree and epistemic stance with free
 /// words standing before or after the verb. Those markers stay on their own
 /// token, with this function; the verb carries no inflection.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ThaiAdverbType {
     // an ordinary lexical adverb, including manner and time expressions
     Lexical,
@@ -108,19 +72,7 @@ pub enum ThaiAdverbType {
 /// Sentence-final particles carry politeness, speaker gender and illocutionary
 /// force, and several forms serve different functions in different positions,
 /// so the inventory is functional rather than positional.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ThaiParticleType {
     // ครับ, ค่ะ, คะ, ขา, จ้ะ, ฮะ, วะ, ขอรับ, เพคะ
     Politeness,
@@ -144,19 +96,7 @@ pub enum ThaiParticleType {
 /// pronouns because Thai person reference is relational: `พี่` or a given name
 /// denotes the speaker, the addressee or a third person according to who is
 /// talking to whom.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum ThaiPronounType {
     Personal,
     KinshipAddress,

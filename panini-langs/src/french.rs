@@ -5,19 +5,7 @@ use panini_core::traits::{
     TypologicalFeature, Upos,
 };
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum FrenchTense {
     Present,
     Imperfect,
@@ -27,19 +15,7 @@ pub enum FrenchTense {
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum FrenchMood {
     Indicative,
     Subjunctive,
@@ -49,19 +25,7 @@ pub enum FrenchMood {
     Participle,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum FrenchPronounCase {
     Subject,
     DirectObject,
@@ -70,19 +34,7 @@ pub enum FrenchPronounCase {
     Tonic,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum FrenchPronounType {
     Personal,
     Possessive,
@@ -92,19 +44,7 @@ pub enum FrenchPronounType {
     Indefinite,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum FrenchDeterminerType {
     Article,
     Possessive,

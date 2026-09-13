@@ -1,4 +1,5 @@
 mod aggregable_fields;
+mod closed_enum;
 mod closed_values;
 mod helpers;
 mod morpheme_function_catalog;
@@ -6,6 +7,11 @@ mod morphology_info;
 mod panini_result;
 
 use proc_macro::TokenStream;
+
+#[proc_macro_attribute]
+pub fn closed_enum(attr: TokenStream, item: TokenStream) -> TokenStream {
+    closed_enum::expand(attr, item)
+}
 
 #[proc_macro_derive(ClosedValues, attributes(closed_values))]
 pub fn closed_values_derive(input: TokenStream) -> TokenStream {

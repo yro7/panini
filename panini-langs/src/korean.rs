@@ -12,19 +12,7 @@ use panini_core::traits::{
 ///
 /// `Unmarked` is the value for a bare nominal: Korean drops case particles
 /// freely in speech.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanCase {
     Nominative,   // 주격 (이/가, 께서)
     Accusative,   // 목적격 (을/를)
@@ -43,19 +31,7 @@ pub enum KoreanCase {
 
 /// Information-structure marking by a 보조사 (auxiliary particle). Stacks on
 /// top of, and often replaces, the case particle.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanMarking {
     Unmarked,  // no 보조사
     Topic,     // 은/는
@@ -63,19 +39,7 @@ pub enum KoreanMarking {
     Exclusive, // 만, 밖에
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanTense {
     Present,    // 현재 (unmarked stem)
     Past,       // 과거 (-았/었-)
@@ -86,19 +50,7 @@ pub enum KoreanTense {
 /// The six 상대높임법 speech levels. `Familiar` (하게체) and `SemiFormal`
 /// (하오체) survive only in fiction, older speech and set phrases, but a
 /// learner meets them in written dialogue, so they stay in the value space.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanSpeechLevel {
     Deferential, // 하십시오체 (-습니다)
     Polite,      // 해요체 (-아요/어요)
@@ -109,19 +61,7 @@ pub enum KoreanSpeechLevel {
 }
 
 /// The sentence type a final ending (종결어미) imposes.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanSentenceType {
     Declarative,   // 평서문
     Interrogative, // 의문문
@@ -131,19 +71,7 @@ pub enum KoreanSentenceType {
 }
 
 /// 높임법 — whose social status the form encodes.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanHonorification {
     NonHonorific,     // 평칭
     SubjectHonorific, // 주체 높임 (-(으)시-, 께서)
@@ -151,38 +79,14 @@ pub enum KoreanHonorification {
     Humble,           // 겸양 (저, 저희)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanVoice {
     Active,    // 능동
     Passive,   // 피동 (-이/히/리/기-, -되다, -어지다)
     Causative, // 사동 (-이/히/리/기/우/구/추-, -게 하다)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanPolarity {
     Positive, // 긍정
     Negative, // 부정 (안, 못, -지 않다, -지 못하다)
@@ -190,19 +94,7 @@ pub enum KoreanPolarity {
 
 /// Which slot the predicate's ending fills: whether the predicate ends the
 /// sentence, links to another clause, modifies a noun, or becomes one.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanVerbForm {
     Final,      // 종결형 — ends the sentence
     Connective, // 연결형 — links clauses (-고, -아서, -면)
@@ -213,19 +105,7 @@ pub enum KoreanVerbForm {
 
 /// Korean runs two full numeral series; which one a phrase takes is fixed by
 /// the counter.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanNumeralSystem {
     Native,     // 고유어 수사 (하나, 둘, 셋)
     SinoKorean, // 한자어 수사 (일, 이, 삼)
@@ -234,19 +114,7 @@ pub enum KoreanNumeralSystem {
 // ─── Enums used only at morpheme level ───────────────────────────────────────
 
 /// The semantic relation a 연결어미 (connective ending) establishes.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanConnective {
     Sequential,   // -고
     Causal,       // -아서/어서, -(으)니까
@@ -259,19 +127,7 @@ pub enum KoreanConnective {
     Auxiliary,    // 보조적 연결어미 -지, -게, -고, -아/어
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanNominalizer {
     Gerundive, // -기 (activity, complement of 좋아하다/시작하다)
     Nominal,   // -(으)ㅁ (fact, written register)
@@ -279,19 +135,7 @@ pub enum KoreanNominalizer {
 
 /// 관형사형 어미 — the relative-clause ending, whose value is tense on a verb
 /// and largely aspectual on a descriptive verb.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanAdnominal {
     Present,       // -는
     Past,          // -(으)ㄴ
@@ -299,19 +143,7 @@ pub enum KoreanAdnominal {
     Retrospective, // -던
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanDerivation {
     Agentive,       // -자, -가, -사, -꾼
     Adverbializing, // -이, -히
@@ -321,19 +153,7 @@ pub enum KoreanDerivation {
 }
 
 /// 선어말어미 modality that is not reducible to tense.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum KoreanModality {
     Conjecture,    // -겠-, -(으)ㄹ까
     Volition,      // -겠- (first person)

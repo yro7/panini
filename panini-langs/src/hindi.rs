@@ -12,19 +12,7 @@ use panini_core::traits::{
 /// something follows it, or because it is an adverbial of time or place
 /// (`सुबह`, `इस साल`). The vocative is its own cell: `लड़के!` (singular),
 /// `लड़को!` (plural).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiCase {
     Direct,   // सीधा / कर्ता कारक
     Oblique,  // तिरछा — required before any postposition
@@ -37,19 +25,7 @@ pub enum HindiCase {
 /// in `-ई` (feminine `लड़की`) has a full paradigm; every other stem (`घर`,
 /// `किताब`, `लाल`, `सुन्दर`, and the Perso-Arabic and English loans) is
 /// invariant and shows its case and number only on what follows it.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiInflectionClass {
     /// Inflects: `-आ` masculines (`लड़का` → `लड़के` → `लड़कों`), `-ई` feminines
     /// (`लड़की` → `लड़कियाँ`), `-आ` adjectives (`अच्छा` / `अच्छे` / `अच्छी`).
@@ -67,19 +43,7 @@ pub enum HindiInflectionClass {
 /// subjunctive (`करे`), the imperative (`करो`) and the infinitive (`करना`)
 /// carry no aspect: omit the field there. `Habitual` is the `-ता`
 /// participle, also called the imperfective participle.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiAspect {
     /// The `-ता` (imperfective) participle: `करता है`, `करता था`.
     Habitual,
@@ -93,19 +57,7 @@ pub enum HindiAspect {
 ///
 /// Finer distinctions are aspectual: `करता था` is habitual + past, not a
 /// separate "imperfect" tense.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiTense {
     Present, // है / हैं / हूँ
     Past,    // था / थी / थे
@@ -117,19 +69,7 @@ pub enum HindiTense {
 /// `Presumptive`, not future: `होगा` in `वह घर पर होगा` ("he must be at home")
 /// and `कर रहा होगा` ("he is probably working") is a present inference built
 /// from the future form of `होना` used as an auxiliary.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiMood {
     Indicative,  // करता है, किया, करेगा
     Subjunctive, // करे, करें — after अगर, शायद, चाहिए कि
@@ -143,19 +83,7 @@ pub enum HindiMood {
 /// participle agrees in gender and number and has no person, a finite future
 /// has person and number and no gender, and the bare stem in a compound verb
 /// agrees with nothing.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiVerbForm {
     /// A form inflected for person or agreeing as a main predicate: `करता है`
     /// (the participle plus its copula are two tokens, both finite in the phrase
@@ -183,19 +111,7 @@ pub enum HindiVerbForm {
 /// oblique and possessive forms. It reaches the third person too: `आप`
 /// agreement is what `वे`/`ये` do when a single respected person is referred
 /// to (`पिताजी आए हैं`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum HindiHonorificity {
     /// `तू` — intimate/inferior. Rare in neutral modern speech; marked when used.
     Intimate,

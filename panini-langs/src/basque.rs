@@ -11,19 +11,7 @@ use panini_core::traits::{
 /// ergative–absolutive: the absolutive is the unmarked case shared by the
 /// intransitive subject and the transitive object, and the ergative `-k` marks
 /// the transitive subject. There is no accusative.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueCase {
     Absolutive,          // NOR — ∅ (etxea, gizonak "the men")
     Ergative,            // NORK — -k (gizonak "the man", lagunek)
@@ -47,19 +35,7 @@ pub enum BasqueCase {
 /// The `mugatzailea` — one fused slot carrying definiteness *and* number.
 /// Basque marks no number at all on an indefinite noun phrase, so this is a
 /// single dimension, never a definiteness field beside a number field.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueDetermination {
     Indefinite,       // mugagabea — bare stem (etxe, liburu bat, zenbat lagun)
     DefiniteSingular, // -a (etxea, etxean)
@@ -71,19 +47,7 @@ pub enum BasqueDetermination {
 /// options; everything else is non-finite. Only a small closed set of verbs
 /// (izan, ukan/*edun, egon, joan, etorri, ibili, eduki, jakin, esan, eraman,
 /// erabili, iraun) has synthetic forms — every other verb is periphrastic.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueVerbForm {
     Synthetic,              // aditz trinkoa — the lexical verb is itself finite (dator, dakit)
     Auxiliary,              // laguntzailea — finite izan / *edun / *edin / *ezan (da, dut, dio)
@@ -98,19 +62,7 @@ pub enum BasqueVerbForm {
 /// The auxiliary paradigm (`aditz laguntzailearen jokoa`) — which argument
 /// slots the finite form indexes. It is what selects the auxiliary: NOR and
 /// NOR-NORI take izan, NOR-NORK and NOR-NORI-NORK take *edun.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueParadigm {
     Nor,        // absolutive only (naiz, da, dira)
     NorNori,    // absolutive + dative (zait, zaio, zaizkit)
@@ -122,19 +74,7 @@ pub enum BasqueParadigm {
 /// person × number grid: `zu` is historically plural but synchronically a
 /// singular polite address, and `hi` is the familiar singular that the
 /// allocutive paradigm is built on.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasquePersonNumber {
     FirstSingular,          // ni
     SecondSingularFamiliar, // hi
@@ -145,38 +85,14 @@ pub enum BasquePersonNumber {
     ThirdPlural,            // haiek
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueTense {
     Present,      // orainaldia (da, dut, dator; dadin, dezan)
     Past,         // iraganaldia (zen, zuen, zetorren; zedin, zezan)
     Hypothetical, // alegiazkoa (balitz, banu, litzateke, nuke; ledin, lezan)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueMood {
     Indicative,    // indikatiboa (da, dut)
     Conditional,   // baldintza — the ba- protasis (banu, balitz)
@@ -190,38 +106,14 @@ pub enum BasqueMood {
 /// argument structure. `None` is neutral zuka speech or a non-finite form; a
 /// present value is a genuine allocutive form and must never be flattened into
 /// the neutral paradigm.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueAllocutive {
     MasculineFamiliar, // toka (duk, zakiat, ziok)
     FeminineFamiliar,  // noka (dun, zakinat, zionat)
     Respectful,        // xuka — regional respectful allocutive with zu
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasquePolarity {
     Affirmative,
     Negative, // ez / ezin — also fronts the finite verb
@@ -229,19 +121,7 @@ pub enum BasquePolarity {
 
 /// The subordinating suffix or prefix a finite verb carries. Basque has no
 /// standalone complementizer word: "that" is the verbal suffix -(e)la.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueSubordination {
     Completive,    // -(e)la, -(e)nik — "that"
     Relative,      // -(e)n (datorren gizona)
@@ -253,19 +133,7 @@ pub enum BasqueSubordination {
     Purposive,     // -t(z)eko
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueDegree {
     Positive,    // handi
     Comparative, // -ago (handiago)
@@ -273,19 +141,7 @@ pub enum BasqueDegree {
     Excessive,   // -egi (handiegi)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasquePronounType {
     /// ni, hi, gu, zu, zuek; Basque has no neutral third-person personal pronoun.
     Personal,
@@ -298,19 +154,7 @@ pub enum BasquePronounType {
     Reciprocal,    // elkar
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueDeterminerType {
     Demonstrative, // hau, hori, hura, hauek
     Quantifier,    // asko, gutxi, batzuk, guzti, dena
@@ -318,19 +162,7 @@ pub enum BasqueDeterminerType {
     Indefinite,    // beste, edozein, zenbait
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueNumeralType {
     Cardinal,     // bat, bi, hiru, hamar
     Ordinal,      // -garren (lehen, bigarren, hirugarren)
@@ -339,19 +171,7 @@ pub enum BasqueNumeralType {
 
 /// The preverbal particles. Basque marks evidentiality and inference with
 /// clitic-like particles sitting immediately before the finite verb.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueParticleType {
     Interrogative, // al
     Dubitative,    // ote
@@ -364,19 +184,7 @@ pub enum BasqueParticleType {
 
 /// Morpheme-level aspect: the four participle constructions. Distinct from
 /// [`BasqueVerbForm`], which also has to name the two finite options.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueAspect {
     Perfective,   // -tu / -du / -i / -n
     Imperfective, // -t(z)en
@@ -384,19 +192,7 @@ pub enum BasqueAspect {
     Resultative,  // -ta / -da / -(r)ik / -a(k)
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum BasqueDerivation {
     AbstractNoun,   // -tasun, -tza (edertasun, nekazaritza)
     ActionNoun,     // -keta, -pen, -aldi, -t(z)e (garbiketa, ikuste)

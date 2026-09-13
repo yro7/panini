@@ -10,19 +10,7 @@ use panini_core::traits::{
 /// The vocative has no forms of its own (direct address takes the
 /// nominative); frozen adverbs such as deswegen, meinetwegen are lexicalised,
 /// not an instrumental.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanCase {
     Nominative, // Nominativ (Wer-Fall)
     Accusative, // Akkusativ (Wen-Fall)
@@ -48,19 +36,7 @@ pub enum GermanCase {
 /// The class is a property of the whole determiner phrase, so `Mixed` is
 /// reported across the entire ein-word paradigm — not only in the three cells
 /// where the strong ending surfaces.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanAdjectiveDeclension {
     Strong, // starke Deklination
     Weak,   // schwache Deklination
@@ -69,19 +45,7 @@ pub enum GermanAdjectiveDeclension {
 
 /// Degree of comparison, for adjectives and for the handful of adverbs that
 /// carry it in their own form (oft / öfter, gern / lieber, bald / eher).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanDegree {
     Positive,    // Positiv
     Comparative, // Komparativ
@@ -97,19 +61,7 @@ pub enum GermanDegree {
 /// The value names the stem the finite form is built on: Konjunktiv I, built
 /// on the present stem, is `Present`; Konjunktiv II, built on the preterite
 /// stem, is `Past`, whatever time either one refers to.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanTense {
     Present, // Präsens
     Past,    // Präteritum
@@ -122,19 +74,7 @@ pub enum GermanTense {
 /// on the preterite stem, usually with umlaut, and is the mood of the
 /// counterfactual, the wish and the polite request (wenn ich Zeit hätte; ich
 /// könnte).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanMood {
     Indicative, // Indikativ
     Imperative, // Imperativ
@@ -153,19 +93,7 @@ pub enum GermanMood {
 /// it. Only the *uninflected* participles are verbs here: an attributive
 /// participle (der lachende Mann, das gebaute Haus) takes adjective endings
 /// and is analysed as an adjective.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanVerbForm {
     Finite,            // finite Form
     Infinitive,        // Infinitiv
@@ -178,19 +106,7 @@ pub enum GermanVerbForm {
 /// A property of the lemma, not of the token: it is invisible in the present
 /// tense (ich singe, ich mache) and decides the preterite and the participle.
 /// Reported on every token of the lemma.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanVerbClass {
     // Schwach — dental suffix, no stem-vowel change: machen, machte, gemacht.
     Weak,
@@ -216,19 +132,7 @@ pub enum GermanVerbClass {
 /// wieder- — are separable or inseparable by *sense*, so the value describes the
 /// reading realised in this occurrence: ǘbersetzen (to ferry across, separable)
 /// and übersétzen (to translate, inseparable) are the same eight letters.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanSeparability {
     Separable,   // trennbar
     Inseparable, // untrennbar
@@ -238,19 +142,7 @@ pub enum GermanSeparability {
 ///
 /// The formal Sie borrows third-person-plural morphology to address a second
 /// person: report it as second person with plural agreement, `formal`.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanPoliteness {
     Familiar, // du / ihr
     Formal,   // Sie
@@ -263,19 +155,7 @@ pub enum GermanPoliteness {
 /// unstressed flavouring words (doch, mal, ja, halt, eben), each of which also
 /// exists as an adverb, a conjunction or an interjection with a different
 /// meaning.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum GermanParticleType {
     Modal, // Modalpartikel / Abtönungspartikel — doch, mal, ja, halt, eben, wohl, and unstressed clause-internal bitte
     Negation,   // nicht

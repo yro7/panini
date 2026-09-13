@@ -9,38 +9,14 @@ use panini_core::traits::{
 ///
 /// A construct-state noun can carry either value: its definiteness comes from
 /// the following possessor rather than from the article on the head noun.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicDefiniteness {
     Indefinite,
     Definite,
 }
 
 /// Whether a noun is free or is the head of an idafa/possessive construction.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicNominalState {
     Free,
     Construct,
@@ -52,19 +28,7 @@ pub enum EgyptianArabicNominalState {
 /// past, or prospective force, but morphologically they still agree like
 /// adjectives. The elative is one form whose comparative or superlative
 /// interpretation is supplied by syntax, so those are not split here.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicAdjectiveForm {
     Lexical,
     ActiveParticiple,
@@ -78,19 +42,7 @@ pub enum EgyptianArabicAdjectiveForm {
 /// Egyptian `itfa3al` passive/reflexive pattern sometimes called VIIt in
 /// descriptions of the dialect. Only the two surviving quadriliteral patterns
 /// are represented.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicVerbPattern {
     FormI,
     // Roman numerals need explicit names: `rename_all = "snake_case"` starts a new
@@ -123,19 +75,7 @@ pub enum EgyptianArabicVerbPattern {
 /// Egyptian Arabic has no inflectional case and no
 /// indicative/subjunctive/jussive ending system. Its imperfective stem
 /// contrasts a bare form with `b-` and future `ha-/ḥa-` series.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicVerbForm {
     Perfective,
     BareImperfective,
@@ -148,56 +88,20 @@ pub enum EgyptianArabicVerbForm {
 ///
 /// Passive and middle/reflexive meanings are normally built with derived
 /// patterns.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicVoice {
     Active,
     Passive,
     MiddleReflexive,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicPolarity {
     Affirmative,
     Negative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicPronounType {
     Personal,
     Demonstrative,
@@ -208,19 +112,7 @@ pub enum EgyptianArabicPronounType {
 }
 
 /// Syntactic function of an attached personal-pronoun clitic.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicAttachmentFunction {
     Possessive,
     DirectObject,
@@ -228,19 +120,7 @@ pub enum EgyptianArabicAttachmentFunction {
     Prepositional,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicDeterminerType {
     DefiniteArticle,
     Demonstrative,
@@ -249,19 +129,7 @@ pub enum EgyptianArabicDeterminerType {
 }
 
 /// Function of an Egyptian Arabic particle or morphologically split clitic.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EgyptianArabicParticleFunction {
     Negation,
     Interrogative,

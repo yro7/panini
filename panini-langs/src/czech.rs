@@ -45,19 +45,7 @@ use panini_core::traits::{
 /// The vocative is a full member of the set: formed productively on any
 /// masculine or feminine noun (Petr → Petře, pan doktor → pane doktore,
 /// Jana → Jano) and required in direct address.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechCase {
     Nominative,   // 1. pád — nominativ (kdo? co?)
     Genitive,     // 2. pád — genitiv (koho? čeho?)
@@ -75,19 +63,7 @@ pub enum CzechCase {
 /// nominative-shaped), the nominative plural (páni/pánové against hrady), and
 /// the written -i / -y of an agreeing adjective or *l*-participle (mladí muži
 /// psali against mladé hrady stály).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechGender {
     MasculineAnimate,   // rod mužský životný — pán, muž, soudce
     MasculineInanimate, // rod mužský neživotný — hrad, stroj
@@ -108,19 +84,7 @@ impl CzechGender {
 /// An imperfective has all three (psal / píšu / budu psát), a perfective only
 /// past and future (napsal / napíšu) — a perfective present-shaped form *is*
 /// a future.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechTense {
     Past,    // minulý čas
     Present, // přítomný čas
@@ -131,19 +95,7 @@ pub enum CzechTense {
 ///
 /// The conditional is the auxiliary paradigm bych, bys, by, bychom, byste
 /// plus the same *l*-participle the past uses.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechMood {
     Indicative,  // oznamovací způsob
     Imperative,  // rozkazovací způsob
@@ -155,19 +107,7 @@ pub enum CzechMood {
 /// Required on every verb; every other verbal field follows from it. In the
 /// compound tenses the participle and its auxiliary are analysed separately,
 /// each with the fields it carries.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechVerbForm {
     // Určitý tvar — a conjugated form: píšu, napíšeš, budeme, piš, bych.
     Finite,
@@ -192,19 +132,7 @@ pub enum CzechVerbForm {
 /// Czech negates a verb by prefixing ne- to the form itself — nevím, nechtěl,
 /// nebudu. The lemma stays positive (nevím → vědět); the negation is recorded
 /// here.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechPolarity {
     Affirmative, // píšu, byl, chtěj
     Negative,    // nepíšu, nebyl, nechtěj
@@ -215,19 +143,7 @@ pub enum CzechPolarity {
 /// Hard: mladý; soft: jarní. The possessive declension (otcův, matčin) is a
 /// third paradigm, mixing nominal and adjectival endings, and `Indeclinable`
 /// is the small closed class of borrowings that take no ending at all.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechAdjectiveDeclension {
     // Tvrdá — vzor mladý: mladý, mladá, mladé, mladého, mladým…
     Hard,
@@ -243,19 +159,7 @@ pub enum CzechAdjectiveDeclension {
 }
 
 /// Degree of comparison (*stupeň*), for adjectives and adverbs alike.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum CzechDegree {
     Positive,    // 1. stupeň — mladý, rychle
     Comparative, // 2. stupeň — mladší, rychleji

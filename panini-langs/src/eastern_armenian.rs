@@ -9,19 +9,7 @@ use panini_core::traits::{
 /// The seven functions are kept distinct even though nominative–accusative and
 /// genitive–dative are frequently syncretic on the surface. The extractor must
 /// resolve the case from syntax, not just from the ending.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianCase {
     Nominative,
     Accusative,
@@ -36,19 +24,7 @@ pub enum EasternArmenianCase {
 ///
 /// Definiteness is normally expressed by the enclitic `-ը` / `-ն`; possessive
 /// suffixes also make the noun phrase definite.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianDefiniteness {
     Indefinite,
     Definite,
@@ -59,37 +35,13 @@ pub enum EasternArmenianDefiniteness {
 /// It matters especially for differential object marking: human direct objects
 /// normally use a dative-shaped form, while non-human direct objects normally
 /// use a nominative-shaped form.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianAnimacy {
     Human,
     NonHuman,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianDegree {
     Positive,
     Comparative,
@@ -98,19 +50,7 @@ pub enum EasternArmenianDegree {
 }
 
 /// Morphological form occupied by a verb token.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianVerbForm {
     Finite,
     Infinitive,
@@ -119,19 +59,7 @@ pub enum EasternArmenianVerbForm {
 }
 
 /// The seven participial forms of Standard Eastern Armenian.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianParticipleType {
     Resultative,
     Subject,
@@ -146,19 +74,7 @@ pub enum EasternArmenianParticipleType {
 ///
 /// Necessitative constructions are periphrastic (`պետք է`, `պիտի`) but are a
 /// first-class cell of the Eastern Armenian verbal system.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianMood {
     Indicative,
     Imperative,
@@ -172,38 +88,14 @@ pub enum EasternArmenianMood {
 /// Compound constructions are split into their participle and auxiliary, so
 /// perfect and prospective meanings belong to the participle type plus the
 /// auxiliary tense rather than to extra synthetic tense values here.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianTense {
     Present,
     Imperfect,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianVoice {
     Active,
     Passive,
@@ -212,19 +104,7 @@ pub enum EasternArmenianVoice {
     Reciprocal,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EasternArmenianPolarity {
     Affirmative,
     Negative,

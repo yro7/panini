@@ -8,37 +8,13 @@ use panini_core::traits::{
 /// substance. English frequently shifts the same lemma between the two by
 /// sense (`coffee` / `two coffees`), so this describes the occurrence rather
 /// than an immutable dictionary property.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishCountability {
     Count,
     Mass,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishDegree {
     Positive,
     Comparative,
@@ -47,37 +23,13 @@ pub enum EnglishDegree {
 
 /// The only two synthetic tenses of contemporary English. Future, perfect and
 /// progressive constructions are periphrastic and are analysed token by token.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishTense {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishMood {
     Indicative,
     Imperative,
@@ -87,19 +39,7 @@ pub enum EnglishMood {
 /// Modern descriptions treat the verbal uses of the English `-ing` form as a
 /// single gerund-participial inflection; its syntactic function does not create
 /// two different word forms.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishVerbForm {
     Finite,
     Infinitive,
@@ -107,38 +47,14 @@ pub enum EnglishVerbForm {
     PastParticiple,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishPronounCase {
     Nominative,
     Accusative,
     Genitive,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishPronounType {
     Personal,
     Possessive,
@@ -150,19 +66,7 @@ pub enum EnglishPronounType {
     Expletive,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum EnglishDeterminerType {
     Article,
     Demonstrative,

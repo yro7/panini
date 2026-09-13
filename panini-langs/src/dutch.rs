@@ -10,55 +10,19 @@ use panini_core::traits::{
 /// `Common` is the class selected by singular `de`; `Neuter` is selected by
 /// singular `het`. Personal pronouns keep a separate three-gender contrast,
 /// represented by `pronominal_gender`.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchNominalGender {
     Common,
     Neuter,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchDefiniteness {
     Definite,
     Indefinite,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchDegree {
     Positive,
     Comparative,
@@ -70,37 +34,13 @@ pub enum DutchDegree {
 /// Future, perfect and conditional readings are periphrastic and are analysed
 /// token by token. `zal werken` is present `zullen` plus an infinitive, while
 /// `zou werken` is past `zullen` plus an infinitive.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchTense {
     Present,
     Past,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchMood {
     Indicative,
     Imperative,
@@ -110,19 +50,7 @@ pub enum DutchMood {
 }
 
 /// The productive finite/non-finite division of Dutch verbal morphology.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchVerbForm {
     Finite,
     Infinitive,
@@ -131,19 +59,7 @@ pub enum DutchVerbForm {
 }
 
 /// The principal-parts class of a Dutch verb lexeme.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchVerbClass {
     /// Suffixing (traditionally weak): `werken`, `werkte`, `gewerkt`.
     Weak,
@@ -159,19 +75,7 @@ pub enum DutchVerbClass {
 /// Absent on a simplex verb. Stress and meaning decide it, not the prefix's
 /// letters: separable `voorkomen` (occur) against inseparable `voorkomen`
 /// (prevent).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchSeparability {
     Separable,
     Inseparable,
@@ -182,19 +86,7 @@ pub enum DutchSeparability {
 /// Nouns have no productive case paradigm. Personal pronouns retain a subject
 /// form against an object/oblique form; the prescriptive `hen`/`hun`
 /// distinction lives inside that oblique domain.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchPronounCase {
     Nominative,
     Oblique,
@@ -202,38 +94,14 @@ pub enum DutchPronounCase {
 
 /// The syntactic role that selects an oblique personal-pronoun form — the
 /// standard `hen`/`hun` opposition.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchPronounRole {
     DirectObject,
     IndirectObject,
     Prepositional,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchPronounType {
     Personal,
     Possessive,
@@ -248,56 +116,20 @@ pub enum DutchPronounType {
 
 /// Full/stressed against reduced/unstressed pronominal forms (`jij`/`je`,
 /// `wij`/`we`, `mij`/`me`).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchPronounStrength {
     Strong,
     Weak,
 }
 
 /// The `jij/je` versus `u` address distinction.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchPoliteness {
     Familiar,
     Formal,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchDeterminerType {
     Article,
     Demonstrative,
@@ -307,19 +139,7 @@ pub enum DutchDeterminerType {
     Relative,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum DutchParticleType {
     Modal,
     Negation,

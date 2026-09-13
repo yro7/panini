@@ -9,19 +9,7 @@ use panini_core::traits::{
 ///
 /// The vocative remnants (Бо́же, отче) and the "second locative" (в лесу́,
 /// на краю́) are reported as the case their syntax calls for.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianCase {
     Nominative,    // именительный
     Genitive,      // родительный
@@ -36,19 +24,7 @@ pub enum RussianCase {
 /// It decides the accusative of masculine singulars (вижу брата = genitive
 /// form) and of every gender in the plural (вижу сестёр), and leaves the rest
 /// of the paradigm untouched.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianAnimacy {
     Animate,   // одушевлённое
     Inanimate, // неодушевлённое
@@ -59,19 +35,7 @@ pub enum RussianAnimacy {
 /// An imperfective has all three (писа́л / пишу́ / бу́ду писа́ть), a perfective
 /// only past and future (написа́л / напишу́) — a perfective "present" form is
 /// a future.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianTense {
     Past,    // прошедшее
     Present, // настоящее
@@ -79,19 +43,7 @@ pub enum RussianTense {
 }
 
 /// Mood of a finite verb (наклонение).
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianMood {
     Indicative,  // изъявительное
     Imperative,  // повелительное
@@ -102,19 +54,7 @@ pub enum RussianMood {
 ///
 /// Required on every verb; which fields apply follows from it. Participles
 /// decline like adjectives, verbal adverbs decline for nothing at all.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianVerbForm {
     Finite,       // спрягаемая форма
     Infinitive,   // инфинитив
@@ -125,38 +65,14 @@ pub enum RussianVerbForm {
 /// Long vs short form, shared by adjectives and by participles: написан is
 /// the short form of a passive participle just as краси́в is the short form of
 /// краси́вый.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianAdjectivalForm {
     Long,  // полная форма (declines)
     Short, // краткая форма (predicative only)
 }
 
 /// Degree of comparison (степень сравнения), for adjectives and adverbs.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum RussianDegree {
     Positive,    // положительная
     Comparative, // сравнительная

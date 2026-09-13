@@ -9,19 +9,7 @@ use panini_core::traits::{
 /// Vietnamese temporal reference, aspect, negation and modality are expressed
 /// by independent words. Those markers stay on the adverb token, with this
 /// function; the lexical verb carries no inflection.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum VietnameseAdverbType {
     /// An ordinary lexical adverb, including manner and location expressions.
     Lexical,
@@ -40,19 +28,7 @@ pub enum VietnameseAdverbType {
 /// The inventory is functional rather than positional: sentence-final
 /// particles do not all mean the same thing, and several items have different
 /// functions in different contexts.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum VietnameseParticleType {
     /// A polar-question or response-seeking particle, for example final `à`.
     Interrogative,
@@ -75,19 +51,7 @@ pub enum VietnameseParticleType {
 /// `KinshipAddress` and `TitleAddress` are distinct from dedicated personal
 /// pronouns: the same term can denote the speaker, addressee or a third person
 /// according to context.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    panini_macro::ClosedValues,
-)]
-#[serde(rename_all = "snake_case")]
+#[panini_macro::closed_enum]
 pub enum VietnamesePronounType {
     Personal,
     KinshipAddress,
