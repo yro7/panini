@@ -141,6 +141,8 @@ pub enum EasternArmenianMorphology {
     CoordinatingConjunction {
         lemma: String,
     },
+    /// Attributive demonstratives (այս, այդ, այն), attributive quantifiers
+    /// (ամեն, բոլոր, նույն, ուրիշ) and the indefinite article մի before a noun.
     Determiner {
         lemma: String,
     },
@@ -160,12 +162,20 @@ pub enum EasternArmenianMorphology {
         #[serde(skip_serializing_if = "Option::is_none")]
         possessor_number: Option<BinaryNumber>,
     },
+    /// Substantivized numerals decline (երկուսը, երկուսին); an attributive
+    /// numeral before its noun carries no case or definiteness.
     Numeral {
         lemma: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        case: Option<EasternArmenianCase>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        definiteness: Option<EasternArmenianDefiniteness>,
     },
     Particle {
         lemma: String,
     },
+    /// A pronoun standing on its own; a demonstrative or quantifier placed
+    /// before a noun is a determiner.
     Pronoun {
         lemma: String,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -319,15 +329,15 @@ impl LinguisticDefinition for EasternArmenian {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "1. Scope and lemmatization: analyze contemporary Standard Eastern Armenian of the Republic of Armenia. Use reformed orthography. Lemmatize common and proper nouns to the nominative singular indefinite form, verbs to the -ել or -ալ infinitive, adjectives to the positive form, and pronouns to their nominative citation form. The copular auxiliary has lemma 'եմ'; the lexical verb 'to be/become' has lemma 'լինել'.\n\
-         2. Never introduce grammatical gender: Eastern Armenian has none. For nouns and proper nouns always report human/non-human animacy, number, syntactic case and definiteness. The article -ը/-ն and possessive suffixes are attached to the host; do not emit them as determiner tokens. A possessive suffix makes the nominal definite and supplies possessor_person and, when distinguishable, possessor_number.\n\
-         3. Case is SYNTACTIC despite surface syncretism. A non-human direct object is normally nominative-shaped and a human direct object normally dative-shaped, but both are accusative in function and must be reported as accusative. Genitive and dative are often identical in form; decide from syntax. Report locative only for the productive -ում case, not merely for any location phrase.\n\
+        "1. Scope and lemmatization: analyze contemporary Standard Eastern Armenian of the Republic of Armenia. Use reformed orthography. Lemmatize common and proper nouns to the nominative singular indefinite form, verbs to the -ել or -ալ infinitive, adjectives to the positive form, and pronouns to their nominative citation form, numerals to their attributive citation form ('երկու', not the substantivized stem 'երկուս'). A personal pronoun's lemma is the nominative of its own person and number: ես, դու, նա, մենք, դուք, նրանք (so իմ and ինձ have lemma 'ես', մեր has lemma 'մենք', նրանց has lemma 'նրանք'). The copular auxiliary has lemma 'եմ'; the lexical verb 'to be/become' has lemma 'լինել'.\n\
+         2. Never introduce grammatical gender: Eastern Armenian has none. For nouns and proper nouns always report human/non-human animacy, number, syntactic case and definiteness. The article -ը/-ն and possessive suffixes are attached to the host; do not emit them as determiner tokens. The determiner tokens are attributive demonstratives and quantifiers ('այս ծաղիկը', 'ամեն օր', 'նույն դպրոցում') and the indefinite article 'մի' before a noun; a demonstrative standing alone is a pronoun. A possessive suffix makes the nominal definite and supplies possessor_person and, when distinguishable, possessor_number.\n\
+         3. Case is SYNTACTIC despite surface syncretism. A non-human direct object is normally nominative-shaped and a human direct object normally dative-shaped, but both are accusative in function and must be reported as accusative. Genitive and dative are often identical in form; decide from syntax. Report locative only for the productive -ում case, not merely for any location phrase. The bare goal of a verb of motion ('գնում ենք Երևան') is accusative, not dative. A nominative-shaped bare noun phrase used as a point-of-time or duration adverbial ('այս տարի', 'այդ ժամանակ', 'ամբողջ օրը', 'ժամը') is accusative of time, not nominative; a dative-marked temporal such as 'աշնանը', 'ամռանը' or 'երկուսին' stays dative; a lexicalized time adverb such as 'երեկոյան', 'առավոտյան', 'այսօր' or 'վաղը' is an adverb, not a declined noun. A substantivized numeral bearing nominal morphology ('ժամը երկուսին') gets case and definiteness; an attributive numeral gets neither.\n\
          4. Adpositions: Armenian has prepositions and postpositions. Report the case governed in this occurrence. Keep a postposition such as 'համար', 'հետ', 'մեջ' or 'վրա' as its own token; do not merge it with its complement.\n\
          5. Verbs: every verb gets verb_form, voice and polarity. Finite forms get mood, tense, person and number. Omit mood, tense and person on infinitives, participles and converbs. Add case, definiteness, possessor fields or nominal number only when a non-finite form is actually used and marked as a nominal.\n\
          6. Split every analytic construction into lexical tokens. In 'գրում եմ', analyze 'գրում' as an imperfective participle of 'գրել' and 'եմ' as a finite present indicative verb. Apply the same split to perfect, resultative, prospective and secondary compound constructions; do not assign the whole phrase as a synthetic tense to each token.\n\
          7. Finite tense values are morphological: present, imperfect and past (the synthetic aorist/simple past). The կ- series is conditional mood with present or imperfect morphology even when its contextual translation is future or would. Necessitative պետք/պիտի constructions use mood necessitative; imperatives have no tense.\n\
          8. Participle types: imperfective -ում; future -ու/-ելու; perfect -ել in an analytic perfect; resultative -ած; subject -ող; future_adjectival -իք/-ելիք; processual -իս. Set participle_type only when verb_form is participle. Treat adverbial forms such as -ելով/-ելիս used as clause modifiers as converbs.\n\
-         9. Voice values are active, passive, causative, middle and reciprocal. Do not label every -վ- verb passive: many are lexical middle/intransitive or reciprocal. Polarity follows the construction, including a lexical verb governed by a negative auxiliary.\n\
+         9. Voice values are active, passive, causative, middle and reciprocal. Do not label every -վ- verb passive: many are lexical middle/intransitive or reciprocal. Use middle only for a -վ- verb that is not passive; an intransitive without -վ- such as 'հանգստանալ' or 'ապրել' is active. Polarity follows the construction, including a lexical verb governed by a negative auxiliary.\n\
          10. Adjectives do not agree with an attributive noun in case or number. If an adjective is substantivized and bears nominal morphology, analyze that occurrence as a noun. Use absolute_superlative for գեր- formations and superlative for ամենա- or equivalent ordinary superlatives.\n\
          11. Tokenization and writing: keep Armenian question, exclamation and emphasis marks attached to their lexical host while analyzing the word without the punctuation mark; never emit punctuation as a morphology token. Preserve reformed spellings such as 'Երևան' and the letter 'և'; never normalize them to traditional Western/Iranian spellings."
     }
