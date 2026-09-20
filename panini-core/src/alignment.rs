@@ -478,7 +478,7 @@ pub mod wire {
 
     /// Whether a punctuation-only segment attaches directly to the previous
     /// word with no space in between, as is the norm for closing punctuation
-    /// across the supported languages.
+    /// across the supported languages, Arabic-script marks included.
     fn attaches_without_leading_space(surface: &str) -> bool {
         matches!(
             surface,
@@ -487,6 +487,9 @@ pub mod wire {
                 | ":"
                 | "!"
                 | "?"
+                | "\u{060C}"
+                | "\u{061B}"
+                | "\u{061F}"
                 | ")"
                 | "]"
                 | "}"
@@ -2407,5 +2410,44 @@ mod v6_tests {
         assert_eq!(resolved.links[0].target, vec![0, 1, 2]);
         assert_eq!(resolved.links[1].source, vec![4, 5]);
         assert_eq!(resolved.links[1].target, vec![3, 4]);
+    }
+
+    #[test]
+    fn arabic_punctuation_attaches_to_the_previous_word() {
+        let wire = wire_v6::AlignedTranslation {
+            source: vec![
+                vec!["إزي".into(), "ك".into()],
+                vec!["يا".into()],
+                vec!["منى".into()],
+                vec!["؟".into()],
+                vec!["الحمد".into()],
+                vec!["لله".into()],
+                vec!["،".into()],
+                vec!["كويسة".into()],
+                vec![".".into()],
+            ],
+            translation: "How are you, Mona? Thank God, fine.".into(),
+            target: vec![
+                vec!["How".into()],
+                vec!["are".into()],
+                vec!["you".into()],
+                vec![",".into()],
+                vec!["Mona".into()],
+                vec!["?".into()],
+                vec!["Thank".into()],
+                vec!["God".into()],
+                vec![",".into()],
+                vec!["fine".into()],
+                vec![".".into()],
+            ],
+            literal: None,
+            links: vec![wire_v6::AlignmentLink {
+                source: vec![0],
+                target: vec![0, 1],
+            }],
+        };
+
+        let resolved = wire.resolve().expect("arabic punctuation should resolve");
+        assert_eq!(resolved.source.text, "إزيك يا منى؟ الحمد لله، كويسة.");
     }
 }
