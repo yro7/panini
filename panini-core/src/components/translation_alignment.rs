@@ -55,8 +55,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                {{\"s\": text, \"o\": occurrence}} where `s` is the segment's exact text and \
                `o` is the 1-based position among segments with that same text in reading \
                order. Use `o`: 1 when the surface is unique. \
-               Discontinuous units go in one link (e.g. French `ne…pas` → one link with two \
-               source references).\n\
+               A discontinuous unit goes in one link holding several references on its side.\n\
              - Link ONLY segments that genuinely correspond in meaning or function — pairing \
                segments because they sit at the same position is wrong. A segment with no \
                counterpart in the other sentence appears in no link at all — never force a \
