@@ -70,6 +70,21 @@ mod tests {
         }
     }
 
+    /// A language without an inventory gets only the general rules, and its
+    /// side comes out under-segmented next to one that has an inventory.
+    #[test]
+    fn every_defined_language_declares_an_inventory() {
+        let missing: Vec<&str> = with_languages!(lang_entries)
+            .iter()
+            .filter(|entry| entry.directives.is_none())
+            .map(|entry| entry.struct_name)
+            .collect();
+        assert!(
+            missing.is_empty(),
+            "languages without alignment directives: {missing:?}"
+        );
+    }
+
     /// The inventory serves whether the language is the source or the
     /// translation, so it must not be written for one particular pair.
     #[test]
