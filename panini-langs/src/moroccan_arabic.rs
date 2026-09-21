@@ -481,8 +481,7 @@ impl LinguisticDefinition for MoroccanArabic {
             "1. Proclitics written attached to the next word are segments of that word: conjunctions و-/ف-, prepositions ب-/ل-/ف-, the article ال-, bound genitive د-, negative ما-, aspectual كا-/تا-, future غا-/غادي-, presentative را-/ها- — [\"ف\", \"ال\", \"دار\"], [\"د\", \"ال\", \"ولد\"], [\"كا\", \"ن\", \"كتب\"], [\"غا\", \"ي\", \"مشي\"].\n\
              2. Enclitics are segments of their host: object and possessive pronouns (ني/ي، ك، و/ه، ها، نا، كم، هم), negative -ش, and the ل + pronoun dative series written on the verb — [\"كتاب\", \"و\"], [\"شفت\", \"ك\"], [\"كتبت\", \"ليه\"]. A feminine ة written ت before a suffix stays in the host segment.\n\
              3. Negation ما … ش is one discontinuous unit: [\"ما\"], [\"كتبت\", \"ش\"] in one link; ما alone before والو/حتى is that same unit; ماشي is a separate word.\n\
-             4. Subject inflection on the verb (يـ/تـ/ن/ك- prefixes, -ت, -ي, -و) is a segment only when the other sentence expresses that subject as its own unit.\n\
-             5. Latin-script Arabizi (3 = ع, 7 = ح, 9 = ق) splits at the same boundaries: [\"f\", \"dar\"], [\"ktab\", \"i\"].",
+             4. Subject inflection on the verb (يـ/تـ/ن/ك- prefixes, -ت, -ي, -و) is a segment only when the other sentence expresses that subject as its own unit.",
         )
     }
 }

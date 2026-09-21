@@ -429,8 +429,7 @@ impl LinguisticDefinition for EgyptianArabic {
             "1. Proclitics written attached to the next word are segments of that word: conjunctions و-/ف-, prepositions ب-/ل-/ع-, the article ال-, negative ما-, future حـ-/هـ-, aspectual بـ- — [\"و\", \"إنت\"], [\"ب\", \"ال\", \"بيت\"], [\"ح\", \"نروح\"].\n\
              2. Enclitics are segments of their host: object and possessive pronouns (ني/ي، ك، ه، ها، نا، كم، هم), negative -ش, and a ل + pronoun dative written on the verb — [\"اسم\", \"ك\"], [\"شفت\", \"ه\"], [\"قال\", \"ل\", \"ها\"]. A feminine ة written ت before a suffix stays in the host segment: [\"حضرت\", \"ك\"].\n\
              3. Negation ما … ش is one discontinuous unit: [\"ما\", \"شفت\", \"ش\"] in one link; مش is a separate word.\n\
-             4. Subject inflection on the verb (يـ/تـ/أ/نـ, -ت, -ي, -وا) is a segment only when the other sentence expresses that subject as its own unit: [\"ب\", \"ي\", \"كتب\"].\n\
-             5. Latin-script Arabizi splits at the same boundaries: [\"w\", \"enta\"], [\"esm\", \"ak\"].",
+             4. Subject inflection on the verb (يـ/تـ/أ/نـ, -ت, -ي, -وا) is a segment only when the other sentence expresses that subject as its own unit: [\"ب\", \"ي\", \"كتب\"].",
         )
     }
 }
