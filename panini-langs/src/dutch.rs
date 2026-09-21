@@ -490,6 +490,16 @@ impl LinguisticDefinition for Dutch {
          11. Particles and ambiguous short words: te before an infinitive is an infinitival Particle; niet is a negation Particle; unstressed words such as eens, maar, toch, even and nou are modal Particles only in their discourse-softening reading, not automatically in every occurrence. A stranded part of a separable verb is a separated_verb_prefix. Tag ja/nee used as answers as Interjections. Analyze er by its actual adverbial/pronominal function in context rather than treating it as a meaningless filler.\n\
          12. Tokenization: preserve one token per orthographic word except that a visibly separated verb prefix remains its own Particle as above. Reduced written pronouns ('k, 't, 'm, d'r) remain their own Pronoun tokens and take their full paradigm lemma; do not merge them into a neighbouring verb. Keep ordinary noun compounds and adjacent forms of separable verbs as one token. Never emit punctuation as a token."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A separable prefix stranded at the end of the clause is its own word (sta … op: one link across two words); written attached it is a segment, as are the participle ge- and the infinitival te inside the verb: [\"op\", \"staan\"], [\"op\", \"ge\", \"staan\"], [\"op\", \"te\", \"staan\"].\n\
+             2. A compound is one written word; split it at the constituent boundary when the other sentence has separate words, the linking -s-/-en-/-e- staying with the first constituent: [\"huis\", \"deur\"], [\"boeken\", \"kast\"], [\"stations\", \"plein\"].\n\
+             3. The clipped forms 't, 'n, 's, d'r, z'n are words of their own: [\"'t\"], [\"is\"]. Pronominal adverbs split at er-/daar-/waar-/hier-: [\"er\", \"mee\"], [\"daar\", \"op\"], [\"waar\", \"om\"].\n\
+             4. The diminutive -je/-tje/-pje stays in the word unless the other sentence has a separate word for it: [\"huis\", \"je\"] only against \"little\".",
+        )
+    }
 }
 
 #[cfg(test)]
