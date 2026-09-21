@@ -314,8 +314,7 @@ impl LinguisticDefinition for Spanish {
     fn alignment_directives(&self) -> Option<&'static str> {
         Some(
             "1. An enclitic cluster is one written word whose clitics are segments, the accent kept as written: [\"dá\", \"me\", \"lo\"], [\"diciéndo\", \"se\", \"lo\"], [\"hacer\", \"lo\"], [\"vámo\", \"nos\"]. A proclitic (me lo dijo) is its own word.\n\
-             2. The contractions al and del stay ONE segment linked to both units.\n\
-             3. no … nada / nadie / nunca / ningún is one discontinuous unit when the other sentence negates once; no alone is a separate word.",
+             2. no … nada / nadie / nunca / ningún is one discontinuous unit when the other sentence negates once; no alone is a separate word.",
         )
     }
 }
