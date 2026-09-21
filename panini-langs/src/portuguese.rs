@@ -184,7 +184,7 @@ impl LinguisticDefinition for Portuguese {
 
     fn alignment_directives(&self) -> Option<&'static str> {
         Some(
-            "1. A hyphenated clitic is a segment of its host, the hyphen staying with the clitic: [\"deu\", \"-me\"], [\"viu\", \"-o\"], mesoclisis [\"dar\", \"-lhe\", \"-ia\"]. The altered host and allomorph after -r/-s/-z or a nasal stay as written ([\"fazê\", \"-lo\"], [\"fizeram\", \"-no\"]); a combined clitic (mo, to, lho) stays one segment linked to both pronouns. A proclitic (me deu) is its own word.\n\
+            "1. A hyphenated clitic opens a word, the hyphen staying with the clitic: [\"deu\"], [\"-me\"]; [\"viu\"], [\"-o\"]; mesoclisis [\"dar\"], [\"-lhe\"], [\"-ia\"]. The altered host and allomorph after -r/-s/-z or a nasal stay as written ([\"fazê\"], [\"-lo\"]; [\"fizeram\"], [\"-no\"]); a combined clitic (mo, to, lho) stays one word linked to both pronouns.\n\
              2. A preposition contracted with a determiner or pronoun (do, da, no, na, num, pelo, ao, à, deste, nisso, dele) stays ONE segment linked to every unit it covers.",
         )
     }
