@@ -45,6 +45,9 @@ impl std::fmt::Display for ProficiencyLevel {
 pub struct ComponentContext<'a> {
     pub targets: &'a [String],
     pub learner_ui_language: IsoLang,
+    /// `LinguisticDefinition::alignment_directives` of `learner_ui_language`,
+    /// resolved by the caller; `None` when that language has no definition.
+    pub translation_alignment_directives: Option<&'a str>,
     pub pedagogical_context: Option<&'a str>,
     pub skill_path: Option<&'a str>,
     pub linguistic_background: &'a [LanguageLevel],

@@ -49,6 +49,9 @@ macro_rules! declare_languages {
 
 with_languages!(declare_languages);
 
+mod alignment_directives;
+pub use alignment_directives::alignment_directives_for;
+
 #[cfg(feature = "registry")]
 pub mod registry;
 

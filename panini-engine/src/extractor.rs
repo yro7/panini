@@ -944,6 +944,7 @@ mod tests {
             pedagogical_context: None,
             skill_path: None,
             learner_ui_language: IsoLang::Eng,
+            translation_alignment_directives: None,
             linguistic_background: vec![],
             user_prompt: None,
         }
@@ -1122,6 +1123,7 @@ mod tests {
             pedagogical_context: None,
             skill_path: None,
             learner_ui_language: IsoLang::Eng,
+            translation_alignment_directives: None,
             linguistic_background: vec![],
             user_prompt: None,
         };
@@ -1162,6 +1164,7 @@ mod tests {
             pedagogical_context: None,
             skill_path: None,
             learner_ui_language: IsoLang::Eng,
+            translation_alignment_directives: None,
             linguistic_background: vec![],
             user_prompt: None,
         };

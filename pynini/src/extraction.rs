@@ -48,17 +48,14 @@ fn load_prompts(prompts_input: Option<&Bound<'_, PyAny>>) -> PyResult<ExtractorP
 }
 
 /// Helper to create an extraction request.
-const fn create_request(
-    text: String,
-    targets: Vec<String>,
-    ui_language: IsoLang,
-) -> ExtractionRequest {
+fn create_request(text: String, targets: Vec<String>, ui_language: IsoLang) -> ExtractionRequest {
     ExtractionRequest {
         content: text,
         targets,
         pedagogical_context: None,
         skill_path: None,
         learner_ui_language: ui_language,
+        translation_alignment_directives: panini_langs::alignment_directives_for(ui_language),
         linguistic_background: vec![],
         user_prompt: None,
     }
