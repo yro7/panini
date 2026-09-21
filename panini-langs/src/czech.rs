@@ -616,6 +616,15 @@ impl LinguisticDefinition for Czech {
          field, and never append prose to a key. Every cardinal numeral (jeden, dva/dvě, pět, sto) \
          uses pos 'numeral'; 'cardinal_numeral' and 'cardinal numeral' are not valid keys."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Negative ne- written attached to its verb is a segment, kept in one link with what it negates: [\"Ne\", \"choď\"], [\"ne\", \"mám\"]. The enclitic -li opens a word at the hyphen: [\"Máš\"], [\"-li\"].\n\
+             2. The past-tense and conditional auxiliaries (jsem, jsi, jsme, bych, bys) and the reflexive se/si are separate words; the fused imperative endings -me/-te are a segment only against a separate subject word: [\"Kup\", \"me\"].\n\
+             3. Prepositions are separate words in their written variant (s/se, v/ve, k/ke, z/ze); a preposition and the noun it governs are never one array.",
+        )
+    }
 }
 
 #[cfg(test)]
