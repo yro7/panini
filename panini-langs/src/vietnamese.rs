@@ -176,6 +176,15 @@ impl LinguisticDefinition for Vietnamese {
          7. Pronouns versus determiners: classify forms such as `này`, `đó`, `kia`, `ai`, `gì` and `nào` by their actual syntactic function. A form modifying an overt nominal is a Determiner; a form heading the noun phrase is a Pronoun. Keep lexicalized multi-syllable or multiword pronouns such as `chúng tôi`, `chúng ta`, `anh ấy`, `cô ấy`, `bản thân` and `người ta` as one TokenAnalysis when they function as one reference expression.\n\
          8. Particles: every Particle gets particle_type according to its function in context, not merely its position. Use interrogative for question particles, politeness for `ạ`, modal for stance/illocutionary softeners such as `nhé` or `nhỉ`, focus for focus markers such as `chính`, topic for particle `thì`, and discourse for connective or turn-management uses such as `mà` and `chứ`; use other only for a genuine particle outside these functions. The same spelling may instead be an Adverb, Determiner, Pronoun, Verb or Interjection in another context. Never emit punctuation as a token."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Every syllable is written with a space around it, and a word is often two or three syllables: sinh viên, học sinh, xe đạp, cà phê, không khí. Each syllable is its own written word — never merge syllables into one array — and the whole word is ONE link spanning them.\n\
+             2. Grammatical words are separate: tense/aspect đã/đang/sẽ/rồi/chưa, plural các/những, classifiers (con, cái, chiếc, quyển), negation không/chẳng, the question không/à/nhé at the end; link each to its counterpart or leave it unlinked.\n\
+             3. Reduplication (vui vẻ, nho nhỏ, xinh xắn) is two written words in one link. Nothing inside a syllable is ever a segment.",
+        )
+    }
 }
 
 #[cfg(test)]
