@@ -487,6 +487,15 @@ impl LinguisticDefinition for NorwegianBokmal {
             "12. Particles, word order and tokenization: å before an infinitive is an infinitival Particle; ikke is a negation Particle. A stressed free element of a particle verb (slå av, finne ut) is a verb_particle, while the Verb keeps the complete lexical expression as its lemma only when the dictionary treats that expression as the lexeme; let the Multiword Expressions component record the combination. Use Bokmål V2 main-clause order and subordinate-clause placement of sentence adverbs only to resolve ambiguous forms, not as morphology to encode. Preserve one token per orthographic word, keep compounds intact, and never emit punctuation as a token."
         )
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The suffixed definite article is a segment: [\"bok\", \"a\"], [\"hus\", \"et\"], [\"bil\", \"en\"], [\"bøk\", \"ene\"]; the genitive -s likewise: [\"Kari\", \"s\"].\n\
+             2. A compound is one written word; split it at the constituent boundary when the other sentence has separate words, the linking -s-/-e- staying with the first constituent: [\"syke\", \"hus\"], [\"arbeids\", \"dag\"], [\"fotball\", \"kamp\"].\n\
+             3. A particle verb (står opp, tar av, liker seg) is several written words in one link; ikke and the reflexive seg are separate words.",
+        )
+    }
 }
 
 #[cfg(test)]
