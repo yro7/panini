@@ -184,8 +184,7 @@ impl LinguisticDefinition for French {
         Some(
             "1. Elision and hyphenation happen inside one written word: the apostrophe stays with the clitic segment and the hyphen with the segment it introduces — [\"j'\", \"aime\"], [\"l'\", \"école\"], [\"qu'\", \"il\"], [\"est\", \"-ce\"], [\"donne\", \"-le\", \"-moi\"], [\"va\", \"-t\", \"-il\"].\n\
              2. Contracted articles au, aux, du, des stay ONE segment linked to every unit they cover; never rewrite them.\n\
-             3. Negation is discontinuous — ne … pas / plus / jamais / rien / personne / que — one link holding both words, the first often elided as [\"n'\", …].\n\
-             4. Regular inflection is separable when it matches a unit of the other sentence: plural -s/-x, feminine -e, verb endings ([\"chat\", \"s\"], [\"parl\", \"ons\"], [\"parl\", \"ait\"]). Suppletive or irregular forms (sommes, vont, yeux) stay whole.",
+             3. Negation is discontinuous — ne … pas / plus / jamais / rien / personne / que — one link holding both words, the first often elided as [\"n'\", …].",
         )
     }
 }
