@@ -116,6 +116,25 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
         Ok(())
     }
 
+    /// Validate this component's section against the item it was extracted
+    /// from — `content` is the request's content string, a card JSON with a
+    /// `sentence` field in the alignment paths.
+    ///
+    /// [`Self::validate`] sees the section alone; a component whose output
+    /// must reproduce the input text (alignment) overrides this to compare
+    /// the two. Runs after `validate`, before `post_process`.
+    ///
+    /// # Errors
+    /// Returns a validation error string, written for the LLM retry.
+    fn validate_against_content(
+        &self,
+        _lang: &L,
+        _content: &str,
+        _section: &serde_json::Value,
+    ) -> Result<(), String> {
+        Ok(())
+    }
+
     /// Post-process this component's section of the parsed JSON (in place).
     ///
     /// # Errors
