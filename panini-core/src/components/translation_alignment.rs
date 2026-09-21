@@ -50,8 +50,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                one link spanning several segments, not by merging words. Conversely, NEVER \
                split one written word into several arrays: a clitic written attached to its \
                host (an article, a conjunction, a preposition, a pronoun suffix) is a segment \
-               of that word's array, e.g. [\"و\", \"إنت\"] or [\"اسم\", \"ك\"], never a word \
-               of its own.\n\
+               of that word's array, never a word of its own.\n\
              - `l` holds the links; they are many-to-many and reference segments as \
                {{\"s\": text, \"o\": occurrence}} where `s` is the segment's exact text and \
                `o` is the 1-based position among segments with that same text in reading \

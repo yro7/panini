@@ -422,6 +422,17 @@ impl LinguisticDefinition for EgyptianArabic {
          14. Names, address and formulas: a personal or place name is `proper_noun`, which takes only a lemma — `سارة`، `منى`، `علي`، `أحمد`، `مصر`، `إسكندرية`. NEVER tag a name as `noun`, and never manufacture a root for one: `علي` the name has no root, unlike the preposition `على`. The vocative `يا` is a `particle` whose `particle_function` is `vocative`, never a bare particle without that field. Question words split by category: `إيه` (what) and `مين` (who) are `pronoun` with pronoun_type `interrogative`; `فين` (where), `منين` (from where), `إمتى` (when), `ليه` (why), `إزاي` (how) and its bound form `إزي` (in `إزيك`/`إزي حضرتك`, lemma `إزاي`) are `adverb`, never pronouns, and the pronoun `إزي` hosts has attachment_function `prepositional`. Greeting and reaction formulas — `أهلا`، `شكرا`، `معلش`، `يلا`، `خلاص`، `إن شاء الله`, and bare `سلام` used as a farewell — are `interjection`, not nouns, and take only a lemma; by contrast `السلام عليكم` is the article `ال` plus the noun `سلام`. Every `particle` you emit MUST carry a `particle_function`, and every `noun` MUST carry gender, number, definiteness and state.\n\
          15. VALUE RULES: noun `number` is exactly singular/dual/plural; `agreement_number` and referent_number are only singular/plural. Gender values are only masculine/feminine and must never appear in a number field. Never emit `case`, `mood`, MSA nunation, dual verb agreement, or feminine-plural verb agreement."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Proclitics written attached to the next word are segments of that word: conjunctions و-/ف-, prepositions ب-/ل-/ع-, the article ال-, negative ما-, future حـ-/هـ-, aspectual بـ- — [\"و\", \"إنت\"], [\"ب\", \"ال\", \"بيت\"], [\"ح\", \"نروح\"].\n\
+             2. Enclitics are segments of their host: object and possessive pronouns (ني/ي، ك، ه، ها، نا، كم، هم), negative -ش, and a ل + pronoun dative written on the verb — [\"اسم\", \"ك\"], [\"شفت\", \"ه\"], [\"قال\", \"ل\", \"ها\"]. A feminine ة written ت before a suffix stays in the host segment: [\"حضرت\", \"ك\"].\n\
+             3. Negation ما … ش is one discontinuous unit: [\"ما\", \"شفت\", \"ش\"] in one link; مش is a separate word.\n\
+             4. Subject inflection on the verb (يـ/تـ/أ/نـ, -ت, -ي, -وا) is a segment only when the other sentence expresses that subject as its own unit: [\"ب\", \"ي\", \"كتب\"].\n\
+             5. Latin-script Arabizi splits at the same boundaries: [\"w\", \"enta\"], [\"esm\", \"ak\"].",
+        )
+    }
 }
 
 #[cfg(test)]
