@@ -240,6 +240,15 @@ impl LinguisticDefinition for Polish {
          past-tense l-participles and conditional forms, where the verb agrees in gender; omit \
          it from present and future non-past forms."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. nie written detached (nie mam) is its own word; written attached to an adjective, participle or noun it is a segment: [\"nie\", \"dobry\"], [\"nie\", \"znany\"].\n\
+             2. The mobile person endings -m/-ś/-śmy/-ście and the conditional by are segments of whatever word hosts them, against a separate subject or \"would\": [\"Kupił\", \"em\"], [\"gdzie\", \"ś\"], [\"chciał\", \"by\", \"m\"], [\"że\", \"by\"].\n\
+             3. Prepositions in their written variant (w/we, z/ze, od/ode) and the reflexive się are separate words; a hyphenated compound opens at the hyphen: [\"biało\"], [\"-czerwony\"].",
+        )
+    }
 }
 
 #[cfg(test)]
