@@ -341,6 +341,16 @@ impl LinguisticDefinition for EasternArmenian {
          10. Adjectives do not agree with an attributive noun in case or number. If an adjective is substantivized and bears nominal morphology, analyze that occurrence as a noun. Use absolute_superlative for գեր- formations and superlative for ամենա- or equivalent ordinary superlatives.\n\
          11. Tokenization and writing: keep Armenian question, exclamation and emphasis marks attached to their lexical host while analyzing the word without the punctuation mark; never emit punctuation as a morphology token. Preserve reformed spellings such as 'Երևան' and the letter 'և'; never normalize them to traditional Western/Iranian spellings."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The definite article -ն/-ը and the possessive -ս/-դ are segments: [\"անուն\", \"ն\"], [\"գիրք\", \"ը\"], [\"տուն\", \"ս\"].\n\
+             2. A case ending is a segment when the other sentence has an adposition for it: [\"ռեստորան\", \"ում\"], [\"երկուս\", \"ին\"], [\"Երևան\", \"ից\"], [\"ընկեր\", \"ների\"]; the plural -ներ/-եր likewise against a separate plural mark.\n\
+             3. The question mark ՞ and the emphasis mark ՛ sit inside the word: keep them in the segment as written ([\"Դավի՞թ\", \"ն\"]). ։ , ՝ and — are separate punctuation words.\n\
+             4. The participle and the copula (եմ, ես, է, ենք, էի, էին) are separate written words; they go in one link when the other sentence has a single verb form.",
+        )
+    }
 }
 
 #[cfg(test)]
