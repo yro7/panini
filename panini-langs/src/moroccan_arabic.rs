@@ -474,6 +474,17 @@ impl LinguisticDefinition for MoroccanArabic {
          14. Conjunctions, names and formulas: decide coordination versus subordination for every conjunction and emit the specific value. `coordinating_conjunction` covers و، ف، أو، ولا، بصح، ولكن; `subordinating_conjunction` covers ملي، فاش، باش، حيت، علاحقاش، إلا، واخا، بلا ما، قبل ما، من بعد ما، حتى. NEVER emit a bare `conjunction` or `conj`: an unspecific tag is filed as coordinating and silently mis-analyses Moroccan subordination. `اللي` is not a conjunction; it is a relative pronoun. A personal or place name is `proper_noun`, which takes only a lemma — `فاطمة`، `يوسف`، `المغرب`، `الدار البيضاء`، `مراكش` — and never a manufactured root. Terms of address are NOT proper nouns: `سيدي` is the noun `سيد` in construct state plus the possessive `ي`, `خويا` is `خو` plus `يا`, `ختي` is `خت` plus `ي`, and `لالة` is a free feminine noun. `بعد`, `قبل`, `قدام`, `حدا` and `عند` governing a noun or a suffix are `adposition` (`من بعد يومين`, `عندي`), not adverbs. Greeting and reaction formulas — `أهلا`، `شكرا`، `صافي`، `يالله`، `واخا`، `الله يخليك`، `إن شاء الله` — are `interjection`, not nouns.\n\
          15. VALUE RULES: noun `number` is exactly singular/dual/plural, with `dual` only on the frozen residue in rule 4; `agreement_number` and referent_number are only singular/plural. Gender values are only masculine/feminine and must never appear in a number field. Every `noun` MUST carry gender, number, definiteness and state. Never emit `case`, `mood`, MSA nunation, dual verb agreement, feminine-plural verb agreement, a `bi_imperfective`, a `ha_imperfective`, or a Form IV, V, VI or VII pattern."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Proclitics written attached to the next word are segments of that word: conjunctions و-/ف-, prepositions ب-/ل-/ف-, the article ال-, bound genitive د-, negative ما-, aspectual كا-/تا-, future غا-/غادي-, presentative را-/ها- — [\"ف\", \"ال\", \"دار\"], [\"د\", \"ال\", \"ولد\"], [\"كا\", \"ن\", \"كتب\"], [\"غا\", \"ي\", \"مشي\"].\n\
+             2. Enclitics are segments of their host: object and possessive pronouns (ني/ي، ك، و/ه، ها، نا، كم، هم), negative -ش, and the ل + pronoun dative series written on the verb — [\"كتاب\", \"و\"], [\"شفت\", \"ك\"], [\"كتبت\", \"ليه\"]. A feminine ة written ت before a suffix stays in the host segment.\n\
+             3. Negation ما … ش is one discontinuous unit: [\"ما\"], [\"كتبت\", \"ش\"] in one link; ما alone before والو/حتى is that same unit; ماشي is a separate word.\n\
+             4. Subject inflection on the verb (يـ/تـ/ن/ك- prefixes, -ت, -ي, -و) is a segment only when the other sentence expresses that subject as its own unit.\n\
+             5. Latin-script Arabizi (3 = ع, 7 = ح, 9 = ق) splits at the same boundaries: [\"f\", \"dar\"], [\"ktab\", \"i\"].",
+        )
+    }
 }
 
 #[cfg(test)]
