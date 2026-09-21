@@ -304,6 +304,26 @@ pub trait LinguisticDefinition {
         None
     }
 
+    /// Segmentation rules for translation alignment — what this language
+    /// can split a written word into when the other sentence expresses that
+    /// piece as a separate unit.
+    ///
+    /// An inventory of the *separable* material of the language, for an
+    /// alignment that preserves the written surface exactly: clitics written
+    /// attached to their host, fused case/number marks, agglutinative chains,
+    /// discontinuous units, contractions that must stay one segment linked
+    /// to several. It says what *can* be a segment; the component's general
+    /// rule decides *whether* to split (only when the piece corresponds to a
+    /// unit of the other sentence).
+    ///
+    /// Not [`Self::extraction_directives`]: those normalize (lemmas, `au` as
+    /// `à` + `le`), alignment never does. Never pairwise — the same text
+    /// serves whether the language is the source or the translation, so it
+    /// must not mention another language. A few numbered lines at most.
+    fn alignment_directives(&self) -> Option<&'static str> {
+        None
+    }
+
     /// Post-process the morpheme segmentation returned by the LLM.
     ///
     /// # Errors
