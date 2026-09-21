@@ -89,6 +89,25 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
         alignment.resolve().map(|_| ())
     }
 
+    fn validate_against_content(
+        &self,
+        _lang: &L,
+        content: &str,
+        section: &serde_json::Value,
+    ) -> Result<(), String> {
+        // Content without a `sentence` (a card model that carries none) has
+        // nothing to hold the alignment against.
+        let Some(sentence) = serde_json::from_str::<serde_json::Value>(content)
+            .ok()
+            .and_then(|c| c.get("sentence")?.as_str().map(str::to_owned))
+        else {
+            return Ok(());
+        };
+        let alignment: wire_v3::AlignedTranslation =
+            serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
+        alignment.resolve()?.check_source_sentence(&sentence)
+    }
+
     fn post_process(&self, _lang: &L, section: &mut serde_json::Value) -> Result<(), String> {
         let alignment: wire_v3::AlignedTranslation =
             serde_json::from_value(section.clone()).map_err(|e| e.to_string())?;
@@ -148,6 +167,50 @@ mod tests {
             skill_path: None,
             linguistic_background: &[],
         }
+    }
+
+    fn section(words: &[&[&str]]) -> serde_json::Value {
+        serde_json::json!({
+            "s": words,
+            "t": {"x": "x", "w": [["x"]]},
+            "l": [],
+            "lit": null
+        })
+    }
+
+    #[test]
+    fn a_respelled_source_is_rejected_against_the_content() {
+        let content = serde_json::json!({"sentence": "Poltsa bidaietarako dut"}).to_string();
+        let good = section(&[&["Poltsa"], &["bidai", "etarako"], &["dut"]]);
+        let bad = section(&[&["Poltsa"], &["bidaia", "etarako"], &["dut"]]);
+
+        AnalysisComponent::<StubLanguage>::validate_against_content(
+            &TranslationAlignment,
+            &StubLanguage,
+            &content,
+            &good,
+        )
+        .expect("the sentence as written passes");
+        let err = AnalysisComponent::<StubLanguage>::validate_against_content(
+            &TranslationAlignment,
+            &StubLanguage,
+            &content,
+            &bad,
+        )
+        .unwrap_err();
+        assert!(err.contains("never respelled"), "got: {err}");
+    }
+
+    #[test]
+    fn content_without_a_sentence_is_not_checked() {
+        let bad = section(&[&["whatever"]]);
+        AnalysisComponent::<StubLanguage>::validate_against_content(
+            &TranslationAlignment,
+            &StubLanguage,
+            r#"{"prompt": "no sentence here"}"#,
+            &bad,
+        )
+        .expect("nothing to hold the alignment against");
     }
 
     #[test]
