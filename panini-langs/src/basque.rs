@@ -1306,6 +1306,17 @@ impl LinguisticDefinition for Basque {
         Some(self.morpheme_directives())
     }
 
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The noun-phrase ending is a separable segment: article -a/-ak/-ok, ergative -k, dative -(r)i, genitive -(r)en, locative genitive -ko, inessive -(e)an/-(e)tan, allative -(e)ra, ablative -(e)tik, comitative -(r)ekin, instrumental -(e)z, partitive -(r)ik — [\"etxe\", \"an\"], [\"lagun\", \"arekin\"], [\"Bilbo\", \"ko\"]. The epenthetic -e-/-r-/-t- stays with the suffix; article and case fused in one ending split only where the other sentence needs it ([\"etxe\", \"a\", \"n\"] or [\"etxe\", \"an\"]).\n\
+             2. A finite auxiliary or synthetic verb (dut, dizkizut, zitzaizkidan, dator) stays ONE segment: link it to every unit it covers (auxiliary, subject, object, indirect object).\n\
+             3. Affixes on the finite verb are separable: ba-, bait-, and the subordinators -(e)n, -(e)la, -(e)lako, -(e)nean — [\"ba\", \"dator\"], [\"dakit\", \"ela\"], [\"datorr\", \"en\"].\n\
+             4. Non-finite endings are separable: participle -tu/-du/-i, imperfective -t(z)en, future -ko/-go, verbal noun -t(z)e and its case — [\"ikus\", \"ten\"], [\"ikusi\", \"ko\"], [\"joan\", \"go\"], [\"ikus\", \"te\", \"ra\"].\n\
+             5. ez, ezin, al, ote, omen, ere are separate words; negation is not discontinuous.",
+        )
+    }
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<BasqueMorphemeFunction>>>,
