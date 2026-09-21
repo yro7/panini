@@ -160,4 +160,14 @@ impl LinguisticDefinition for Italian {
          9. Elisions: restore an elided word to its full form as its own token — l'ho visto -> 'lo' + 'ho' + 'visto'; un'amica -> 'una' + 'amica'; l'altra -> 'la' + 'altra'.\n\
          10. Preposizioni articolate: split articulated prepositions into the preposition lemma and the determiner (e.g., 'della' -> 'di' + 'la' as feminine singular, 'nei' -> 'in' + 'i' as masculine plural)."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Elision opens a word at the apostrophe: [\"l'\"], [\"amico\"]; [\"un'\"], [\"altra\"]; [\"dell'\"], [\"acqua\"]; [\"c'\"], [\"è\"].\n\
+             2. An articulated preposition (del, nel, sul, al, dal, della, nello, dagli) is one written word; split it at the surface boundary when the other sentence has both a preposition and an article — [\"de\", \"l\"], [\"ne\", \"lla\"], [\"a\", \"l\"] — and keep it whole otherwise.\n\
+             3. An enclitic cluster on an infinitive, gerund or imperative is one word whose clitics are segments: [\"dam\", \"me\", \"lo\"], [\"far\", \"lo\"], [\"dicendo\", \"glie\", \"lo\"], [\"andar\", \"sene\"]. Proclitics (me lo dà) are separate words.\n\
+             4. non is a separate word; non … mai / niente / nessuno / più is one discontinuous unit in one link.",
+        )
+    }
 }
