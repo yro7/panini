@@ -179,4 +179,13 @@ impl LinguisticDefinition for Danish {
          9. 'en' and 'et' standing before a noun are the indefinite article: tag them as a determiner carrying gender, common for 'en' and neuter for 'et', never as a numeral or as other. This holds when the noun phrase answers 'hvor mange' ('kun et æble og en pære' is still determiner neuter and determiner common). The numeral reading is only for the stressed, accent-marked 'én'/'ét' that counts one against another number. Getting this wrong erases the en/et contrast, which is the single most taught point of Danish grammar.\n\
          10. A word qualifying a noun, whether attributive ('kold mælk', 'det kolde vand') or predicative ('vandet er koldt'), is an adjective with its degree, never an adverb. Tag an adverb only for a word modifying a verb, an adjective or the whole clause ('meget', 'ofte', 'ikke')."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The suffixed definite article is a segment: [\"bog\", \"en\"], [\"hus\", \"et\"], [\"bøger\", \"ne\"]; the genitive -s likewise: [\"Peter\", \"s\"].\n\
+             2. A compound is one written word; split it at the constituent boundary when the other sentence has separate words, the linking -s-/-e- staying with the first constituent: [\"fødsels\", \"dag\"], [\"arbejds\", \"tid\"], [\"køkken\", \"bord\"].\n\
+             3. A particle verb (står op, tager af sted) is several written words in one link; ikke and the reflexive sig are separate words.",
+        )
+    }
 }
