@@ -391,4 +391,13 @@ impl LinguisticDefinition for Russian {
          11. Tokenization: hyphenated forms are single tokens (кто-то, что-нибудь, по-русски, из-за, \
          кое-как). не and бы are separate particle tokens, never fused with the verb they attach to."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The reflexive -ся/-сь is a segment when the other sentence has a separate reflexive or passive marker: [\"моет\", \"ся\"], [\"учу\", \"сь\"].\n\
+             2. The particles -то/-нибудь/-либо/-ка and кое- open a word at the hyphen ([\"кто\"], [\"-то\"]; [\"дай\"], [\"-ка\"]; [\"кое\"], [\"-что\"]) and the pair goes in one link. не and ни are separate words; a fused negative (нельзя, некого, никто) stays one word.\n\
+             3. Prepositions are separate words in their written variant (в/во, с/со, к/ко, о/об/обо). A verb prefix (по-, при-, у-, вы-, пере-) is a segment only when the other sentence has a separate word for it: [\"при\", \"шёл\"], [\"вы\", \"йти\"].",
+        )
+    }
 }
