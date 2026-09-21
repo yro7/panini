@@ -1148,6 +1148,15 @@ impl LinguisticDefinition for Swahili {
         Some(self.morpheme_directives())
     }
 
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A finite verb is one written word chaining subject marker, tense/aspect, object marker, relative marker, stem and final vowel; each slot is a segment: [\"ni\", \"na\", \"ku\", \"penda\"], [\"a\", \"li\", \"ye\", \"kuja\"], [\"ha\", \"tu\", \"ja\", \"fika\"]. The negative markers (ha-/si-/-si-/-ku-) are segments linked with the negation; the -i/-e final links with it or with the mood.\n\
+             2. A noun class prefix is a segment only when the other sentence has a separate plural or article: [\"wa\", \"tu\"], [\"vi\", \"tabu\"]; otherwise the noun is one segment. The infinitive ku- is a segment: [\"ku\", \"soma\"].\n\
+             3. An agreeing possessive (wangu, yake, zetu) and the -a of association (wa, ya, cha, la) are separate written words; reduplication (pole pole, haraka haraka) is two words in one link.",
+        )
+    }
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<SwahiliMorphemeFunction>>>,
