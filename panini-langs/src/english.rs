@@ -277,9 +277,8 @@ impl LinguisticDefinition for English {
         Some(
             "1. A contraction is one written word whose clitic is a segment, the apostrophe staying with the clitic: [\"I\", \"'m\"], [\"she\", \"'ll\"], [\"we\", \"'ve\"], [\"it\", \"'s\"]. Negative contractions split before n't ([\"do\", \"n't\"], [\"is\", \"n't\"]); can't, won't and shan't stay whole, linked to both the verb and the negation.\n\
              2. Possessive 's and the plural possessive apostrophe are segments: [\"Paul\", \"'s\"], [\"parents\", \"'\"].\n\
-             3. Regular inflection is separable when it matches a unit of the other sentence: plural -s/-es, -ing, -ed, third-person -s, comparative -er/-est — [\"book\", \"s\"], [\"walk\", \"ed\"], [\"bigg\", \"er\"]. Irregular forms (children, went, better) stay whole.\n\
-             4. Periphrasis is several words in one link, never a merged array: will go, has been going, more careful, the particle of a phrasal verb (gave … up).\n\
-             5. A hyphenated compound is one word; the hyphen stays with the segment it introduces: [\"well\", \"-known\"].",
+             3. Periphrasis is several words in one link, never a merged array: will go, has been going, more careful, the particle of a phrasal verb (gave … up).\n\
+             4. A hyphenated compound is one word; the hyphen stays with the segment it introduces: [\"well\", \"-known\"].",
         )
     }
 }

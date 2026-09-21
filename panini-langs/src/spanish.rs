@@ -315,9 +315,7 @@ impl LinguisticDefinition for Spanish {
         Some(
             "1. An enclitic cluster is one written word whose clitics are segments, the accent kept as written: [\"dá\", \"me\", \"lo\"], [\"diciéndo\", \"se\", \"lo\"], [\"hacer\", \"lo\"], [\"vámo\", \"nos\"]. A proclitic (me lo dijo) is its own word.\n\
              2. The contractions al and del stay ONE segment linked to both units.\n\
-             3. A verb ending fuses person, number, tense and mood; it is separable when the other sentence expresses the subject or the tense as a unit: [\"habl\", \"amos\"], [\"com\", \"ieron\"], [\"teng\", \"o\"]. Suppletive forms (soy, fui, es, hay, va) stay whole.\n\
-             4. Plural -s/-es and feminine -a are separable: [\"gato\", \"s\"], [\"profesor\", \"a\"].\n\
-             5. no … nada / nadie / nunca / ningún is one discontinuous unit when the other sentence negates once; no alone is a separate word.",
+             3. no … nada / nadie / nunca / ningún is one discontinuous unit when the other sentence negates once; no alone is a separate word.",
         )
     }
 }
