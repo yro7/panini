@@ -138,6 +138,20 @@ pub trait AnalysisComponent<L: LinguisticDefinition>: Send + Sync + Debug {
         true
     }
 
+    /// Whether this component's prompt needs the language's
+    /// `<extraction_directives>` block.
+    ///
+    /// That block carries the language's *morphological* conventions —
+    /// lemmatization, which contractions to split, which suffixes never to
+    /// split. Components that must preserve the sentence's written surface
+    /// (alignment, multiword expressions) override this to `false`: those
+    /// conventions contradict their own contract, and a single-axis call
+    /// would otherwise carry a page of rules the task cannot follow. The
+    /// composer includes the block if any component in the call requests it.
+    fn needs_extraction_directives(&self) -> bool {
+        true
+    }
+
     /// Returns `Some(self)` for components that produce aggregable data.
     ///
     /// Override to return `Some(self)` in components that implement [`Aggregating<L>`].

@@ -166,6 +166,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     // alignment, …) they are noise — the skill context even carries
     // exercise-generation instructions.
     let wants_pedagogical_context = components.iter().any(|c| c.needs_pedagogical_context());
+    let wants_extraction_directives = components.iter().any(|c| c.needs_extraction_directives());
 
     let mut blocks = Vec::new();
 
@@ -187,9 +188,12 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let language_context = interpolate(&cfg.target_language, &global_ctx)?;
     blocks.push(wrap_tag("target_language", &language_context));
 
-    // Extraction directives section
-    let extraction_directives = interpolate(&cfg.extraction_directives, &global_ctx)?;
-    blocks.push(wrap_tag("extraction_directives", &extraction_directives));
+    // Extraction directives section — the language's morphological
+    // conventions, which surface-preserving components opt out of.
+    if wants_extraction_directives {
+        let extraction_directives = interpolate(&cfg.extraction_directives, &global_ctx)?;
+        blocks.push(wrap_tag("extraction_directives", &extraction_directives));
+    }
 
     if wants_pedagogical_context {
         // Learner profile section
@@ -617,6 +621,30 @@ mod tests {
         assert!(
             prompt.contains("<extraction_directives>\nTest directives\n</extraction_directives>")
         );
+    }
+
+    #[test]
+    fn alignment_only_prompt_drops_extraction_directives() {
+        use panini_core::components::TranslationAlignment;
+        let a: &dyn AnalysisComponent<TestLang> = &TranslationAlignment;
+        let prompt = compose_prompt(&TestLang, &test_request(), &test_prompts(), &[a])
+            .expect("prompt should compose");
+
+        assert!(!prompt.contains("<extraction_directives>"));
+        assert!(!prompt.contains("Test directives"));
+        assert!(prompt.contains("<target_language>"));
+    }
+
+    #[test]
+    fn alignment_with_morphology_keeps_extraction_directives_once() {
+        use panini_core::components::{MorphologyAnalysis, TranslationAlignment};
+        let a: &dyn AnalysisComponent<TestLang> = &TranslationAlignment;
+        let m: &dyn AnalysisComponent<TestLang> = &MorphologyAnalysis;
+        let prompt = compose_prompt(&TestLang, &test_request(), &test_prompts(), &[a, m])
+            .expect("prompt should compose");
+
+        assert_eq!(prompt.matches("<extraction_directives>").count(), 1);
+        assert_eq!(prompt.matches("Test directives").count(), 1);
     }
 
     #[test]
