@@ -226,6 +226,7 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     let comp_ctx = ComponentContext {
         targets: &request.targets,
         learner_ui_language: request.learner_ui_language,
+        translation_alignment_directives: request.translation_alignment_directives,
         pedagogical_context: request.pedagogical_context.as_deref(),
         skill_path: request.skill_path.as_deref(),
         linguistic_background: &request.linguistic_background,
@@ -587,6 +588,7 @@ mod tests {
             pedagogical_context: Some("Generate a cloze exercise.".to_string()),
             skill_path: Some("Basics > Greetings".to_string()),
             learner_ui_language: IsoLang::Eng,
+            translation_alignment_directives: None,
             linguistic_background: vec![],
             user_prompt: Some("food vocabulary".to_string()),
         }

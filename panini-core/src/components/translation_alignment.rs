@@ -140,6 +140,7 @@ mod tests {
         ComponentContext {
             targets: &[],
             learner_ui_language: IsoLang::Fra,
+            translation_alignment_directives: None,
             pedagogical_context: None,
             skill_path: None,
             linguistic_background: &[],

@@ -115,6 +115,10 @@ pub struct ExtractionRequest {
     /// Learner's UI language (for pedagogical explanation).
     #[builder(default = IsoLang::Eng)]
     pub learner_ui_language: IsoLang,
+    /// Segmentation inventory of `learner_ui_language` for translation
+    /// alignment, resolved by the caller from its language definition;
+    /// `None` when that language has no definition.
+    pub translation_alignment_directives: Option<&'static str>,
     /// Learner's linguistic background.
     #[builder(default)]
     pub linguistic_background: Vec<LanguageLevel>,
@@ -142,6 +146,8 @@ pub struct BatchExtractionRequest {
     pub skill_path: Option<String>,
     /// Learner's UI language (for pedagogical explanation).
     pub learner_ui_language: IsoLang,
+    /// See [`ExtractionRequest::translation_alignment_directives`].
+    pub translation_alignment_directives: Option<&'static str>,
     /// Learner's linguistic background.
     pub linguistic_background: Vec<LanguageLevel>,
     /// Optional user-provided context.
@@ -159,6 +165,7 @@ impl BatchExtractionRequest {
             pedagogical_context: self.pedagogical_context.clone(),
             skill_path: self.skill_path.clone(),
             learner_ui_language: self.learner_ui_language,
+            translation_alignment_directives: self.translation_alignment_directives,
             linguistic_background: self.linguistic_background.clone(),
             user_prompt: self.user_prompt.clone(),
         }
