@@ -262,6 +262,7 @@ where
             &schema_value,
             &system_prompt,
             &user_message,
+            &request.content,
             &compatible,
             &requested_keys,
             &options,
@@ -387,7 +388,11 @@ where
             &user_message,
             &compatible,
             &requested_keys,
-            request.items.len(),
+            &request
+                .items
+                .iter()
+                .map(|item| item.content.as_str())
+                .collect::<Vec<_>>(),
             &options,
             remaining,
             prev_attempt.as_ref(),
@@ -451,7 +456,7 @@ async fn perform_batch_single_shot<L, E>(
     user_message: &str,
     compatible: &[&dyn AnalysisComponent<L>],
     requested_keys: &[&'static str],
-    expected_count: usize,
+    item_contents: &[&str],
     options: &ExtractionOptions<'_>,
     remaining_total_timeout: Duration,
     previous_attempt: Option<&PreviousAttempt>,
@@ -533,6 +538,7 @@ where
         }
         .into());
     };
+    let expected_count = item_contents.len();
     if cards.len() != expected_count {
         return Err(ExtractionParseError {
             raw_response: processed,
@@ -553,6 +559,7 @@ where
             compatible,
             requested_keys,
             index,
+            item_contents[index],
             card,
         ));
     }
@@ -565,6 +572,7 @@ fn process_batch_item<L>(
     compatible: &[&dyn AnalysisComponent<L>],
     requested_keys: &[&'static str],
     index: usize,
+    content: &str,
     card: &serde_json::Value,
 ) -> Result<ExtractionResult, BatchItemError>
 where
@@ -581,9 +589,11 @@ where
     for comp in compatible {
         let key = comp.schema_key();
         if let Some(section) = card.get(key) {
-            comp.validate(language, section).map_err(|e| {
-                item_error(ExtractionFailureReason::ComponentValidation { key, message: e })
-            })?;
+            comp.validate(language, section)
+                .and_then(|()| comp.validate_against_content(language, content, section))
+                .map_err(|e| {
+                    item_error(ExtractionFailureReason::ComponentValidation { key, message: e })
+                })?;
         }
     }
 
@@ -608,6 +618,7 @@ async fn perform_single_shot_extraction<L, E>(
     schema_value: &serde_json::Value,
     system_prompt: &str,
     user_message: &str,
+    content: &str,
     compatible: &[&dyn AnalysisComponent<L>],
     requested_keys: &[&'static str],
     options: &ExtractionOptions<'_>,
@@ -696,6 +707,7 @@ where
         let key = comp.schema_key();
         if let Some(section) = json_value.get(key) {
             comp.validate(language, section)
+                .and_then(|()| comp.validate_against_content(language, content, section))
                 .map_err(|e| ExtractionParseError {
                     raw_response: processed.clone(),
                     reason: ExtractionFailureReason::ComponentValidation { key, message: e },
@@ -833,6 +845,22 @@ mod tests {
                 return Err("alpha must not be 'bad'".to_string());
             }
             Ok(())
+        }
+
+        /// Fails when the section does not echo the item's content.
+        fn validate_against_content(
+            &self,
+            _lang: &TestLang,
+            content: &str,
+            section: &serde_json::Value,
+        ) -> Result<(), String> {
+            match section.as_str() {
+                Some(text) if text.starts_with("echo:") && text[5..] != *content => Err(format!(
+                    "alpha echoes «{}», the item reads «{content}»",
+                    &text[5..]
+                )),
+                _ => Ok(()),
+            }
         }
     }
 
@@ -1109,6 +1137,32 @@ mod tests {
 
         // Item-level failures must NOT re-fire the whole batch.
         assert_eq!(executor.calls.lock().unwrap().len(), 1);
+    }
+
+    #[tokio::test]
+    async fn batch_items_are_validated_against_their_own_content() {
+        let executor = FakeExecutor::new(vec![
+            r#"{"cards": [{"alpha": "echo:card 0"}, {"alpha": "echo:card 0"}]}"#,
+        ]);
+        let prompts = test_prompts();
+
+        let results = extract_batch_with_components_executor(
+            &TestLang,
+            &executor,
+            &batch_request(2),
+            &[&AlphaComponent as &dyn AnalysisComponent<TestLang>],
+            batch_options(&prompts),
+        )
+        .await
+        .expect("batch call itself should succeed");
+
+        assert!(results[0].is_ok());
+        let error = results[1].as_ref().expect_err("card 1 echoes card 0");
+        assert!(matches!(
+            &error.reason,
+            ExtractionFailureReason::ComponentValidation { key: "alpha", message }
+                if message.contains("the item reads «card 1»")
+        ));
     }
 
     #[tokio::test]
