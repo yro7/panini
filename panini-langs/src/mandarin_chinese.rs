@@ -134,4 +134,13 @@ impl LinguisticDefinition for MandarinChinese {
          5. Modal/Sentence-final Particles: Sentence-final particles like '吗', '吧', '呢', '啊' should be marked as Particle with particle_type 'modal'.\n\
          6. Pronouns: Distinguish personal pronouns ('我', '你', '他') and plural forms with '们' (e.g. '我们' -> pronoun with person: first, number: plural)."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. There are no spaces: a word is a lexical word (词), never a run of single characters — [\"同学\"], [\"你好\"], [\"对不起\"], [\"没关系\"], [\"早上好\"], [\"运动鞋\"], [\"椅子\"] are each ONE one-element word. A character is a segment of its word only when it corresponds to a unit of the other sentence: [\"我\", \"们\"], [\"朋友\", \"们\"], [\"打\", \"开\"] against a separate plural mark, or a separate complement word.\n\
+             2. Particles are their own words: aspect 了/着/过, modal 吗/吧/呢/啊, structural 的/地/得. A numeral and its classifier are two words (一 个, 两 只); a classifier with no counterpart stays unlinked.\n\
+             3. Full-width punctuation (，。？！：) is its own word and stays unlinked, even when the other sentence writes the same mark.",
+        )
+    }
 }
