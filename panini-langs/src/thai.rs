@@ -273,6 +273,15 @@ impl LinguisticDefinition for Thai {
          12. Particles: every Particle gets particle_type and register. Use politeness for the speaker-gender-indexed sentence-final particles — ครับ and ครับผม for male speakers, ค่ะ, คะ and ขา for female speakers, plus จ้ะ, จ๊ะ, ฮะ, วะ, ขอรับ and เพคะ — and keep the written tone mark exactly as it appears, because ค่ะ and คะ are different tokens with different functions. Use interrogative for ไหม, มั้ย, หรือ, เหรอ, รึ and question-frame เปล่า; modal for the stance and illocutionary particles นะ, สิ, ซิ, เถอะ, หรอก, แหละ and ล่ะ; focus for เอง and focusing ก็; topic for น่ะ, นี่ and เนี่ย marking a preceding topic; discourse for connective and turn-management uses such as คือ and ก็; and other only for a genuine particle outside these functions. A sentence-final particle is a grammatical word, not a content word: never tag it Noun, Verb or Interjection, never merge it into the preceding word, and never drop it because it has no English translation.\n\
          13. Determiners, numerals and residue: tag adnominal นี้, นั้น, โน้น, ทุก, บาง, แต่ละ, หลาย, ต่าง and อื่น as Determiners, while the standalone forms นี่, นั่น and โน่น are Pronouns. In the ordinal frame ที่ followed by a numeral, tag ที่ as a Determiner and the numeral as a Numeral. Tag numerals as Numeral and preserve Thai or Arabic digits exactly as written. Thai nouns are number-neutral: never report a noun as plural, and let พวก, a numeral or ๆ carry plurality on its own token. Never emit punctuation as a token; tag ฯลฯ and other non-alphabetic signs as Symbol, and use Other only for material that genuinely fits no part of speech."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. There are no spaces between words — a space closes a phrase or clause. A word is a lexical word, each its own one-element array: [\"สวัสดี\"], [\"ฉัน\"], [\"ชื่อ\"], [\"โรงเรียน\"]; never split a word into syllables.\n\
+             2. Grammatical words are words of their own: polite ครับ/ค่ะ, question ไหม/หรือ, aspect and tense แล้ว/กำลัง/จะ/อยู่/เคย, negation ไม่/ยัง, a numeral and its classifier ([\"สอง\"], [\"ตัว\"]), and the nominalizers การ/ความ before their stem ([\"การ\"], [\"เรียน\"]).\n\
+             3. The repetition mark ๆ is its own word, linked together with the word it repeats; Thai punctuation is rare — a space is not a word.",
+        )
+    }
 }
 
 #[cfg(test)]
