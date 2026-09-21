@@ -398,6 +398,15 @@ impl LinguisticDefinition for ModernGreek {
          12b. Cited-word morphology: a complete word mentioned autonymically after metalanguage such as 'στη λέξη καλός' keeps the lexical category and morphology of the displayed form; it does not agree with 'λέξη' or inherit the preposition's accusative case. Thus cited 'καλός' is a positive masculine singular nominative Adjective, and cited dictionary-form 'μέσο' is a neuter singular nominative Noun. Use the citation form when an ending is syncretic and the cited word has no independent syntactic role.\n\
          13. Tokenization: split ONLY complete orthographic tokens that are fused σε + article forms into both underlying tokens ('στον' -> 'σε' + 'τον', 'στην' -> 'σε' + 'την', 'στα' -> 'σε' + 'τα'). Apply this case-insensitively at sentence start too: 'Στο' -> lowercase emitted words 'σε' + 'το', 'Στον' -> 'σε' + 'τον', and 'Στις' -> 'σε' + 'τις'; never emit 'Στο', 'Στον' or 'Στις' as the adposition word. Never split a lexical word merely because it begins with στ-/στη-/στο-: verbs such as 'στηρίζουν' and nouns such as 'στοιχείο' remain one token, with no invented 'σε' or article. The contraction rule also applies when an adjective or adverb follows the complete fused token before the noun: emit 'στο πάνω ράφι' as the four words 'σε', 'το', 'πάνω', 'ράφι'. Split EVERY contraction occurrence independently even when one sentence contains several: 'Στη λέξη καλός γράφουμε ς στο τέλος' must contain both 'σε' + 'τη' and the later 'σε' + 'το', never a residual 'στο'. In the emitted features, set the first word exactly to 'σε', never to the unsplit surface form such as 'στο' or 'στην', and the second word exactly to the restored article. Restore ordinary elisions ('απ\''' -> 'από'). Keep weak pronouns as separate tokens. Strip punctuation from analyzed tokens and never emit punctuation as morphology."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. σε fused with an article (στο, στη, στον, στην, στους, στις) splits at the surface boundary when the other sentence has both a preposition and an article — [\"σ\", \"το\"], [\"σ\", \"την\"] — and stays whole otherwise.\n\
+             2. Elision opens a word at the apostrophe: [\"σ'\"], [\"αγαπώ\"]; [\"απ'\"], [\"το\"]; [\"τ'\"], [\"όνομα\"]. κι is one word (και before a vowel).\n\
+             3. Weak pronouns (μου, σου, το, τη, τους), the particles θα/να/ας and the negators δεν/μη(ν) are separate written words; θα or δεν with its verb is one link when the other sentence has a single verb form, and an enclitic possessive after a noun (το βιβλίο μου) is its own word.",
+        )
+    }
 }
 
 #[cfg(test)]
