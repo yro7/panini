@@ -88,4 +88,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
     fn needs_pedagogical_context(&self) -> bool {
         false
     }
+
+    fn needs_extraction_directives(&self) -> bool {
+        false
+    }
 }
