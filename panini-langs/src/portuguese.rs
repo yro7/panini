@@ -180,4 +180,14 @@ impl LinguisticDefinition for Portuguese {
          5. Contractions: Split contracted prepositions (e.g., 'no' -> 'em' + 'o', 'da' -> 'de' + 'a', 'num' -> 'em' + 'um', 'deste' -> 'de' + 'este', 'pelo' -> 'por' + 'o', 'à' -> 'a' + 'a').\n\
          6. Clitic Pronouns: Separate hyphenated enclitic, proclitic, or mesoclitic pronouns (e.g., 'deu-me' -> 'dar' + 'me', 'viu-o' -> 'ver' + 'o', 'dar-lhe-ia' -> 'dar' + 'lhe')."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A hyphenated clitic is a segment of its host, the hyphen staying with the clitic: [\"deu\", \"-me\"], [\"viu\", \"-o\"], mesoclisis [\"dar\", \"-lhe\", \"-ia\"]. The altered host and allomorph after -r/-s/-z or a nasal stay as written ([\"fazê\", \"-lo\"], [\"fizeram\", \"-no\"]); a combined clitic (mo, to, lho) stays one segment linked to both pronouns. A proclitic (me deu) is its own word.\n\
+             2. A preposition contracted with a determiner or pronoun (do, da, no, na, num, pelo, ao, à, deste, nisso, dele) stays ONE segment linked to every unit it covers.\n\
+             3. A verb ending fuses person, number, tense and mood; it is separable when the other sentence expresses the subject or the tense as a unit: [\"fal\", \"amos\"], [\"com\", \"eram\"], personal infinitive [\"fazer\", \"mos\"]. Suppletive forms (sou, foi, é, há, vou) stay whole.\n\
+             4. Plural -s/-es and feminine -a are separable: [\"gato\", \"s\"], [\"professor\", \"a\"]; irregular plurals (pães, leões) stay whole.",
+        )
+    }
 }
