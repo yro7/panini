@@ -581,6 +581,17 @@ impl LinguisticDefinition for German {
          zumachen, with separability separable. The stranded prefix is never an Adposition and never \
          an Adverb."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A preposition contracted with its article (im, ins, am, ans, aufs, beim, vom, zum, zur, durchs, fürs) stays ONE segment linked to both units.\n\
+             2. A separable prefix stranded at the end of the clause is its own word (steht … auf: one link across two words); written attached it is a segment, as are the participle ge- and the infinitival zu inside the verb: [\"auf\", \"stehen\"], [\"auf\", \"ge\", \"standen\"], [\"auf\", \"zu\", \"stehen\"].\n\
+             3. A compound noun is one written word; split it at the constituent boundary when the other sentence has separate words, the linking -s-/-n-/-e-/-er- staying with the preceding constituent: [\"Haus\", \"tür\"], [\"Arbeits\", \"zeit\"], [\"Kinder\", \"garten\"].\n\
+             4. Inflection is separable when it matches a unit: plural [\"Kind\", \"er\"], [\"Tag\", \"e\"]; determiner and adjective endings [\"ein\", \"em\"], [\"klein\", \"en\"]; verb endings [\"geh\", \"st\"], [\"komm\", \"en\"]. Suppletive forms (bin, ist, sind, war) stay whole.\n\
+             5. Pronominal adverbs split at da(r)-/wo(r)-: [\"da\", \"mit\"], [\"dar\", \"auf\"], [\"wo\", \"zu\"].",
+        )
+    }
 }
 
 #[cfg(test)]
