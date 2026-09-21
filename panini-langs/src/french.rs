@@ -182,9 +182,9 @@ impl LinguisticDefinition for French {
 
     fn alignment_directives(&self) -> Option<&'static str> {
         Some(
-            "1. Elision and hyphenation happen inside one written word: the apostrophe stays with the clitic segment and the hyphen with the segment it introduces — [\"j'\", \"aime\"], [\"l'\", \"école\"], [\"qu'\", \"il\"], [\"est\", \"-ce\"], [\"donne\", \"-le\", \"-moi\"], [\"va\", \"-t\", \"-il\"].\n\
+            "1. Elision and hyphenation open a word: the apostrophe stays with the clitic and the hyphen with the piece it introduces — [\"j'\"], [\"aime\"]; [\"l'\"], [\"école\"]; [\"qu'\"], [\"il\"]; [\"est\"], [\"-ce\"]; [\"donne\"], [\"-le\"], [\"-moi\"]; [\"va\"], [\"-t\"], [\"-il\"].\n\
              2. Contracted articles au, aux, du, des stay ONE segment linked to every unit they cover; never rewrite them.\n\
-             3. Negation is discontinuous — ne … pas / plus / jamais / rien / personne / que — one link holding both words, the first often elided as [\"n'\", …].",
+             3. Negation is discontinuous — ne … pas / plus / jamais / rien / personne / que — one link holding both words, the first often elided as [\"n'\"].",
         )
     }
 }

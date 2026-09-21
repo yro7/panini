@@ -275,10 +275,10 @@ impl LinguisticDefinition for English {
 
     fn alignment_directives(&self) -> Option<&'static str> {
         Some(
-            "1. A contraction is one written word whose clitic is a segment, the apostrophe staying with the clitic: [\"I\", \"'m\"], [\"she\", \"'ll\"], [\"we\", \"'ve\"], [\"it\", \"'s\"]. Negative contractions split before n't ([\"do\", \"n't\"], [\"is\", \"n't\"]); can't, won't and shan't stay whole, linked to both the verb and the negation.\n\
-             2. Possessive 's and the plural possessive apostrophe are segments: [\"Paul\", \"'s\"], [\"parents\", \"'\"].\n\
+            "1. A contraction opens at the apostrophe into two words, the apostrophe staying with the clitic: [\"I\"], [\"'m\"]; [\"she\"], [\"'ll\"]; [\"do\"], [\"n't\"]; [\"is\"], [\"n't\"]. can't, won't and shan't stay one word, linked to both the verb and the negation.\n\
+             2. Possessive 's and the plural possessive apostrophe are words of their own: [\"Paul\"], [\"'s\"]; [\"parents\"], [\"'\"].\n\
              3. Periphrasis is several words in one link, never a merged array: will go, has been going, more careful, the particle of a phrasal verb (gave … up).\n\
-             4. A hyphenated compound is one word; the hyphen stays with the segment it introduces: [\"well\", \"-known\"].",
+             4. A hyphenated compound opens at the hyphen, which stays with the piece it introduces: [\"well\"], [\"-known\"].",
         )
     }
 }
