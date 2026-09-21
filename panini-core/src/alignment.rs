@@ -228,6 +228,132 @@ impl AlignedTranslation {
         }
     }
 
+    /// Checks the resolved source against the sentence it was aligned from.
+    ///
+    /// The structural checks only compare the segments with a text the
+    /// model itself produced, so a respelled stem (`bidaia` + `etarako` for
+    /// `bidaietarako`) passes them. This one holds the segments against the
+    /// input: they must spell the sentence exactly, whitespace aside, and a
+    /// word boundary is legal only where the sentence has whitespace or
+    /// punctuation on either side — an apostrophe or a hyphen included, so
+    /// `s'` + `est` and `vas` + `-tu` pass while `و` + `إنتو` does not.
+    /// Scripts written without spaces (Han, kana, Thai, …) skip the
+    /// boundary rule: there the word is the model's to draw.
+    ///
+    /// # Errors
+    /// Returns the violations, written for the LLM self-correction retry.
+    pub fn check_source_sentence(&self, sentence: &str) -> Result<(), String> {
+        let expected: Vec<char> = sentence.chars().filter(|c| !c.is_whitespace()).collect();
+        let emitted: Vec<char> = self
+            .source
+            .segments
+            .iter()
+            .flat_map(|seg| seg.surface.chars())
+            .collect();
+        if emitted != expected {
+            let at = emitted
+                .iter()
+                .zip(&expected)
+                .position(|(a, b)| a != b)
+                .unwrap_or(emitted.len().min(expected.len()));
+            let context = |chars: &[char]| -> String {
+                chars[at.saturating_sub(8)..(at + 8).min(chars.len())]
+                    .iter()
+                    .collect()
+            };
+            return Err(format!(
+                "source: the segments spell «{}» where the sentence reads «{}» — every \
+                 surface is copied from the sentence exactly as written, never respelled, \
+                 never dropped, never added",
+                context(&emitted),
+                context(&expected)
+            ));
+        }
+        if is_unspaced_script(sentence) {
+            return Ok(());
+        }
+
+        // Boundaries are positions in the whitespace-free text: `i` sits
+        // between char i-1 and char i.
+        let mut legal = HashSet::new();
+        let mut i = 0usize;
+        let mut after_space = false;
+        for c in sentence.chars() {
+            if c.is_whitespace() {
+                after_space = true;
+                continue;
+            }
+            if i > 0 && (after_space || is_punctuation(c) || is_punctuation(expected[i - 1])) {
+                legal.insert(i);
+            }
+            after_space = false;
+            i += 1;
+        }
+        let mut required: Vec<usize> = Vec::new();
+        i = 0;
+        after_space = false;
+        for c in sentence.chars() {
+            if c.is_whitespace() {
+                after_space = true;
+                continue;
+            }
+            if i > 0 && after_space {
+                required.push(i);
+            }
+            after_space = false;
+            i += 1;
+        }
+
+        // Emitted words: one per token, with the boundary position each opens.
+        let mut words: Vec<(usize, String)> = Vec::new();
+        let mut pos = 0usize;
+        let mut token = None;
+        for seg in &self.source.segments {
+            if token != Some(seg.token) {
+                words.push((pos, String::new()));
+                token = Some(seg.token);
+            }
+            words
+                .last_mut()
+                .expect("just pushed")
+                .1
+                .push_str(&seg.surface);
+            pos += seg.surface.chars().count();
+        }
+        let emitted_boundaries: HashSet<usize> = words.iter().skip(1).map(|(at, _)| *at).collect();
+
+        let mut errors = Vec::new();
+        for (w, (at, text)) in words.iter().enumerate().skip(1) {
+            if !legal.contains(at) {
+                let (_, previous) = &words[w - 1];
+                errors.push(format!(
+                    "source: «{previous}» + «{text}» split the written word «{previous}{text}» — a \
+                     word written without a space is ONE array; only whitespace and punctuation \
+                     separate words"
+                ));
+            }
+        }
+        for at in required {
+            if !emitted_boundaries.contains(&at) {
+                let (_, text) = words
+                    .iter()
+                    .rev()
+                    .find(|(start, _)| *start < at)
+                    .expect("a boundary inside the text follows some word");
+                errors.push(format!(
+                    "source: «{text}» merges two whitespace-separated words into one array — \
+                     a multi-word unit is one link spanning several words, never a merged \
+                     array"
+                ));
+            }
+        }
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors.join("\n"))
+        }
+    }
+
     /// Fills in the char span of every segment by walking both texts.
     /// Offsets are computed here — deterministically — rather than requested
     /// from the LLM, which cannot count characters reliably.
@@ -249,6 +375,27 @@ impl AlignedTranslation {
         }
         Ok(())
     }
+}
+
+/// Unicode punctuation or symbol — the characters a word boundary may touch.
+fn is_punctuation(c: char) -> bool {
+    static CLASS: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    CLASS
+        .get_or_init(|| regex::Regex::new(r"^[\p{P}\p{S}]$").expect("valid class"))
+        .is_match(c.encode_utf8(&mut [0; 4]))
+}
+
+/// Whether the sentence uses a script that writes no spaces between words.
+fn is_unspaced_script(sentence: &str) -> bool {
+    static SCRIPTS: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    SCRIPTS
+        .get_or_init(|| {
+            regex::Regex::new(
+                r"[\p{Han}\p{Hiragana}\p{Katakana}\p{Thai}\p{Lao}\p{Khmer}\p{Myanmar}\p{Tibetan}]",
+            )
+            .expect("valid class")
+        })
+        .is_match(sentence)
 }
 
 fn has_duplicates(ids: &[u32]) -> bool {
@@ -1289,6 +1436,84 @@ mod tests {
             a.source.segments.last().unwrap().span,
             Some(CharSpan { start: 19, end: 20 })
         );
+    }
+
+    /// A source built from whole words, one token per word.
+    fn source_of(words: &[&[&str]]) -> AlignedTranslation {
+        let mut a = demo();
+        let mut segments = Vec::new();
+        for (token, word) in words.iter().enumerate() {
+            for surface in *word {
+                segments.push(seg(segments.len() as u32, token as u32, surface));
+            }
+        }
+        a.source.text = words
+            .iter()
+            .map(|w| w.concat())
+            .collect::<Vec<_>>()
+            .join(" ");
+        a.source.segments = segments;
+        a.links.clear();
+        a
+    }
+
+    #[test]
+    fn sentence_check_accepts_the_sentence_spelled_as_written() {
+        source_of(&[&["Ev", "ler", "im", "de"], &["kal", "ıyor", "um"], &["."]])
+            .check_source_sentence("Evlerimde kalıyorum.")
+            .expect("exact spelling passes");
+    }
+
+    #[test]
+    fn sentence_check_rejects_a_respelled_stem() {
+        let err = source_of(&[&["Poltsa"], &["bidaia", "etarako"], &["dut"]])
+            .check_source_sentence("Poltsa bidaietarako dut")
+            .unwrap_err();
+        assert!(err.contains("never respelled"), "got: {err}");
+        assert!(err.contains("bidaiaeta"), "got: {err}");
+    }
+
+    #[test]
+    fn sentence_check_rejects_a_written_word_split_into_words() {
+        let err = source_of(&[&["و"], &["إنتو"], &["منين"]])
+            .check_source_sentence("وإنتو منين")
+            .unwrap_err();
+        assert!(err.contains("split the written word «وإنتو»"), "got: {err}");
+    }
+
+    #[test]
+    fn sentence_check_rejects_two_words_merged_into_one() {
+        let err = source_of(&[&["Geçen"], &["sık", "sık"], &["gelirdik"]])
+            .check_source_sentence("Geçen sık sık gelirdik")
+            .unwrap_err();
+        assert!(err.contains("«sıksık» merges"), "got: {err}");
+    }
+
+    #[test]
+    fn sentence_check_allows_boundaries_at_apostrophes_hyphens_and_punctuation() {
+        source_of(&[
+            &["Il"],
+            &["s'"],
+            &["est"],
+            &["coupé"],
+            &[","],
+            &["vas"],
+            &["-tu"],
+            &["?"],
+        ])
+        .check_source_sentence("Il s'est coupé, vas-tu?")
+        .expect("elision, enclisis and punctuation open a word");
+    }
+
+    #[test]
+    fn sentence_check_skips_boundaries_for_unspaced_scripts() {
+        source_of(&[&["我"], &["有"], &["一"], &["个"], &["苹果"], &["。"]])
+            .check_source_sentence("我有一个苹果。")
+            .expect("a script without spaces draws its own words");
+        let err = source_of(&[&["我"], &["有"], &["苹果"]])
+            .check_source_sentence("我有一个苹果。")
+            .unwrap_err();
+        assert!(err.contains("never dropped"), "got: {err}");
     }
 
     #[test]
