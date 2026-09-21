@@ -77,6 +77,12 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                 lang.name()
             ));
         }
+        if let Some(directives) = ctx.translation_alignment_directives {
+            fragment.push_str(&format!(
+                "\n\nTranslation ({}) — language-specific segmentation:\n{directives}",
+                ctx.learner_ui_language.to_name()
+            ));
+        }
         fragment
     }
 
@@ -156,6 +162,7 @@ mod tests {
         );
 
         assert!(!prompt.contains("Source sentence ("));
+        assert!(!prompt.contains("Translation ("));
         assert!(prompt.contains("Translate the sentence into French"));
     }
 
@@ -170,5 +177,24 @@ mod tests {
         let heading = "Source sentence (Turkish) — language-specific segmentation:\n1. Case suffixes are segments.";
         assert_eq!(prompt.matches(heading).count(), 1);
         assert!(prompt.find(heading).unwrap() > prompt.find("`lit`:").unwrap());
+    }
+
+    #[test]
+    fn translation_directives_come_after_the_source_ones() {
+        let ctx = ComponentContext {
+            translation_alignment_directives: Some("1. `ne…pas` is one discontinuous unit."),
+            ..context()
+        };
+        let prompt = AnalysisComponent::<SplittingLanguage>::prompt_fragment(
+            &TranslationAlignment,
+            &SplittingLanguage,
+            &ctx,
+        );
+
+        let source = prompt.find("Source sentence (Turkish)").unwrap();
+        let translation = prompt
+            .find("Translation (French) — language-specific segmentation:\n1. `ne…pas`")
+            .unwrap();
+        assert!(source < translation);
     }
 }
