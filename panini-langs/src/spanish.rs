@@ -309,6 +309,17 @@ impl LinguisticDefinition for Spanish {
          14. 'cómo', 'dónde', 'adónde' and 'cuándo' are interrogative Adverbs ('¿cómo estás?' -> Adverb 'cómo'); 'donde', 'cuando' and 'como' with an antecedent are relative Adverbs ('la universidad donde estudia', 'en diciembre, cuando termina', 'así es como lo hicimos'); opening a clause with no antecedent they are Subordinating Conjunctions ('cuando vamos al parque', 'como si lo supiera'), and so are the comparative 'que' and 'como' after más, menos, tan and tanto ('más alto que tú', 'tanta paciencia como su madre'). 'qué', 'quién', 'cuál' and 'cuánto' are interrogative Pronouns standing alone and interrogative Determiners before a noun, exclamations included ('¿qué hora es?', '¿cuántos años tienes?', '¡qué desastre!' -> Determiner 'qué'; '¿qué es esto?', '¿qué tal?' -> Pronoun 'qué').\n\
          15. The quantifiers that stand before a noun and agree with it — mucho, poco, tanto, demasiado, bastante, todo, otro, varios, cada, alguno, ninguno, cualquier — are Determiners of type indefinite ('mucho viento', 'mucha paciencia', 'varios amigos', 'toda América'), fixed phrases included ('mucho gusto', 'otra vez' -> Determiner); standing alone they are indefinite Pronouns ('todos están nerviosos'), and 'mucho' next to a verb or an adjective is an Adverb ('trabajas mucho'). 'un', 'una', 'unos', 'unas' before a noun are the indefinite article — Determiner, article, lemma 'un' ('un amigo') — and a Numeral only when they count against other numbers ('treinta y una personas' -> 'uno'); the compounds keep their own lemma ('veintiún años', 'veintiuna mesas' -> 'veintiuno'). 'varios' keeps the lemma 'varios', and a possessive determiner keeps its own unaccented lemma ('tu casa' -> 'tu', never 'tú'). The speaker labels of a dialogue ('A:', 'B:') are Symbols."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. An enclitic cluster is one written word whose clitics are segments, the accent kept as written: [\"dá\", \"me\", \"lo\"], [\"diciéndo\", \"se\", \"lo\"], [\"hacer\", \"lo\"], [\"vámo\", \"nos\"]. A proclitic (me lo dijo) is its own word.\n\
+             2. The contractions al and del stay ONE segment linked to both units.\n\
+             3. A verb ending fuses person, number, tense and mood; it is separable when the other sentence expresses the subject or the tense as a unit: [\"habl\", \"amos\"], [\"com\", \"ieron\"], [\"teng\", \"o\"]. Suppletive forms (soy, fui, es, hay, va) stay whole.\n\
+             4. Plural -s/-es and feminine -a are separable: [\"gato\", \"s\"], [\"profesor\", \"a\"].\n\
+             5. no … nada / nadie / nunca / ningún is one discontinuous unit when the other sentence negates once; no alone is a separate word.",
+        )
+    }
 }
 
 #[cfg(test)]
