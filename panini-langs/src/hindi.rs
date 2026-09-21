@@ -530,4 +530,13 @@ impl LinguisticDefinition for Hindi {
          the gender field. NEVER use `neuter`: Hindi has two genders only. NEVER report a case other \
          than direct, oblique or vocative — ने, को, से, में are postposition tokens, not case values."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A postposition (को, से, में, पर, तक, का/की/के) is its own written word, never part of the noun's array; a fused pronoun + postposition (मुझे, तुझे, उसे, इसे, इन्हें) stays ONE segment linked to both. The का/की/के series written on a pronoun splits: [\"इस\", \"का\"], [\"उस\", \"के\"].\n\
+             2. A compound or light-verb chain (कर रहा हूँ, खा लिया, जा सकता है, हो गया) is several written words in one link; the auxiliary हूँ/है/हैं/था/थी carries the tense and joins that link when the other sentence has a single verb form.\n\
+             3. Negation नहीं/मत/न is a separate word. A hyphenated echo or reduplicated form opens at the hyphen (धीरे-धीरे → [\"धीरे\"], [\"-धीरे\"]) and the pair goes in one link.",
+        )
+    }
 }
