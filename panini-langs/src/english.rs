@@ -271,6 +271,17 @@ impl LinguisticDefinition for English {
          7. Contractions: split transparent contractions into their grammatical constituents while retaining each written constituent in 'word': I'm -> I + 'm (lemma be), can't -> can + n't (lemma not), she'll -> she + 'll (lemma will), and we've -> we + 've (lemma have). Resolve ambiguous 's from context as contracted be, contracted have, or the possessive clitic. Analyze possessive 's (and the plural possessive apostrophe) as a separate Particle, not as noun declension.\n\
          8. Context-sensitive tokens: infinitival 'to' is a Particle and prepositional 'to' is an Adposition; 'not' is a Particle; noun modifiers such as 'coffee' in 'coffee shop' remain Nouns. Keep phrasal-verb particles as separate tokens and keep the verb's simplex lemma ('gave up' -> give + up); the Multiword Expressions component records any idiomatic unit. Never emit punctuation as a token."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A contraction is one written word whose clitic is a segment, the apostrophe staying with the clitic: [\"I\", \"'m\"], [\"she\", \"'ll\"], [\"we\", \"'ve\"], [\"it\", \"'s\"]. Negative contractions split before n't ([\"do\", \"n't\"], [\"is\", \"n't\"]); can't, won't and shan't stay whole, linked to both the verb and the negation.\n\
+             2. Possessive 's and the plural possessive apostrophe are segments: [\"Paul\", \"'s\"], [\"parents\", \"'\"].\n\
+             3. Regular inflection is separable when it matches a unit of the other sentence: plural -s/-es, -ing, -ed, third-person -s, comparative -er/-est — [\"book\", \"s\"], [\"walk\", \"ed\"], [\"bigg\", \"er\"]. Irregular forms (children, went, better) stay whole.\n\
+             4. Periphrasis is several words in one link, never a merged array: will go, has been going, more careful, the particle of a phrasal verb (gave … up).\n\
+             5. A hyphenated compound is one word; the hyphen stays with the segment it introduces: [\"well\", \"-known\"].",
+        )
+    }
 }
 
 #[cfg(test)]
