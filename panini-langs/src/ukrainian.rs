@@ -717,4 +717,13 @@ impl LinguisticDefinition for Ukrainian {
          is normally unwritten (Він студент): never invent a token for it, but when є is actually \
          written (Він є студентом), analyse it as a finite present form of бути."
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The reflexive -ся/-сь is a segment when the other sentence has a separate reflexive or passive marker: [\"мию\", \"ся\"], [\"сміє\", \"ться\"].\n\
+             2. The particles -небудь/-сь/-то and будь-/казна-/хтозна- open a word at the hyphen ([\"хто\"], [\"-небудь\"]; [\"будь\"], [\"-хто\"]) and the pair goes in one link. не and ні are separate words; a fused negative (ніхто, нічого) stays one word.\n\
+             3. Prepositions are separate words in their written variant (в/у, з/із/зі, під/піді, над/наді). A verb prefix (при-, ви-, по-, пере-) is a segment only when the other sentence has a separate word for it: [\"при\", \"йшов\"], [\"ви\", \"йти\"].",
+        )
+    }
 }
