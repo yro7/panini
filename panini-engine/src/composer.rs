@@ -650,6 +650,22 @@ mod tests {
     }
 
     #[test]
+    fn alignment_prompt_carries_the_translation_directives_from_the_request() {
+        use panini_core::components::TranslationAlignment;
+        let a: &dyn AnalysisComponent<TestLang> = &TranslationAlignment;
+        let request = ExtractionRequest {
+            translation_alignment_directives: Some("1. Contractions stay one segment."),
+            ..test_request()
+        };
+        let prompt = compose_prompt(&TestLang, &request, &test_prompts(), &[a])
+            .expect("prompt should compose");
+
+        assert!(prompt.contains(
+            "Translation (English) — language-specific segmentation:\n1. Contractions stay one segment."
+        ));
+    }
+
+    #[test]
     fn pedagogical_component_prompt_keeps_context_blocks() {
         // FakeComponentA keeps the default (needs pedagogical context).
         let a: &dyn AnalysisComponent<TestLang> = &FakeComponentA;
