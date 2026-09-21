@@ -565,6 +565,15 @@ impl LinguisticDefinition for Swedish {
             "12. Word order, particles and tokenization: V2 syntax and the BIFF rule are syntactic context for resolving forms, not morphology to encode: a main-clause finite verb follows the first constituent, while subordinate inte normally precedes the finite verb. Infinitival att is a Particle with particle_type infinitival; subordinating att is a SubordinatingConjunction. Inte, icke and ej are negation Particles. A stressed free particle in a particle verb (tycka om, slå på) is a verb_particle token; keep the Verb lemma simplex and let the Multiword Expressions component record the lexical combination. Preserve one token per orthographic word, keep compounds intact, and never emit punctuation as a token."
         )
     }
+
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. The suffixed definite article is a segment: [\"bok\", \"en\"], [\"hus\", \"et\"], [\"böcker\", \"na\"]; the genitive -s likewise: [\"Anna\", \"s\"].\n\
+             2. A compound is one written word; split it at the constituent boundary when the other sentence has separate words, the linking -s-/-e-/-o- staying with the first constituent: [\"sjuk\", \"hus\"], [\"arbets\", \"dag\"], [\"kvinno\", \"namn\"].\n\
+             3. A particle verb (går upp, tycker om, kommer ihåg) is several written words in one link; inte and the reflexive sig are separate words.",
+        )
+    }
 }
 
 #[cfg(test)]
