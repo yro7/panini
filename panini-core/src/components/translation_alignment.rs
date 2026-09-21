@@ -31,8 +31,8 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
         serde_json::to_value(&schema).unwrap()
     }
 
-    fn prompt_fragment(&self, _lang: &L, ctx: &ComponentContext) -> String {
-        format!(
+    fn prompt_fragment(&self, lang: &L, ctx: &ComponentContext) -> String {
+        let mut fragment = format!(
             "Translate the sentence into {ui_lang}; `t.x` is that idiomatic translation. \
              CRITICAL: `t` MUST be an object containing BOTH `x` (the complete translation) \
              and `w` (its token arrays); NEVER emit `t` as a bare array. \
@@ -68,7 +68,16 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                earth\". Follow the source's own word order and morphology, not {ui_lang} \
                idiom. Null when it would read the same as `t.x`.",
             ui_lang = ctx.learner_ui_language.to_name()
-        )
+        );
+        // Per-language segmentation inventories, source first: they say what
+        // each language *can* split, the rules above decide whether to.
+        if let Some(directives) = lang.alignment_directives() {
+            fragment.push_str(&format!(
+                "\n\nSource sentence ({}) — language-specific segmentation:\n{directives}",
+                lang.name()
+            ));
+        }
+        fragment
     }
 
     fn validate(&self, _lang: &L, section: &serde_json::Value) -> Result<(), String> {
@@ -91,5 +100,74 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
 
     fn needs_extraction_directives(&self) -> bool {
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_support::{StubLanguage, StubMorphology};
+    use crate::traits::{IsoLang, Script};
+
+    /// A stub that declares what it can split; `StubLanguage` declares nothing.
+    #[derive(Debug)]
+    struct SplittingLanguage;
+
+    impl LinguisticDefinition for SplittingLanguage {
+        type Morphology = StubMorphology;
+        type MorphemeFunction = ();
+
+        const ISO_LANG: IsoLang = IsoLang::Tur;
+
+        fn supported_scripts(&self) -> &[Script] {
+            &[Script::LATN]
+        }
+
+        fn default_script(&self) -> Script {
+            Script::LATN
+        }
+
+        fn extraction_directives(&self) -> &str {
+            ""
+        }
+
+        fn alignment_directives(&self) -> Option<&'static str> {
+            Some("1. Case suffixes are segments.")
+        }
+    }
+
+    fn context() -> ComponentContext<'static> {
+        ComponentContext {
+            targets: &[],
+            learner_ui_language: IsoLang::Fra,
+            pedagogical_context: None,
+            skill_path: None,
+            linguistic_background: &[],
+        }
+    }
+
+    #[test]
+    fn a_language_without_directives_gets_no_source_section() {
+        let prompt = AnalysisComponent::<StubLanguage>::prompt_fragment(
+            &TranslationAlignment,
+            &StubLanguage,
+            &context(),
+        );
+
+        assert!(!prompt.contains("Source sentence ("));
+        assert!(prompt.contains("Translate the sentence into French"));
+    }
+
+    #[test]
+    fn source_directives_follow_the_general_rules_under_the_language_name() {
+        let prompt = AnalysisComponent::<SplittingLanguage>::prompt_fragment(
+            &TranslationAlignment,
+            &SplittingLanguage,
+            &context(),
+        );
+
+        let heading = "Source sentence (Turkish) — language-specific segmentation:\n1. Case suffixes are segments.";
+        assert_eq!(prompt.matches(heading).count(), 1);
+        assert!(prompt.find(heading).unwrap() > prompt.find("`lit`:").unwrap());
     }
 }
