@@ -1150,6 +1150,17 @@ impl LinguisticDefinition for Korean {
         Some(self.morpheme_directives())
     }
 
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Each 어절 (spacing unit) is one word. Particles written attached to it are separable segments, in order: plural -들, case 이/가, 을/를, 의, 에, 에서, 에게/한테, (으)로, 와/과/하고, 부터, 까지, then 은/는, 도, 만, 요 — [\"학교\", \"에서\", \"는\"], [\"친구\", \"들\", \"도\"], [\"저\", \"는\"].\n\
+             2. A predicate's ending chain is separable: stem, honorific -(으)시-, tense -았/었-/-겠-, and the final or connective ending (-습니다, -어요, -고, -지만, -(으)면, -(으)ㄴ/-는/-(으)ㄹ) — [\"먹\", \"었\", \"어요\"], [\"가\", \"고\"]. A syllable that fuses two morphemes (갔, 셨, 해요) stays one segment linked to everything it fuses: [\"가\", \"셨\", \"어요\"].\n\
+             3. A noun + 하다 verb and a noun + copula split at the noun: [\"공부\", \"해요\"], [\"학생\", \"이에요\"].\n\
+             4. Long negation spans two words in one link: [\"먹\", \"지\"] + [\"않\", \"아요\"]; 안, 못 and 아니다 are separate words.\n\
+             5. Sino-Korean numerals and counters written attached split at the counter: [\"삼십\", \"분\"].",
+        )
+    }
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<KoreanMorphemeFunction>>>,
