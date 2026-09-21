@@ -42,8 +42,7 @@ impl<L: LinguisticDefinition> AnalysisComponent<L> for TranslationAlignment {
                whole word is a one-element array like [\"plaży\"]; split a word into several \
                segments (stem, affixes, clitics, fused plural marks) whenever a sub-word unit \
                corresponds to a separate unit in the other sentence — mandatory for \
-               agglutinative morphology, e.g. [\"Ev\", \"ler\", \"im\", \"de\"]. The stem is a \
-               segment too.\n\
+               agglutinative morphology. The stem is a segment too.\n\
              - The segments of one word concatenate to that word exactly as written — no added \
                hyphens, no normalization, NEVER any whitespace inside a segment. Each \
                punctuation mark is its own one-element word, left unlinked. NEVER merge two \

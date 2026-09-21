@@ -887,6 +887,15 @@ impl LinguisticDefinition for Turkish {
         Some(self.morpheme_directives())
     }
 
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. A word is a stem followed by a chain of suffixes, each one a separable segment in its written shape (after vowel harmony and consonant change): plural -lAr, possessive -(I)m/-(I)n/-(s)I/-(I)mIz/-(I)nIz/-lArI, case -(y)I/-(y)A/-DA/-DAn/-(n)In/-(y)lA, and -ki, -lI, -sIz, -CA — [\"Ev\", \"ler\", \"im\", \"de\"], [\"okul\", \"dan\"].\n\
+             2. A finite verb chains negation -mA, tense/aspect/mood (-Iyor, -DI, -mIş, -(y)AcAk, -Ir/-Ar, -sA, -mAlI, -(y)Abil), voice (-Il/-In, -DIr, -Iş) and the person ending (-Im, -sIn, -Iz, -sInIz, -lAr): [\"gel\", \"me\", \"di\", \"m\"]. The question particle mI is a separate written word carrying its own person ending: [\"geliyor\"], [\"mu\", \"sun\"].\n\
+             3. A buffer consonant (y, n, s, ş) or linking vowel belongs to the suffix it introduces: [\"kapı\", \"yı\"], [\"ev\", \"i\", \"nde\"].\n\
+             4. Detached de/da (also) and ki are their own words; attached -dA is the locative suffix, a segment of its host. Postpositions (için, ile, gibi, kadar, sonra) are separate words.",
+        )
+    }
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<TurkishMorphemeFunction>>>,
