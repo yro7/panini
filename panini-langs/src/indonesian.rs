@@ -395,6 +395,15 @@ impl LinguisticDefinition for Indonesian {
         Some(self.morpheme_directives())
     }
 
+
+    fn alignment_directives(&self) -> Option<&'static str> {
+        Some(
+            "1. Affixes are segments in their written allomorph, the nasal staying with the prefix: [\"mem\", \"baca\"], [\"men\", \"ulis\"], [\"ber\", \"jalan\"], [\"di\", \"tulis\"], [\"ter\", \"buka\"], [\"ajar\", \"kan\"], [\"kunjung\", \"i\"], [\"makan\", \"an\"]. A circumfix is two segments around the stem: [\"ke\", \"baik\", \"an\"], [\"per\", \"tanya\", \"an\"].\n\
+             2. Clitic pronouns are segments: enclitic -nya/-ku/-mu ([\"buku\", \"nya\"], [\"rumah\", \"ku\"]) and proclitic ku-/kau- ([\"ku\", \"baca\"]). -nya as a definite or nominalizing marker is a segment too.\n\
+             3. Reduplication opens at the hyphen ([\"orang\"], [\"-orang\"]; [\"jalan\"], [\"-jalan\"]) and the pair goes in one link; there is no other plural mark.",
+        )
+    }
+
     fn post_process_extraction(
         &self,
         segmentation: &mut Option<Vec<WordSegmentation<IndonesianMorphemeFunction>>>,
