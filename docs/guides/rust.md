@@ -25,7 +25,7 @@ The engine accepts any `rig::completion::CompletionModel`.
 ```rust
 use panini_engine::{extract_features_via_llm, ExtractionOptions, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
-use panini_langs::polish::Polish;
+use panini_langs::pol::Polish;
 use rig::providers::openai;
 
 #[tokio::main]

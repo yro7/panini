@@ -5,7 +5,7 @@ use panini_core::morpheme::WordSegmentation;
 use panini_core::traits::IsoLang;
 use panini_engine::prompts::{ExtractionRequest, ExtractorPrompts};
 use panini_langs::registry;
-use panini_langs::turkish::TurkishMorphemeFunction;
+use panini_langs::tur::TurkishMorphemeFunction;
 use rig::client::CompletionClient;
 use rig::providers::gemini;
 use std::env;
