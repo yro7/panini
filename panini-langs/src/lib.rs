@@ -7,33 +7,33 @@
 macro_rules! with_languages {
     ($callback:ident) => {
         $callback! {
-            (basque, Basque),
-            (czech, Czech),
-            (danish, Danish),
-            (dutch, Dutch),
-            (eastern_armenian, EasternArmenian),
-            (egyptian_arabic, EgyptianArabic),
-            (english, English),
-            (french, French),
-            (german, German),
-            (hindi, Hindi),
-            (indonesian, Indonesian),
-            (italian, Italian),
-            (korean, Korean),
-            (mandarin_chinese, MandarinChinese),
-            (modern_greek, ModernGreek),
-            (moroccan_arabic, MoroccanArabic),
-            (norwegian_bokmal, NorwegianBokmal),
-            (polish, Polish),
-            (portuguese, Portuguese),
-            (russian, Russian),
-            (spanish, Spanish),
-            (swahili, Swahili),
-            (swedish, Swedish),
-            (thai, Thai),
-            (turkish, Turkish),
-            (ukrainian, Ukrainian),
-            (vietnamese, Vietnamese),
+            (ary, MoroccanArabic),
+            (arz, EgyptianArabic),
+            (ces, Czech),
+            (cmn, MandarinChinese),
+            (dan, Danish),
+            (deu, German),
+            (ell, ModernGreek),
+            (eng, English),
+            (eus, Basque),
+            (fra, French),
+            (hin, Hindi),
+            (hye, EasternArmenian),
+            (ind, Indonesian),
+            (ita, Italian),
+            (kor, Korean),
+            (nld, Dutch),
+            (nob, NorwegianBokmal),
+            (pol, Polish),
+            (por, Portuguese),
+            (rus, Russian),
+            (spa, Spanish),
+            (swe, Swedish),
+            (swh, Swahili),
+            (tha, Thai),
+            (tur, Turkish),
+            (ukr, Ukrainian),
+            (vie, Vietnamese),
         }
     };
 }
@@ -128,20 +128,53 @@ mod lang_digest_tests {
     fn turkish_digest_covers_morpheme_functions() {
         use panini_core::traits::MorphemeFunctionCatalog;
 
-        let with_functions = turkish::Turkish.lang_digest();
+        let with_functions = tur::Turkish.lang_digest();
         let morphology_only = LanguageDigest::compute::<
-            <turkish::Turkish as LinguisticDefinition>::Morphology,
+            <tur::Turkish as LinguisticDefinition>::Morphology,
             (),
         >(IsoLang::Tur);
 
         assert!(
-            !<turkish::Turkish as LinguisticDefinition>::MorphemeFunction::function_descriptors()
+            !<tur::Turkish as LinguisticDefinition>::MorphemeFunction::function_descriptors()
                 .is_empty(),
             "Turkish must expose morpheme functions for this test to mean anything"
         );
         assert_ne!(
             with_functions, morphology_only,
             "dropping the morpheme functions must change the digest"
+        );
+    }
+}
+
+/// Every language file is named after its ISO 639-3 code, so a reader holding
+/// `fixtures/<iso>/` or a wrapper's `ISO_LANG` finds the definition without a
+/// lookup. `pub mod $module;` resolves to `src/$module.rs`, so checking the
+/// module name against `ISO_LANG` is checking the filename.
+#[cfg(test)]
+mod file_naming_tests {
+    use panini_core::traits::LinguisticDefinition;
+
+    macro_rules! module_iso_pairs {
+        ($(($module:ident, $struct:ident)),* $(,)?) => {
+            vec![$((
+                stringify!($module),
+                <crate::$module::$struct as LinguisticDefinition>::ISO_LANG.to_639_3(),
+            )),*]
+        };
+    }
+
+    #[test]
+    fn every_language_file_is_named_after_its_iso_639_3_code() {
+        let mismatches: Vec<String> = with_languages!(module_iso_pairs)
+            .into_iter()
+            .filter(|(module, iso)| module != iso)
+            .map(|(module, iso)| format!("src/{module}.rs declares ISO_LANG `{iso}`"))
+            .collect();
+
+        assert!(
+            mismatches.is_empty(),
+            "language files must be named `<iso 639-3>.rs`:\n{}",
+            mismatches.join("\n")
         );
     }
 }
@@ -231,43 +264,43 @@ mod pivot_tests {
 
     #[test]
     fn morphology_closed_field_handle_exposes_values_and_extracts() {
-        let morphology = polish::PolishMorphology::Noun {
+        let morphology = pol::PolishMorphology::Noun {
             lemma: "dom".to_string(),
-            gender: polish::PolishGender::MasculineInanimate,
-            number: polish::PolishNumber::Singular,
-            case: polish::PolishCase::Nominative,
+            gender: pol::PolishGender::MasculineInanimate,
+            number: pol::PolishNumber::Singular,
+            case: pol::PolishCase::Nominative,
         };
 
         assert_eq!(
-            polish::PolishMorphology::PIVOT_CASE.value_kind,
+            pol::PolishMorphology::PIVOT_CASE.value_kind,
             PivotValueKind::Closed
         );
         assert!(
-            polish::PolishMorphology::PIVOT_CASE
+            pol::PolishMorphology::PIVOT_CASE
                 .values()
                 .contains(&"nominative")
         );
         assert_eq!(
-            polish::PolishMorphology::PIVOT_CASE.value(&morphology),
+            pol::PolishMorphology::PIVOT_CASE.value(&morphology),
             Some("nominative".to_string())
         );
     }
 
     #[test]
     fn morpheme_function_handle_extracts_matching_category_only() {
-        let polarity = turkish::TurkishMorphemeFunction::Polarity {
-            value: turkish::TurkishPolarity::Negative,
+        let polarity = tur::TurkishMorphemeFunction::Polarity {
+            value: tur::TurkishPolarity::Negative,
         };
-        let tense = turkish::TurkishMorphemeFunction::Tense {
-            value: turkish::TurkishTense::PastDefinite,
+        let tense = tur::TurkishMorphemeFunction::Tense {
+            value: tur::TurkishTense::PastDefinite,
         };
 
         assert_eq!(
-            turkish::TurkishMorphemeFunction::PIVOT_POLARITY.value(&polarity),
+            tur::TurkishMorphemeFunction::PIVOT_POLARITY.value(&polarity),
             Some("negative".to_string())
         );
         assert_eq!(
-            turkish::TurkishMorphemeFunction::PIVOT_POLARITY.value(&tense),
+            tur::TurkishMorphemeFunction::PIVOT_POLARITY.value(&tense),
             None
         );
     }

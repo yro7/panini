@@ -188,7 +188,7 @@ Then call `extract_features_via_llm` with any `rig::completion::CompletionModel`
 ```rust
 use panini_engine::{extract_features_via_llm, ExtractionOptions, ExtractionRequest};
 use panini_engine::prompts::ExtractorPrompts;
-use panini_langs::polish::Polish;
+use panini_langs::pol::Polish;
 use rig::providers::openai;
 
 #[tokio::main]
@@ -283,7 +283,7 @@ panini-macro/        # #[derive(MorphologyInfo)], #[derive(PaniniResult)] proc m
 4. Curate `MORPHOLOGY_PIVOTS` with generated handles such as `PolishMorphology::PIVOT_CASE`
 5. For agglutinative languages, also derive `MorphemeFunctionCatalog`, implement `Agglutinative` with a morpheme inventory, and curate `MORPHEME_PIVOTS`
 
-See `panini-langs/src/polish.rs` or `panini-langs/src/turkish.rs` as references.
+See `panini-langs/src/pol.rs` or `panini-langs/src/tur.rs` as references.
 
 ## Adding an analysis component
 
