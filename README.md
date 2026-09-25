@@ -19,6 +19,9 @@
 
 Pāṇini is a linguistic feature extraction framework: describe your language's morphology as Rust types, write extraction directives, and the pipeline handles the rest — prompt assembly, JSON schema generation, LLM orchestration, response parsing, and validation. No universal schema imposed; you define exactly the features your language needs.
 
+*Built by the [Panglotive](https://www.panglotive.com) Team. Check out our work!*
+
+
 ## Table of Contents
 - [Table of Contents](#table-of-contents)
 - [Extraction Capabilities](#extraction-capabilities)
