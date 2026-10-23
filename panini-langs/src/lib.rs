@@ -17,6 +17,7 @@ macro_rules! with_languages {
             (eng, English),
             (eus, Basque),
             (fra, French),
+            (gle, Irish),
             (hin, Hindi),
             (hye, EasternArmenian),
             (ind, Indonesian),
