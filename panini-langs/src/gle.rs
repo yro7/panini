@@ -64,6 +64,14 @@ pub enum IrishMood {
     Subjunctive,
 }
 
+/// Polarity encoded by the verb token itself, not by a separate particle.
+/// In particular, níl and the negative copula retain their positive lemma.
+#[panini_macro::closed_enum]
+pub enum IrishPolarity {
+    Affirmative,
+    Negative,
+}
+
 /// The autonomous paradigm leaves the agent unspecified; it is not a passive
 /// agreement form. Copular is/ba is distinct from forms of the verb bí.
 #[panini_macro::closed_enum]
@@ -219,6 +227,7 @@ pub enum IrishMorphology {
         lemma: String,
         verb_form: IrishVerbForm,
         mood: IrishMood,
+        polarity: IrishPolarity,
         #[serde(skip_serializing_if = "Option::is_none")]
         tense: Option<IrishTense>,
         /// Only when encoded by the synthetic form (including the bare
@@ -270,6 +279,7 @@ impl LinguisticDefinition for Irish {
         IrishMorphology::PIVOT_NOUN_FORM,
         IrishMorphology::PIVOT_VERB_FORM,
         IrishMorphology::PIVOT_MOOD,
+        IrishMorphology::PIVOT_POLARITY,
         IrishMorphology::PIVOT_TENSE,
         IrishMorphology::PIVOT_DEGREE,
     ];
@@ -299,81 +309,57 @@ impl LinguisticDefinition for Irish {
     }
 
     fn extraction_directives(&self) -> &'static str {
-        "1. Lemmas: remove contextual lenition/eclipsis and h-/t-/n-prefixing, preserving the fada. \
-         Nouns take nominative singular (fhir → fear, mná → bean, leabhair → leabhar); proper nouns \
-         retain capitalization (a Sheáin → Seán). Verbs use the second-singular imperative citation \
-         form (rinne → déan, chonaic → feic, d'ith → ith, tá/bhí/beidh/raibh/níl → bí). The copula \
-         has lemma is, never bí. Adjectives use the unmutated positive singular (fearr → maith, \
-         mó → mór); verbal adjectives keep their adjective citation form (dúnta, déanta).\n\
-         2. Nominals: give lexical gender even in the plural, number, and case. Nominative is \
-         the common case for subjects AND direct objects; do not invent an accusative noun case. \
-         Genitive marks possession and appropriate complements of verbal nouns and compound \
-         prepositions; dative is the case after ordinary dative-governing simple prepositions, \
-         even when identical to nominative. Follow actual government: chun normally takes genitive. \
-         Use vocative in direct address, including a Sheáin and a chara. Case is not mutation. \
-         Give a counted noun its own grammatical number: trí bhád has singular bád despite three \
-         referents. Lexical plurals and higher-number constructions follow their actual syntax.\n\
-         3. Mutation reports the OVERT change relative to the unmutated form: bhád lenition; \
-         mbád and n-úll eclipsis; háit h_prefix; t-uisce and tseachtain t_prefix. An unchanged \
-         initial, including a letter that cannot mutate, is unmutated. Never classify lexical h, \
-         lexical initial consonant clusters, or a past d' prefix as initial mutation.\n\
-         4. The verbal noun is a NOUN with noun_form verbal_noun, its own nominal lemma, gender, \
-         number and case: ag ithe → ithe, ag déanamh → déanamh, a dhéanamh → déanamh. Other nouns \
-         have noun_form simple. Irish has no morphological infinitive: a + verbal noun is a \
-         particle plus noun, and bí + ag + verbal noun is analysed token by token, with tense on \
-         bí only. Verbal adjectives such as dúnta/déanta are ADJECTIVES, not finite verbs or a \
-         fictitious past tense. Positive attributive adjectives take their head's gender, number \
-         and case; omit all three for invariant predicative and comparative/superlative forms. \
-         Distinguish comparative níos fearr from superlative is fearr by construction.\n\
-         5. Finite verbs: synthetic forms encode person/number (ólaim first singular, ólaimid \
-         first plural); the bare singular imperative ól is also synthetic, second singular. \
-         Analytic forms such as ólann, d'ól and beidh take NO person/number from their separate \
-         subject. Autonomous óltar/óladh/ólfar have verb_form autonomous, no person/number and \
-         their actual mood/tense; they are not passive agreement. Forms of is/ba are copula, with \
-         no person/number. Ordinary questions keep indicative mood. Provide tense on indicative \
-         and subjunctive forms; omit tense on imperative and conditional. Use present_habitual \
-         for bím/bíonn, present for tá, past_habitual for bhíodh and d'óladh (dependent óladh) \
-         in a habitual-past context, and past for bhí/d'ól. Context distinguishes autonomous past \
-         óladh from dependent habitual-past óladh. \
-         Copular ba/b' is past in a past assertion and conditional (without tense) in a hypothetical \
-         context. Do not transfer a compound construction's tense to a nominal or adjectival token.\n\
-         6. Inflected prepositions stay one ADPOSITION: agam → ag first singular; liom → le \
-         first singular; dó/dí → do third singular masculine/feminine; acu → ag third plural. \
-         Report person and number only for a pronominal object or fused possessor; gender only \
-         for third singular; omit these on simple prepositions and preposition+article contractions \
-         (sa/san → i, den → de, don → do). possessive is true for ina/óna/lena when a possessive \
-         determiner is fused, with the possessor's features from context; false otherwise. Do not \
-         confuse ina chónaí (possessive) with ann (pronominal). Set emphasis plain/emphatic only \
-         on pronominal prepositions (agam/agam-sa); omit it on simple/possessive/article forms.\n\
-         7. Determiners: an/na are article, with lemma an, article number and case; singular \
-         gender comes from the noun, plural gender is omitted. na can be feminine genitive SINGULAR \
-         as well as plural. Possessive mo/do/a/ár/bhur has the POSSESSOR'S person/number and gender \
-         only for third singular: a chóta his, a cóta her, a gcóta their. Omit possessive case. \
-         seo/sin/úd modifying a noun are demonstrative determiners; gach/aon are quantifiers; \
-         cén is interrogative. Omit person/number/gender/case from invariant nonpossessive \
-         determiners. Demonstratives standing alone are pronouns, not determiners.\n\
-         8. Personal pronouns encode person/number; gender is present only in third singular. \
-         Give pronoun_case subjective for subjects and objective for objects and the é/í/iad \
-         series in copular identification. mise/tusa/seisean/sise/muidne/sibhse/siadsan are emphatic \
-         personal forms: lemmatize to mé/tú/sé/sí/muid/sibh/siad, with emphasis emphatic. Ordinary \
-         personal forms have emphasis plain. Reflexives with féin take the personal token's \
-         features; féin remains a separate token. For invariant demonstrative, relative, \
-         interrogative and indefinite pronouns omit person/number/gender/pronoun_case/emphasis \
-         unless that particular form genuinely encodes the feature.\n\
-         9. Keep orthographic tokens with their actual apostrophe or hyphen: d'ith, n-úll, \
-         t-uisce and inflected prepositions are not strings of invented words. Elided possessives \
-         m'/d' before a noun may be separate determiner tokens (lemma mo/do), retaining the \
-         following noun as its own token. Separate written ag, a, ní, níor, an and nach. Classify \
-         homographs by syntax: an article is a determiner, an before a finite verb a question \
-         particle; a may be possessive determiner, relative marker, vocative or infinitival \
-         particle. A fused negative/question/relative COPULA (ní, an, nach, gur, ar etc.) is a \
-         verb with lemma is when it itself supplies the copula; is coordinating 'and' is a \
-         conjunction with lemma agus. Never invent an unwritten copula or a subject pronoun. \
-         Names of specific people and places are proper_noun even inside a fixed expression \
-         (Muire in Dia is Muire duit), with their actual gender, number, case and mutation; \
-         do not add noun_form. Adverbial-forming go in go maith/go fóill is a particle, not \
-         an adverb or the preposition meaning to/until. The following lexical adjective may \
-         remain adjective even when the whole phrase functions adverbially."
+        "1. Lemmas, tokens and mutation: preserve fadas; undo contextual initial changes in lemmas. \
+         Nouns use nominative singular (mná → bean); verbs the second-singular imperative \
+         (rinne → déan, chonaic → feic, tá/bhí/beidh/raibh/níl → bí); copulas use is, never bí; \
+         adjectives use positive singular (fearr → maith). Personal/place names remain proper_noun \
+         with capitalization, including Muire in Dia is Muire duit. Keep orthographic tokens \
+         (d'ith, n-úll, agam-sa); elided possessives m'/d' may split from their noun (lemma mo/do). \
+         Mutation records only overt change: bhád lenition, mbád/n-úll eclipsis, háit h_prefix, \
+         t-uisce/tseachtain t_prefix; unchanged initials, lexical h/clusters and past d' are unmutated.\n\
+         2. Nominals: retain lexical gender in plurals. Nominative covers subjects AND objects; \
+         use genitive for possession and appropriate verbal-noun/compound-preposition complements, \
+         dative after dative-governing simple prepositions even without a distinct ending, vocative \
+         for address (a Sheáin). Follow government: chun normally takes genitive. Attributive \
+         adjectives normally agree with the head; counted forms keep their OWN number: trí bhád \
+         mhóra has singular bhád but plural mhóra. Cardinals 2–19 take plural adjectives; 1 and \
+         full tens normally singular; higher numbers follow the actual traditional/simplified \
+         construction. Omit adjective gender/number/case in invariant predicative and comparative/ \
+         superlative uses; distinguish níos fearr comparative from is fearr superlative.\n\
+         3. Deverbatives: verbal nouns are NOUNS with noun_form verbal_noun and their own nominal \
+         lemma/gender/number/case (a dhéanamh → déanamh); ordinary nouns have noun_form simple. \
+         a + verbal noun is particle + noun, not a morphological infinitive; bí + ag + verbal noun \
+         keeps separate tokens with tense only on bí. Verbal adjectives (dúnta/déanta) stay \
+         ADJECTIVES with their adjective lemma, not past-tense verbs.\n\
+         4. Verbs: only synthetic forms encode person/number (ólaim first singular; bare imperative \
+         ól second singular). Analytic ólann/d'ól/beidh, autonomous óltar/óladh/ólfar and copulas \
+         omit person/number; autonomous is not passive agreement. Questions remain indicative. \
+         Give tense on indicative/subjunctive, omit it on imperative/conditional. tá is present, \
+         bím/bíonn present_habitual, bhí/d'ól past, bhíodh/d'óladh past_habitual; context resolves \
+         autonomous past versus dependent habitual óladh. Copular ba/b' is past in assertions, \
+         conditional without tense in hypotheticals. Polarity is TOKEN-LOCAL: negative on níl/nílim \
+         and fused negative copulas (ní/níor/níorbh/nach/nár/nárbh), affirmative otherwise, including \
+         interrogative copular an. Separate ní/níor stay particles: raibh/ól in ní raibh/níor ól \
+         retain affirmative token polarity.\n\
+         5. Prepositions and determiners: inflected prepositions stay ADPOSITIONS with the base \
+         preposition as lemma (agam → ag; dó/dí → do). Person/number describe the pronominal object \
+         or fused possessor; gender only third singular. Omit them on simple/article contractions \
+         (sa/san → i, den → de, don → do). possessive is true only with a fused possessive \
+         (ina/óna/lena, traits from context): ina chónaí differs from pronominal ann. Emphasis \
+         plain/emphatic applies only to pronominal forms (agam/agam-sa). Articles an/na use lemma an, \
+         article number/case and singular head gender; na also marks feminine genitive singular. \
+         Possessives carry POSSESSOR person/number, gender only third singular, no case \
+         (a chóta his, a cóta her, a gcóta their). Invariant determiners omit agreement: seo/sin/úd \
+         demonstrative, gach/aon quantifier, cén interrogative; standalone demonstratives are pronouns.\n\
+         6. Pronouns and homographs: personal pronouns carry person/number, gender only third singular, \
+         subjective case for subjects, objective for objects and copular é/í/iad. Emphatic \
+         mise/tusa/seisean/sise/muidne/sibhse/siadsan use lemmas mé/tú/sé/sí/muid/sibh/siad; ordinary \
+         forms have emphasis plain. Reflexive féin stays separate from the personal token. Other \
+         pronouns omit these features unless encoded. Resolve an as article versus question particle; \
+         a as possessive, relative, vocative or infinitival marker. Fused copulas ní/an/nach/gur/ar \
+         are VERBS with lemma is when supplying the copula; coordinating is has lemma agus. \
+         Never invent unwritten copulas/subjects. Adverbial go (go maith/go fóill) is a PARTICLE, \
+         not to/until; the following adjective may stay adjective."
     }
 
     fn alignment_directives(&self) -> Option<&'static str> {
@@ -398,14 +384,63 @@ impl LinguisticDefinition for Irish {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use panini_core::aggregable::Aggregable;
     use panini_core::traits::MorphologyInfo;
     use serde_json::json;
+
+    #[test]
+    fn fused_negation_survives_lemma_normalization_and_aggregation() {
+        // tá/níl and copular is/ní must remain distinct after normalization.
+        for (lemma, verb_form) in [("bí", "analytic"), ("is", "copula")] {
+            let affirmative: IrishMorphology = serde_json::from_value(json!({
+                "pos": "verb", "lemma": lemma, "verb_form": verb_form,
+                "mood": "indicative", "tense": "present", "polarity": "affirmative",
+                "mutation": "unmutated"
+            }))
+            .unwrap();
+            let mut negative_json = serde_json::to_value(&affirmative).unwrap();
+            negative_json["polarity"] = json!("negative");
+            let negative: IrishMorphology = serde_json::from_value(negative_json).unwrap();
+
+            assert_eq!(affirmative.lemma(), negative.lemma());
+            assert_ne!(affirmative.observations(), negative.observations());
+            for (form, expected) in [(&affirmative, "affirmative"), (&negative, "negative")] {
+                assert_eq!(
+                    IrishMorphology::PIVOT_POLARITY.value(form).as_deref(),
+                    Some(expected)
+                );
+                assert!(form.observations()[0].contains(&("polarity".into(), expected.into())));
+            }
+        }
+        assert!(Irish::MORPHOLOGY_PIVOTS.iter().any(|pivot| pivot.key == "polarity"));
+    }
+
+    #[test]
+    fn verb_polarity_is_required_and_closed_in_the_extraction_schema() {
+        let schema = serde_json::to_value(schemars::schema_for!(IrishMorphology)).unwrap();
+        let verb = schema["oneOf"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|variant| variant["properties"]["pos"]["const"] == "verb")
+            .unwrap();
+        assert!(verb["required"].as_array().unwrap().contains(&json!("polarity")));
+
+        let mut form = json!({
+            "pos": "verb", "lemma": "bí", "verb_form": "analytic",
+            "mood": "indicative", "tense": "present", "mutation": "unmutated"
+        });
+        assert!(serde_json::from_value::<IrishMorphology>(form.clone()).is_err());
+        form["polarity"] = json!("unknown");
+        assert!(serde_json::from_value::<IrishMorphology>(form).is_err());
+    }
 
     #[test]
     fn autonomous_verb_has_no_agreement_and_reaches_the_tense_pivot() {
         let form: IrishMorphology = serde_json::from_value(json!({
             "pos": "verb", "lemma": "ól", "verb_form": "autonomous",
-            "mood": "indicative", "tense": "present", "mutation": "unmutated"
+            "mood": "indicative", "tense": "present", "polarity": "affirmative",
+            "mutation": "unmutated"
         }))
         .unwrap();
         let value = serde_json::to_value(&form).unwrap();
