@@ -25,6 +25,7 @@ macro_rules! with_languages {
             (kor, Korean),
             (nld, Dutch),
             (nob, NorwegianBokmal),
+            (pes, IranianPersian),
             (pol, Polish),
             (por, Portuguese),
             (rus, Russian),
