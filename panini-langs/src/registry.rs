@@ -7,10 +7,7 @@ use anyhow::{Result, anyhow};
 use rig::completion::CompletionModel;
 
 use panini_core::component::{AnalysisComponent, ExtractionResult};
-use panini_core::components::{
-    LeipzigGloss, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
-    PedagogicalExplanation, TranslationAlignment,
-};
+use panini_core::components;
 use panini_core::traits::IsoLang;
 use panini_engine::prompts::BatchExtractionRequest;
 use panini_engine::{
@@ -18,7 +15,30 @@ use panini_engine::{
     extract_with_components, extract_with_components_executor,
 };
 
-/// Helper: build the component list for a concrete language and dispatch.
+/// Single ordered catalog for every extraction entry point. Component keys
+/// come from their implementations; registering a component requires one entry.
+fn select_components<'a, L: panini_core::LinguisticDefinition + 'a>(
+    component_keys: Option<&[&str]>,
+) -> Vec<&'a dyn AnalysisComponent<L>> {
+    let all_components: &[&dyn AnalysisComponent<L>] = &[
+        &components::PedagogicalExplanation,
+        &components::MorphologyAnalysis,
+        &components::MultiwordExpressions,
+        &components::MorphemeSegmentation,
+        &components::LeipzigGloss,
+        &components::TranslationAlignment,
+    ];
+
+    all_components
+        .iter()
+        .copied()
+        .filter(|component| {
+            component_keys.is_none_or(|keys| keys.contains(&component.schema_key()))
+        })
+        .collect()
+}
+
+/// Dispatch a concrete language through the shared component selection.
 async fn extract_for_language<L, M>(
     lang: &L,
     model: &M,
@@ -28,53 +48,9 @@ async fn extract_for_language<L, M>(
 ) -> Result<ExtractionResult>
 where
     L: panini_core::LinguisticDefinition + Send + Sync,
-    L::Morphology: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + std::hash::Hash
-        + Eq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + panini_core::MorphologyInfo
-        + Send
-        + Sync,
-    L::MorphemeFunction: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + Send
-        + Sync,
     M: CompletionModel + Sync,
 {
-    let pedagogical = PedagogicalExplanation;
-    let morphology = MorphologyAnalysis;
-    let multiword = MultiwordExpressions;
-    let morpheme_seg = MorphemeSegmentation;
-    let leipzig = LeipzigGloss;
-    let translation = TranslationAlignment;
-
-    let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
-        ("pedagogical_explanation", &pedagogical),
-        ("morphology", &morphology),
-        ("multiword_expressions", &multiword),
-        ("morpheme_segmentation", &morpheme_seg),
-        ("leipzig_gloss", &leipzig),
-        ("translation_alignment", &translation),
-    ];
-
-    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
-        || all_components.iter().map(|(_, c)| *c).collect(),
-        |keys| {
-            all_components
-                .iter()
-                .filter(|(k, _)| keys.contains(k))
-                .map(|(_, c)| *c)
-                .collect()
-        },
-    );
+    let selected = select_components::<L>(component_keys);
 
     Ok(extract_with_components(lang, model, request, &selected, options).await?)
 }
@@ -88,53 +64,9 @@ async fn extract_for_language_executor<L, E>(
 ) -> Result<ExtractionResult>
 where
     L: panini_core::LinguisticDefinition + Send + Sync,
-    L::Morphology: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + std::hash::Hash
-        + Eq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + panini_core::MorphologyInfo
-        + Send
-        + Sync,
-    L::MorphemeFunction: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + Send
-        + Sync,
     E: panini_engine::structured_llm::StructuredLlmExecutor,
 {
-    let pedagogical = PedagogicalExplanation;
-    let morphology = MorphologyAnalysis;
-    let multiword = MultiwordExpressions;
-    let morpheme_seg = MorphemeSegmentation;
-    let leipzig = LeipzigGloss;
-    let translation = TranslationAlignment;
-
-    let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
-        ("pedagogical_explanation", &pedagogical),
-        ("morphology", &morphology),
-        ("multiword_expressions", &multiword),
-        ("morpheme_segmentation", &morpheme_seg),
-        ("leipzig_gloss", &leipzig),
-        ("translation_alignment", &translation),
-    ];
-
-    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
-        || all_components.iter().map(|(_, c)| *c).collect(),
-        |keys| {
-            all_components
-                .iter()
-                .filter(|(k, _)| keys.contains(k))
-                .map(|(_, c)| *c)
-                .collect()
-        },
-    );
+    let selected = select_components::<L>(component_keys);
 
     Ok(extract_with_components_executor(lang, executor, request, &selected, options).await?)
 }
@@ -150,53 +82,9 @@ async fn extract_batch_for_language_executor<L, E>(
 ) -> Result<Vec<Result<ExtractionResult, BatchItemError>>>
 where
     L: panini_core::LinguisticDefinition + Send + Sync,
-    L::Morphology: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + std::hash::Hash
-        + Eq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + panini_core::MorphologyInfo
-        + Send
-        + Sync,
-    L::MorphemeFunction: std::fmt::Debug
-        + Clone
-        + PartialEq
-        + serde::Serialize
-        + for<'de> serde::Deserialize<'de>
-        + schemars::JsonSchema
-        + Send
-        + Sync,
     E: panini_engine::structured_llm::StructuredLlmExecutor,
 {
-    let pedagogical = PedagogicalExplanation;
-    let morphology = MorphologyAnalysis;
-    let multiword = MultiwordExpressions;
-    let morpheme_seg = MorphemeSegmentation;
-    let leipzig = LeipzigGloss;
-    let translation = TranslationAlignment;
-
-    let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
-        ("pedagogical_explanation", &pedagogical),
-        ("morphology", &morphology),
-        ("multiword_expressions", &multiword),
-        ("morpheme_segmentation", &morpheme_seg),
-        ("leipzig_gloss", &leipzig),
-        ("translation_alignment", &translation),
-    ];
-
-    let selected: Vec<&dyn AnalysisComponent<L>> = component_keys.map_or_else(
-        || all_components.iter().map(|(_, c)| *c).collect(),
-        |keys| {
-            all_components
-                .iter()
-                .filter(|(k, _)| keys.contains(k))
-                .map(|(_, c)| *c)
-                .collect()
-        },
-    );
+    let selected = select_components::<L>(component_keys);
 
     Ok(extract_batch_with_components_executor(lang, executor, request, &selected, options).await?)
 }
@@ -342,7 +230,7 @@ with_languages!(generate_registry);
 
 #[cfg(test)]
 mod tests {
-    use super::project_morphology_erased;
+    use super::{project_morphology_erased, select_components};
     use crate::{Basque, Danish, Indonesian, Korean, Polish, Swahili, Turkish};
     use panini_core::component::AnalysisComponent;
     use panini_core::components::*;
@@ -353,6 +241,43 @@ mod tests {
         if let Err(err) = L::validate_inventory() {
             panic!("Morpheme inventory validation failed: {err}");
         }
+    }
+
+    #[test]
+    fn component_selection_preserves_catalog_order_and_existing_filter_behavior() {
+        let keys = |requested: Option<&[&str]>| {
+            select_components::<Polish>(requested)
+                .iter()
+                .map(|component| component.schema_key())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            keys(None),
+            [
+                "pedagogical_explanation",
+                "morphology",
+                "multiword_expressions",
+                "morpheme_segmentation",
+                "leipzig_gloss",
+                "translation_alignment"
+            ]
+        );
+        // Requested order and duplicates do not change the catalog's order.
+        assert_eq!(
+            keys(Some(&[
+                "translation_alignment",
+                "morphology",
+                "morphology",
+                "unknown"
+            ])),
+            ["morphology", "translation_alignment"]
+        );
+        assert!(keys(Some(&[])).is_empty());
+        assert!(keys(Some(&["unknown"])).is_empty());
+        // Compatibility remains the engine's responsibility.
+        let selected = select_components::<Polish>(Some(&["morpheme_segmentation"]));
+        assert_eq!(selected.len(), 1);
+        assert!(!selected[0].is_compatible(&Polish));
     }
 
     #[test]
