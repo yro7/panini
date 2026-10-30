@@ -32,6 +32,7 @@ Pāṇini is a linguistic feature extraction framework: describe your language's
     - [`morpheme_segmentation`](#morpheme_segmentation)
     - [`multiword_expressions`](#multiword_expressions)
     - [`leipzig_gloss`](#leipzig_gloss)
+    - [`lfg_f_structure`](#lfg_f_structure)
 - [Usage](#usage)
   - [As a library (Rust API)](#as-a-library-rust-api)
   - [Python](#python)
@@ -80,6 +81,7 @@ let result = registry::extract_erased_with_components(
 | `multiword_expressions`   | `MultiwordExpressions`   | Extracts idioms, collocations, and phrasal expressions                                          | All languages                 |
 | `leipzig_gloss`       | `LeipzigGloss`           | Leipzig-style interlinear morpheme-by-morpheme gloss (Leipzig Glossing Rules)                   | All languages                 |
 | `translation_alignment`   | `TranslationAlignment`   | Aligns the sentence with its translation: many-to-many segment links, morpheme grain when needed | All languages                 |
+| `lfg_f_structure`         | `LfgFStructure`          | LFG f-structure graph with predicates, grammatical functions, features, sets and shared references | All languages |
 
 *Agglutinative languages are marked with a "Agglutinative" trait implementation in the framework. You can define the implementation for any language, even for low-agglutination languages like french, etc.
 
@@ -170,6 +172,30 @@ Lezgian — `"Gila abur-u-n ferma hamišaluǧ güǧüna amuq'-da-č."`
       { "source": "amuq'-da-č",     "gloss": "stay-FUT-NEG" }
     ],
     "free_translation": "Now their farm will not stay behind forever."
+  }
+}
+```
+
+#### `lfg_f_structure`
+
+English — `"The cat sleeps."`
+
+```json
+{
+  "lfg_f_structure": {
+    "root": "f0",
+    "structures": [
+      {
+        "id": "f0",
+        "pred": { "lemma": "sleep", "arguments": ["SUBJ"] },
+        "attributes": { "SUBJ": { "ref": "f1" } }
+      },
+      {
+        "id": "f1",
+        "pred": { "lemma": "cat", "arguments": [] },
+        "attributes": { "NUM": "sg" }
+      }
+    ]
   }
 }
 ```
@@ -337,15 +363,18 @@ pub mod my_component;
 pub use my_component::MyComponent;
 ```
 
-**3. Add to the registry** in `panini-langs/src/registry.rs` (`extract_for_language`):
+**3. Add one entry to the shared catalog** in
+`panini-langs/src/registry.rs` (`select_components`):
 
 ```rust
-let my_comp = MyComponent;
-let all_components: Vec<(&str, &dyn AnalysisComponent<L>)> = vec![
+let all_components: &[&dyn AnalysisComponent<L>] = &[
     // ...existing...
-    ("my_component", &my_comp),
+    &components::MyComponent,
 ];
 ```
+
+The registry reads the key from `schema_key()` and uses the same catalog for
+model-based, executor-based and batch extraction.
 
 That's it. The component is automatically integrated into the schema and prompt via `compose_schema()` / `compose_prompt()`. Use it with `--components my_component`.
 

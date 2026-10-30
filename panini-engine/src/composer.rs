@@ -167,6 +167,11 @@ pub fn compose_prompt<L: LinguisticDefinition>(
     // exercise-generation instructions.
     let wants_pedagogical_context = components.iter().any(|c| c.needs_pedagogical_context());
     let wants_extraction_directives = components.iter().any(|c| c.needs_extraction_directives());
+    // Templates may interpolate {directives} in target_language too. Opting out
+    // must suppress those morphology rules everywhere in a single-axis prompt.
+    if !wants_extraction_directives {
+        global_ctx.insert("directives", String::new());
+    }
 
     let mut blocks = Vec::new();
 
@@ -635,6 +640,43 @@ mod tests {
         assert!(!prompt.contains("<extraction_directives>"));
         assert!(!prompt.contains("Test directives"));
         assert!(prompt.contains("<target_language>"));
+    }
+
+    #[test]
+    fn lfg_omits_morphology_directives_even_in_target_language_template() {
+        use panini_core::components::LfgFStructure;
+        let mut prompts = test_prompts();
+        prompts.target_language = "{language}. {directives}".to_string();
+        let prompt = compose_prompt(&TestLang, &test_request(), &prompts, &[&LfgFStructure])
+            .expect("prompt should compose");
+        assert!(!prompt.contains("Test directives"));
+        assert!(!prompt.contains("<learner_profile>"));
+        assert!(!prompt.contains("<skill_context>"));
+        assert!(prompt.contains("<lfg_f_structure>"));
+        assert!(prompt.contains("XCOMP"));
+    }
+
+    #[test]
+    fn lfg_wire_schema_validates_control_and_requires_nullable_predicate() {
+        use panini_core::components::LfgFStructure;
+        let schema = compose_schema(&TestLang, &[&LfgFStructure]);
+        let validator = jsonschema::validator_for(&schema).unwrap();
+        let mut sample = serde_json::json!({"lfg_f_structure": {
+            "root":"f0", "structures":[
+                {"id":"f0","pred":{"lemma":"sleep","arguments":["SUBJ"]},"attributes":[
+                    {"name":"SUBJ","value":{"kind":"reference","target":"f1"}},
+                    {"name":"TNS-ASP","value":{"kind":"reference","target":"f2"}}
+                ]},
+                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[]},
+                {"id":"f2","pred":null,"attributes":[{"name":"TENSE","value":{"kind":"atom","value":"pres"}}]}
+            ]
+        }});
+        assert!(validator.is_valid(&sample), "{schema}");
+        sample["lfg_f_structure"]["structures"][2]
+            .as_object_mut()
+            .unwrap()
+            .remove("pred");
+        assert!(!validator.is_valid(&sample));
     }
 
     #[test]

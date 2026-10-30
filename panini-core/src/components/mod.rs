@@ -1,4 +1,5 @@
 pub mod leipzig;
+pub mod lfg_f_structure;
 pub mod morpheme_segmentation;
 pub mod morphology;
 pub mod multiword;
@@ -9,6 +10,7 @@ pub mod translation_alignment_v4;
 pub mod translation_alignment_v6;
 
 pub use leipzig::LeipzigGloss;
+pub use lfg_f_structure::LfgFStructure;
 pub use morpheme_segmentation::MorphemeSegmentation;
 pub use morphology::MorphologyAnalysis;
 pub use multiword::MultiwordExpressions;

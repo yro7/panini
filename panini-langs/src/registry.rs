@@ -27,6 +27,7 @@ fn select_components<'a, L: panini_core::LinguisticDefinition + 'a>(
         &components::MorphemeSegmentation,
         &components::LeipzigGloss,
         &components::TranslationAlignment,
+        &components::LfgFStructure,
     ];
 
     all_components
@@ -259,18 +260,19 @@ mod tests {
                 "multiword_expressions",
                 "morpheme_segmentation",
                 "leipzig_gloss",
-                "translation_alignment"
+                "translation_alignment",
+                "lfg_f_structure"
             ]
         );
         // Requested order and duplicates do not change the catalog's order.
         assert_eq!(
             keys(Some(&[
-                "translation_alignment",
+                "lfg_f_structure",
                 "morphology",
                 "morphology",
                 "unknown"
             ])),
-            ["morphology", "translation_alignment"]
+            ["morphology", "lfg_f_structure"]
         );
         assert!(keys(Some(&[])).is_empty());
         assert!(keys(Some(&["unknown"])).is_empty());
