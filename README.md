@@ -193,7 +193,7 @@ English — `"The cat sleeps."`
       {
         "id": "f1",
         "pred": { "lemma": "cat", "arguments": [] },
-        "attributes": { "NUM": "sg" }
+        "attributes": { "MORPHOLOGY-GROUP": "noun", "NUM": "singular" }
       }
     ]
   }

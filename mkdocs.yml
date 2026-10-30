@@ -62,6 +62,7 @@ nav:
       - Roles & Principles: components/index.md
       - Creating a Component: components/creating.md
       - Validation Pipeline: components/pipeline.md
+      - LFG F-Structures: components/lfg.md
   - 📊 Aggregation & Statistics:
       - The Aggregable Concept: aggregation/index.md
       - Working with Digests: aggregation/digests.md
