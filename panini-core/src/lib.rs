@@ -32,8 +32,8 @@ pub use explanation::{
 };
 pub use lang_digest::LanguageDigest;
 pub use lfg::{
-    LfgAnalysis, LfgAttribute, LfgFunction, LfgPredicate, LfgReference, LfgSet, LfgStructure,
-    LfgValue,
+    LfgAnalysis, LfgAttribute, LfgFeature, LfgFunction, LfgMorphology, LfgPredicate, LfgReference,
+    LfgSet, LfgStructure, LfgValue,
 };
 pub use morpheme::{ExtractedMorpheme, MorphemeObservation, WordSegmentation};
 pub use morphology_enums::{ParseUposError, Upos};
