@@ -91,3 +91,60 @@ impl LfgMorphology {
         Ok(result)
     }
 }
+
+/// Specialize the derived wire schema from the language's existing catalog.
+/// Category and feature value remain in the same branch: inventories are never
+/// flattened into a union across noun, pronoun, verb, etc.
+fn schema<L: LinguisticDefinition>() -> serde_json::Value {
+    let branches: Vec<_> = catalog::<L>()
+        .into_iter()
+        .filter(|g| g.dimensions.iter().any(|d| d.name != "lemma"))
+        .map(|group| {
+            let fields: Vec<_> = group
+                .dimensions
+                .iter()
+                .filter(|d| d.name != "lemma")
+                .map(|field| {
+                    let value = match &field.kind {
+                        FieldKind::Open => serde_json::json!({"type":"string"}),
+                        FieldKind::Closed(values) => {
+                            serde_json::json!({"type":"string","enum":values})
+                        }
+                    };
+                    serde_json::json!({
+                        "type":"object","additionalProperties":false,"required":["name","value"],
+                        "properties":{"name":{"type":"string","enum":[field.name]},"value":value}
+                    })
+                })
+                .collect();
+            let features = serde_json::json!({"type":"array","items":{"anyOf":fields}});
+            serde_json::json!({
+                "type":"object","additionalProperties":false,"required":["category","features"],
+                "properties":{"category":{"type":"string","enum":[group.key]},"features":features}
+            })
+        })
+        .collect();
+    if branches.is_empty() {
+        // Handwritten test/external languages may expose no catalog at all.
+        // In that case the optional morphology bundle can only be null.
+        serde_json::json!({"type":"null"})
+    } else {
+        serde_json::json!({"anyOf":branches})
+    }
+}
+
+/// Schema-only parameter: the transport still deserializes `LfgMorphology`,
+/// but its generated schema uses the requested language's existing inventories.
+pub(crate) struct LfgMorphologySchema<L>(std::marker::PhantomData<L>);
+
+impl<L: LinguisticDefinition> JsonSchema for LfgMorphologySchema<L> {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        format!("LfgMorphology_{}", L::ISO_LANG.to_639_3()).into()
+    }
+
+    fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schema::<L>()
+            .try_into()
+            .expect("morphology projection is an object schema")
+    }
+}

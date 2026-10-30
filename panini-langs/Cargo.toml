@@ -24,3 +24,6 @@ rig-core = { version = "0.33", optional = true }
 
 [features]
 registry = ["dep:panini-engine", "dep:anyhow", "dep:rig-core"]
+
+[dev-dependencies]
+jsonschema = "0.45.0"
