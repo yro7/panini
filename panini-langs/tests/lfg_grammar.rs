@@ -2,7 +2,7 @@ use panini_core::components::LfgFStructure;
 use panini_core::{
     AnalysisComponent, FieldKind, LfgAnalysis, LinguisticDefinition, MorphologyCatalog,
 };
-use panini_lang_langs::{Irish, Polish};
+use panini_lang_langs::{English, French, Irish, Polish};
 use serde_json::{Value, json};
 
 fn sentence(morphology: Value) -> Value {
@@ -133,5 +133,22 @@ fn v1_persisted_results_still_deserialize_and_validate() {
         let analysis: LfgAnalysis =
             serde_json::from_value(case["result"]["lfg_f_structure"].clone()).unwrap();
         analysis.validate().unwrap();
+    }
+}
+
+#[test]
+fn current_live_results_revalidate_with_their_language() {
+    let report: Value =
+        serde_json::from_str(include_str!("../../examples/data/lfg_grammar_live.json")).unwrap();
+    for case in report["cases"].as_array().unwrap() {
+        let analysis: LfgAnalysis =
+            serde_json::from_value(case["result"]["lfg_f_structure"].clone()).unwrap();
+        match case["language"].as_str().unwrap() {
+            "eng" => analysis.validate_for_language(&English),
+            "fra" => analysis.validate_for_language(&French),
+            "gle" => analysis.validate_for_language(&Irish),
+            other => panic!("Unexpected live language {other}"),
+        }
+        .unwrap();
     }
 }

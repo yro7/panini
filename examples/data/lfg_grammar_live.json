@@ -1,0 +1,601 @@
+{
+  "model": "gemini-3.1-flash-lite-preview",
+  "failures": 0,
+  "cases": [
+    {
+      "language": "eng",
+      "text": "The driver starts the tractor.",
+      "elapsed_seconds": 14.085419667,
+      "graph_valid": true,
+      "expected_controller": null,
+      "controller": null,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "start",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "NUM": "singular",
+                "OBJ": {
+                  "ref": "f3"
+                },
+                "PERS": "third",
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "VERB-FORM": "finite",
+                "VOICE": "active"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "driver",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "present"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The tractor was repaired by the farmer.",
+      "elapsed_seconds": 2.974551042,
+      "graph_valid": true,
+      "expected_controller": null,
+      "controller": null,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "repair",
+                "arguments": [
+                  "SUBJ",
+                  "OBL_AG"
+                ]
+              },
+              "attributes": {
+                "OBL_AG": {
+                  "ref": "f3"
+                },
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "VOICE": "passive"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "past"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The farmer tries to leave.",
+      "elapsed_seconds": 4.947285292,
+      "graph_valid": true,
+      "expected_controller": "SUBJ",
+      "controller": "SUBJ",
+      "control_shared": true,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "try",
+                "arguments": [
+                  "SUBJ",
+                  "XCOMP"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "NUM": "singular",
+                "PERS": "third",
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "VERB-FORM": "finite",
+                "VOICE": "active",
+                "XCOMP": {
+                  "ref": "f3"
+                },
+                "XCOMP-CONTROLLER": "SUBJ"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "leave",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "VERB-FORM": "infinitive"
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "present"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The farmer persuades his neighbor to leave.",
+      "elapsed_seconds": 12.755138042,
+      "graph_valid": true,
+      "expected_controller": "OBJ",
+      "controller": "OBJ",
+      "control_shared": true,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "persuade",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ",
+                  "XCOMP"
+                ]
+              },
+              "attributes": {
+                "OBJ": {
+                  "ref": "f3"
+                },
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f5"
+                },
+                "VOICE": "active",
+                "XCOMP": {
+                  "ref": "f4"
+                },
+                "XCOMP-CONTROLLER": "OBJ"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "neighbor",
+                "arguments": []
+              },
+              "attributes": {
+                "COUNTABILITY": "count",
+                "DEF": "-",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f4",
+              "pred": {
+                "lemma": "leave",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "SUBJ": {
+                  "ref": "f3"
+                },
+                "VERB-FORM": "infinitive"
+              }
+            },
+            {
+              "id": "f5",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "present"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The farmer who bought the tractor left.",
+      "elapsed_seconds": 5.349671583,
+      "graph_valid": true,
+      "expected_controller": null,
+      "controller": null,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "leave",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "VERB-FORM": "finite"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "ADJUNCT": {
+                  "set": [
+                    "f3"
+                  ]
+                },
+                "DEF": "+",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "buy",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "OBJ": {
+                  "ref": "f6"
+                },
+                "SUBJ": {
+                  "ref": "f5"
+                },
+                "TNS-ASP": {
+                  "ref": "f7"
+                }
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "past"
+              }
+            },
+            {
+              "id": "f5",
+              "pred": {
+                "lemma": "who",
+                "arguments": []
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "pronoun",
+                "PRONOUN-TYPE": "relative"
+              }
+            },
+            {
+              "id": "f6",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "-",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f7",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "past"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "fra",
+      "text": "Le fermier essaie de partir.",
+      "elapsed_seconds": 13.384654083,
+      "graph_valid": true,
+      "expected_controller": "SUBJ",
+      "controller": "SUBJ",
+      "control_shared": true,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "essayer",
+                "arguments": [
+                  "SUBJ",
+                  "XCOMP"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "NUM": "singular",
+                "PERS": "third",
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "XCOMP": {
+                  "ref": "f3"
+                },
+                "XCOMP-CONTROLLER": "SUBJ"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "fermier",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "GEND": "masculine",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "partir",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f5"
+                }
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MOOD": "indicative",
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "present"
+              }
+            },
+            {
+              "id": "f5",
+              "pred": null,
+              "attributes": {
+                "MOOD": "infinitive",
+                "MORPHOLOGY-GROUP": "verb"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "gle",
+      "text": "Tosaíonn an tiománaí an tarracóir.",
+      "elapsed_seconds": 6.674360667,
+      "graph_valid": true,
+      "expected_controller": null,
+      "controller": null,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f1",
+          "structures": [
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "tosaigh",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "OBJ": {
+                  "ref": "f3"
+                },
+                "SUBJ": {
+                  "ref": "f2"
+                },
+                "TNS-ASP": {
+                  "ref": "f4"
+                },
+                "VERB-FORM": "analytic",
+                "VOICE": "active"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "tiománaí",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "GEND": "masculine",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "tarracóir",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "GEND": "masculine",
+                "MORPHOLOGY-GROUP": "noun",
+                "NUM": "singular"
+              }
+            },
+            {
+              "id": "f4",
+              "pred": null,
+              "attributes": {
+                "MORPHOLOGY-GROUP": "verb",
+                "TENSE": "present"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
