@@ -664,11 +664,10 @@ mod tests {
         let mut sample = serde_json::json!({"lfg_f_structure": {
             "root":"f0", "structures":[
                 {"id":"f0","pred":{"lemma":"sleep","arguments":["SUBJ"]},"attributes":[
-                    {"name":"SUBJ","value":{"kind":"reference","target":"f1"}},
-                    {"name":"TNS-ASP","value":{"kind":"reference","target":"f2"}}
-                ]},
-                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[]},
-                {"id":"f2","pred":null,"attributes":[{"name":"TENSE","value":{"kind":"atom","value":"pres"}}]}
+                    {"kind":"function","function":"SUBJ","target":"f1"}
+                ],"morphology":null,"controller":null},
+                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[],"morphology":null,"controller":null},
+                {"id":"f2","pred":null,"attributes":[],"morphology":null,"controller":null}
             ]
         }});
         assert!(validator.is_valid(&sample), "{schema}");

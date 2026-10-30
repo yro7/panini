@@ -1271,13 +1271,13 @@ mod tests {
         let valid = serde_json::json!({"lfg_f_structure":{
             "root":"f0","structures":[
                 {"id":"f0","pred":{"lemma":"sleep","arguments":["SUBJ"]},
-                 "attributes":[{"name":"SUBJ","value":{"kind":"reference","target":"f1"}}]},
-                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[]}
+                 "attributes":[{"kind":"function","function":"SUBJ","target":"f1"}],
+                 "morphology":null,"controller":null},
+                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[],"morphology":null,"controller":null}
             ]
         }});
         let mut invalid = valid.clone();
-        invalid["lfg_f_structure"]["structures"][0]["attributes"][0]["value"]["target"] =
-            "missing".into();
+        invalid["lfg_f_structure"]["structures"][0]["attributes"][0]["target"] = "missing".into();
         let (bad, good) = (invalid.to_string(), valid.to_string());
         let executor = FakeExecutor::new(vec![&bad, &good]);
         let request = ExtractionRequest {

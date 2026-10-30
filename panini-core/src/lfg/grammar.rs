@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::aggregable::ClosedValues;
 use crate::traits::{BinaryVoice, LinguisticDefinition};
 
-use super::{LfgAnalysis, LfgStructure, LfgValue, features};
+use super::{LfgAnalysis, LfgReference, LfgSet, LfgStructure, LfgValue, features};
 
 /// Governed functions supported by this profile. ADJUNCT, TOPIC and FOCUS are
 /// deliberately absent: they cannot occur in a predicate's selected frame.
@@ -81,6 +81,26 @@ fn attribute_schema(schema: &mut schemars::Schema) {
         && let Some(variants) = object.remove("oneOf")
     {
         object.insert("anyOf".into(), variants);
+    }
+}
+
+impl LfgAttribute {
+    pub(super) fn resolve(self) -> (String, LfgValue) {
+        let reference = |target| LfgValue::Reference(LfgReference { target });
+        match self {
+            Self::Function { function, target } => {
+                (function.as_str().to_string(), reference(target))
+            }
+            Self::Adjunct { members } => ("ADJUNCT".into(), LfgValue::Set(LfgSet { set: members })),
+            Self::Topic { target } => ("TOPIC".into(), reference(target)),
+            Self::Focus { target } => ("FOCUS".into(), reference(target)),
+            Self::TenseAspect { target } => ("TNS-ASP".into(), reference(target)),
+            Self::Definite { value } => (
+                "DEF".into(),
+                LfgValue::Atom(if value { "+" } else { "-" }.into()),
+            ),
+            Self::Voice { value } => ("VOICE".into(), LfgValue::Atom(value.variant_str().into())),
+        }
     }
 }
 

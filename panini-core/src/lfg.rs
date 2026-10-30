@@ -1,8 +1,9 @@
 //! A language-independent, finite acyclic f-structure graph.
 //!
 //! This is a deliberately bounded LFG profile, not an XLE grammar or a proof
-//! that an analysis is linguistically correct. Attribute names follow ParGram
-//! conventions; language-specific features need no Rust language definition.
+//! that an analysis is linguistically correct. Function names follow a bounded
+//! ParGram-style profile; morphological inventories come from the existing
+//! language definitions without a separate LFG implementation per language.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -193,76 +194,10 @@ impl LfgAnalysis {
     }
 }
 
-/// Strict-output transport: named entries instead of open JSON property maps.
-/// Post-processing resolves it into the public attribute-map representation.
-pub(crate) mod wire {
-    use super::*;
-
-    #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-    #[serde(deny_unknown_fields)]
-    pub struct LfgWireAnalysis {
-        pub root: String,
-        pub structures: Vec<LfgWireStructure>,
-    }
-
-    #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-    #[serde(deny_unknown_fields)]
-    #[schemars(extend("required" = ["id", "pred", "attributes"]))]
-    pub struct LfgWireStructure {
-        pub id: String,
-        pub pred: Option<LfgPredicate>,
-        pub attributes: Vec<LfgWireAttribute>,
-    }
-
-    #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-    #[serde(deny_unknown_fields)]
-    pub struct LfgWireAttribute {
-        pub name: String,
-        pub value: LfgWireValue,
-    }
-
-    #[derive(Debug, Serialize, Deserialize, JsonSchema)]
-    #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
-    pub enum LfgWireValue {
-        Atom { value: String },
-        Reference { target: String },
-        Set { members: Vec<String> },
-    }
-
-    impl LfgWireAnalysis {
-        pub fn resolve(self) -> Result<LfgAnalysis, String> {
-            let mut structures = Vec::new();
-            for node in self.structures {
-                let mut attributes = BTreeMap::new();
-                for attr in node.attributes {
-                    let value = match attr.value {
-                        LfgWireValue::Atom { value } => LfgValue::Atom(value),
-                        LfgWireValue::Reference { target } => {
-                            LfgValue::Reference(LfgReference { target })
-                        }
-                        LfgWireValue::Set { members } => LfgValue::Set(LfgSet { set: members }),
-                    };
-                    if attributes.insert(attr.name.clone(), value).is_some() {
-                        return Err(format!("{}: duplicate attribute {}", node.id, attr.name));
-                    }
-                }
-                structures.push(LfgStructure {
-                    id: node.id,
-                    pred: node.pred,
-                    attributes,
-                });
-            }
-            let analysis = LfgAnalysis {
-                root: self.root,
-                structures,
-            };
-            analysis.validate()?;
-            Ok(analysis)
-        }
-    }
-}
-
 mod features;
 mod grammar;
+pub(crate) mod wire;
+
+pub(crate) use features::LfgMorphologySchema;
 pub use features::{LfgFeature, LfgMorphology};
 pub use grammar::{LfgAttribute, LfgFunction};
