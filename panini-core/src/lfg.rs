@@ -262,5 +262,7 @@ pub(crate) mod wire {
     }
 }
 
+mod features;
 mod grammar;
+pub use features::{LfgFeature, LfgMorphology};
 pub use grammar::{LfgAttribute, LfgFunction};
