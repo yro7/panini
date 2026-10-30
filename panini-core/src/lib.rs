@@ -31,7 +31,9 @@ pub use explanation::{
     GrammarRecap, MarkupKind, MarkupRun, StructuredExplanation, parse_markup, plain_text,
 };
 pub use lang_digest::LanguageDigest;
-pub use lfg::{LfgAnalysis, LfgPredicate, LfgReference, LfgSet, LfgStructure, LfgValue};
+pub use lfg::{
+    LfgAnalysis, LfgFunction, LfgPredicate, LfgReference, LfgSet, LfgStructure, LfgValue,
+};
 pub use morpheme::{ExtractedMorpheme, MorphemeObservation, WordSegmentation};
 pub use morphology_enums::{ParseUposError, Upos};
 pub use pivot::{OwnedPivotMeta, PivotField, PivotMeta, PivotValueKind};

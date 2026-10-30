@@ -55,10 +55,10 @@ pub struct LfgSet {
 }
 
 fn governed(name: &str) -> bool {
-    matches!(
-        name,
-        "SUBJ" | "OBJ" | "OBJ2" | "COMP" | "XCOMP" | "OBL" | "PREDLINK"
-    ) || name.starts_with("OBL_")
+    // Retain the open role spellings for legacy v1 readers. New extractions
+    // additionally pass the closed, typed profile in validate_for_language().
+    <LfgFunction as crate::aggregable::ClosedValues>::all_variants().contains(&name)
+        || name.starts_with("OBL_")
         || name.starts_with("OBJ_")
 }
 
@@ -261,3 +261,6 @@ pub(crate) mod wire {
         }
     }
 }
+
+mod grammar;
+pub use grammar::LfgFunction;

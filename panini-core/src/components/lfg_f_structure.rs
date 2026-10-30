@@ -202,4 +202,17 @@ mod tests {
                 .contains("duplicate set member")
         );
     }
+    #[test]
+    fn function_inventory_matches_serde_and_rejects_non_functions() {
+        use crate::aggregable::ClosedValues;
+        use crate::lfg::LfgFunction;
+        for name in LfgFunction::all_variants() {
+            let function: LfgFunction = serde_json::from_value((*name).into()).unwrap();
+            assert_eq!(serde_json::to_value(function).unwrap(), *name);
+            assert_eq!(function.as_str(), *name);
+        }
+        for name in ["ADJUNCT", "AGENT", "PATIENT", "OBL_MADE_UP"] {
+            assert!(serde_json::from_value::<LfgFunction>(name.into()).is_err());
+        }
+    }
 }

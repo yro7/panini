@@ -11,7 +11,7 @@ pub use panini_core::components::{
     PedagogicalExplanation,
 };
 pub use panini_core::lfg::{
-    LfgAnalysis, LfgPredicate, LfgReference, LfgSet, LfgStructure, LfgValue,
+    LfgAnalysis, LfgFunction, LfgPredicate, LfgReference, LfgSet, LfgStructure, LfgValue,
 };
 pub use panini_core::{LinguisticDefinition, MorphologyInfo};
 pub use panini_engine::extractor::{ExtractionError, ExtractionOptions};
