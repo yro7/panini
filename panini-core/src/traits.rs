@@ -39,6 +39,12 @@ pub struct MorphologyGroupSchema {
 /// Exposes compile-time morphology descriptors without requiring runtime samples.
 pub trait MorphologyCatalog {
     fn group_descriptors() -> Vec<MorphologyGroupSchema>;
+
+    /// All morphological dimensions, including optional fields. Unlike the
+    /// aggregation catalog, this can constrain a partial feature projection.
+    fn feature_descriptors() -> Vec<MorphologyGroupSchema> {
+        Self::group_descriptors()
+    }
 }
 
 /// Static schema for one morpheme-function variant such as `case` or `agreement`.

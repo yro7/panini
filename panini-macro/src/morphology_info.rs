@@ -154,59 +154,48 @@ fn generate_catalog_impl(
     name: &syn::Ident,
     variant_infos: &[VariantInfo],
 ) -> proc_macro2::TokenStream {
-    let schema_entries: Vec<proc_macro2::TokenStream> = variant_infos
-        .iter()
-        .map(|info| {
-            let ident = info.ident;
-            let label = ident.to_string();
+    let catalog_entries = |include_optional: bool| {
+        variant_infos.iter().map(|info| {
+            let label = info.ident.to_string();
             let key = label.to_snake_case();
-
-            let descriptor_entries = info.aggregable.iter().map(|(f, class)| {
-                let field_name = f.ident.as_ref().unwrap().to_string();
-                let ty = &f.ty;
-                match class {
-                    FieldClass::String => quote! {
-                        panini_core::aggregable::FieldDescriptor {
-                            name: #field_name.into(),
-                            kind: panini_core::aggregable::FieldKind::Open,
-                        }
-                    },
-                    FieldClass::Bool => quote! {
-                        panini_core::aggregable::FieldDescriptor {
-                            name: #field_name.into(),
-                            kind: panini_core::aggregable::FieldKind::Closed(&["true", "false"]),
-                        }
-                    },
-                    FieldClass::Closed => quote! {
-                        panini_core::aggregable::FieldDescriptor {
-                            name: #field_name.into(),
-                            kind: panini_core::aggregable::FieldKind::Closed(
+            let descriptors = info.observable.iter()
+                .filter(|field| include_optional || !field.is_option)
+                .map(|field| {
+                    let field_name = field.field.ident.as_ref().unwrap().to_string();
+                    let ty = option_inner_type(&field.field.ty).unwrap_or(&field.field.ty);
+                    let kind = match field.class {
+                        FieldClass::String => quote! { panini_core::aggregable::FieldKind::Open },
+                        FieldClass::Bool => quote! { panini_core::aggregable::FieldKind::Closed(&["true", "false"]) },
+                        FieldClass::Closed => quote! {
+                            panini_core::aggregable::FieldKind::Closed(
                                 <#ty as panini_core::aggregable::ClosedValues>::all_variants()
-                            ),
+                            )
+                        },
+                    };
+                    quote! {
+                        panini_core::aggregable::FieldDescriptor {
+                            name: #field_name.into(), kind: #kind,
                         }
-                    },
-                }
-            });
-
+                    }
+                });
             quote! {
                 panini_core::traits::MorphologyGroupSchema {
-                    key: #key.to_string(),
-                    label: #label.to_string(),
-                    dimensions: vec![#(#descriptor_entries,)*],
+                    key: #key.to_string(), label: #label.to_string(),
+                    dimensions: vec![#(#descriptors,)*],
                 }
             }
-        })
-        .collect();
-
-    let mut closed_field_types: Vec<proc_macro2::TokenStream> = Vec::new();
-    for info in variant_infos {
-        for (f, class) in &info.aggregable {
-            if matches!(class, FieldClass::Closed) {
-                let ty = &f.ty;
-                closed_field_types.push(quote! { #ty });
-            }
-        }
-    }
+        }).collect::<Vec<_>>()
+    };
+    let schema_entries = catalog_entries(false);
+    let feature_entries = catalog_entries(true);
+    let closed_field_types = variant_infos
+        .iter()
+        .flat_map(|info| &info.observable)
+        .filter(|field| matches!(field.class, FieldClass::Closed))
+        .map(|field| {
+            let ty = option_inner_type(&field.field.ty).unwrap_or(&field.field.ty);
+            quote! { #ty }
+        });
 
     let mut seen = std::collections::HashSet::new();
     let unique_closed_types: Vec<_> = closed_field_types
@@ -225,6 +214,10 @@ fn generate_catalog_impl(
         {
             fn group_descriptors() -> Vec<panini_core::traits::MorphologyGroupSchema> {
                 vec![#(#schema_entries),*]
+            }
+
+            fn feature_descriptors() -> Vec<panini_core::traits::MorphologyGroupSchema> {
+                vec![#(#feature_entries),*]
             }
         }
     }
