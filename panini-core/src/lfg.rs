@@ -263,4 +263,4 @@ pub(crate) mod wire {
 }
 
 mod grammar;
-pub use grammar::LfgFunction;
+pub use grammar::{LfgAttribute, LfgFunction};
