@@ -45,6 +45,7 @@ pub fn variant_serialized_name(variant_name: &str, rename_all: Option<&String>) 
         Some("snake_case") => pascal_to_snake_case(variant_name),
         Some("lowercase") => variant_name.to_lowercase(),
         Some("UPPERCASE") => variant_name.to_uppercase(),
+        Some("SCREAMING_SNAKE_CASE") => pascal_to_snake_case(variant_name).to_uppercase(),
         // kebab-case, SCREAMING_SNAKE_CASE etc. can be added if needed
         _ => variant_name.to_string(),
     }
