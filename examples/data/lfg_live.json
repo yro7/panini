@@ -1,0 +1,430 @@
+{
+  "model": "gemini-3.1-flash-lite-preview",
+  "failures": 0,
+  "cases": [
+    {
+      "language": "eng",
+      "text": "The driver starts the tractor.",
+      "elapsed_seconds": 2.562396541,
+      "graph_valid": true,
+      "expected_control": false,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "start",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "OBJ": {
+                  "ref": "f2"
+                },
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f3"
+                }
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "driver",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": null,
+              "attributes": {
+                "TENSE": "pres"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The tractor was repaired by the farmer.",
+      "elapsed_seconds": 1.775339792,
+      "graph_valid": true,
+      "expected_control": false,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "repair",
+                "arguments": [
+                  "SUBJ",
+                  "OBL_AG"
+                ]
+              },
+              "attributes": {
+                "OBL_AG": {
+                  "ref": "f2"
+                },
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f3"
+                },
+                "VOICE": "passive"
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": null,
+              "attributes": {
+                "TENSE": "past"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The farmer tries to leave.",
+      "elapsed_seconds": 1.7908943750000001,
+      "graph_valid": true,
+      "expected_control": true,
+      "control_shared": true,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "try",
+                "arguments": [
+                  "SUBJ",
+                  "XCOMP"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f3"
+                },
+                "XCOMP": {
+                  "ref": "f2"
+                }
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "leave",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f1"
+                }
+              }
+            },
+            {
+              "id": "f3",
+              "pred": null,
+              "attributes": {
+                "TENSE": "pres"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "eng",
+      "text": "The farmer who bought the tractor left.",
+      "elapsed_seconds": 9.431394791,
+      "graph_valid": true,
+      "expected_control": false,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "leave",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f5"
+                }
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "farmer",
+                "arguments": []
+              },
+              "attributes": {
+                "ADJUNCT": {
+                  "set": [
+                    "f2"
+                  ]
+                },
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "buy",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "OBJ": {
+                  "ref": "f4"
+                },
+                "SUBJ": {
+                  "ref": "f3"
+                }
+              }
+            },
+            {
+              "id": "f3",
+              "pred": {
+                "lemma": "who",
+                "arguments": []
+              },
+              "attributes": {}
+            },
+            {
+              "id": "f4",
+              "pred": {
+                "lemma": "tractor",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f5",
+              "pred": null,
+              "attributes": {
+                "TENSE": "past"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "fra",
+      "text": "Le fermier essaie de partir.",
+      "elapsed_seconds": 2.901983291,
+      "graph_valid": true,
+      "expected_control": true,
+      "control_shared": true,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "essayer",
+                "arguments": [
+                  "SUBJ",
+                  "XCOMP"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f3"
+                },
+                "XCOMP": {
+                  "ref": "f2"
+                }
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "fermier",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "partir",
+                "arguments": [
+                  "SUBJ"
+                ]
+              },
+              "attributes": {
+                "SUBJ": {
+                  "ref": "f1"
+                }
+              }
+            },
+            {
+              "id": "f3",
+              "pred": null,
+              "attributes": {
+                "TENSE": "pres"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "language": "gle",
+      "text": "Tosaíonn an tiománaí an tarracóir.",
+      "elapsed_seconds": 1.826458584,
+      "graph_valid": true,
+      "expected_control": false,
+      "control_shared": false,
+      "result": {
+        "lfg_f_structure": {
+          "root": "f0",
+          "structures": [
+            {
+              "id": "f0",
+              "pred": {
+                "lemma": "tosaigh",
+                "arguments": [
+                  "SUBJ",
+                  "OBJ"
+                ]
+              },
+              "attributes": {
+                "OBJ": {
+                  "ref": "f2"
+                },
+                "SUBJ": {
+                  "ref": "f1"
+                },
+                "TNS-ASP": {
+                  "ref": "f3"
+                }
+              }
+            },
+            {
+              "id": "f1",
+              "pred": {
+                "lemma": "tiománaí",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f2",
+              "pred": {
+                "lemma": "tarracóir",
+                "arguments": []
+              },
+              "attributes": {
+                "DEF": "+",
+                "NUM": "sg"
+              }
+            },
+            {
+              "id": "f3",
+              "pred": null,
+              "attributes": {
+                "TENSE": "pres"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

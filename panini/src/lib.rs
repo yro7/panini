@@ -7,7 +7,11 @@ pub use panini_core::component::{
     AnalysisComponent, ComponentContext, ExtractionResult, ExtractionResultError,
 };
 pub use panini_core::components::{
-    MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions, PedagogicalExplanation,
+    LfgFStructure, MorphemeSegmentation, MorphologyAnalysis, MultiwordExpressions,
+    PedagogicalExplanation,
+};
+pub use panini_core::lfg::{
+    LfgAnalysis, LfgPredicate, LfgReference, LfgSet, LfgStructure, LfgValue,
 };
 pub use panini_core::{LinguisticDefinition, MorphologyInfo};
 pub use panini_engine::extractor::{ExtractionError, ExtractionOptions};

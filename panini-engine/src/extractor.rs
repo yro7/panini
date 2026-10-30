@@ -1263,4 +1263,50 @@ mod tests {
             ]
         );
     }
+
+    #[tokio::test]
+    async fn lfg_graph_failure_retries_then_returns_attribute_maps() {
+        use panini_core::components::LfgFStructure;
+        use panini_core::lfg::LfgAnalysis;
+        let valid = serde_json::json!({"lfg_f_structure":{
+            "root":"f0","structures":[
+                {"id":"f0","pred":{"lemma":"sleep","arguments":["SUBJ"]},
+                 "attributes":[{"name":"SUBJ","value":{"kind":"reference","target":"f1"}}]},
+                {"id":"f1","pred":{"lemma":"cat","arguments":[]},"attributes":[]}
+            ]
+        }});
+        let mut invalid = valid.clone();
+        invalid["lfg_f_structure"]["structures"][0]["attributes"][0]["value"]["target"] =
+            "missing".into();
+        let (bad, good) = (invalid.to_string(), valid.to_string());
+        let executor = FakeExecutor::new(vec![&bad, &good]);
+        let request = ExtractionRequest {
+            content: "The cat sleeps.".into(),
+            targets: vec![],
+            pedagogical_context: None,
+            skill_path: None,
+            learner_ui_language: IsoLang::Eng,
+            translation_alignment_directives: None,
+            linguistic_background: vec![],
+            user_prompt: None,
+        };
+        let prompts = test_prompts();
+        let mut options = ExtractionOptions::new(&prompts, "lfg-test");
+        options.retry.initial_backoff_secs = 0;
+        let result = extract_with_components_executor(
+            &TestLang,
+            &executor,
+            &request,
+            &[&LfgFStructure],
+            options,
+        )
+        .await
+        .expect("corrected graph should pass");
+        let analysis: LfgAnalysis = result.get("lfg_f_structure").unwrap();
+        analysis.validate().unwrap();
+        let calls = executor.calls.lock().unwrap();
+        assert_eq!(calls.len(), 2);
+        assert!(!calls[0].had_retry_context);
+        assert!(calls[1].had_retry_context);
+    }
 }
