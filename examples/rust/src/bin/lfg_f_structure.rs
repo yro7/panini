@@ -1,6 +1,6 @@
 //! Set GOOGLE_API_KEY, or LFG_ENV_FILE pointing to a dotenv file containing it.
 //! Optional: LFG_MODEL, LFG_OUTPUT.
-//! With no arguments, analyze six sentences; otherwise pass ISO-639-3 and text.
+//! With no arguments, analyze seven sentences; otherwise pass ISO-639-3 and text.
 use anyhow::{Context, Result, ensure};
 use panini_core::traits::IsoLang;
 use panini_core::{LfgAnalysis, LfgValue};
@@ -36,21 +36,26 @@ async fn main() -> Result<()> {
         args.is_empty() || args.len() == 2,
         "Usage: lfg_f_structure [ISO-639-3 'sentence']"
     );
-    let cases: Vec<(&str, &str, bool)> = if args.is_empty() {
+    let cases: Vec<(&str, &str, Option<&str>)> = if args.is_empty() {
         vec![
-            ("eng", "The driver starts the tractor.", false),
-            ("eng", "The tractor was repaired by the farmer.", false),
-            ("eng", "The farmer tries to leave.", true),
-            ("eng", "The farmer who bought the tractor left.", false),
-            ("fra", "Le fermier essaie de partir.", true),
-            ("gle", "Tosaíonn an tiománaí an tarracóir.", false),
+            ("eng", "The driver starts the tractor.", None),
+            ("eng", "The tractor was repaired by the farmer.", None),
+            ("eng", "The farmer tries to leave.", Some("SUBJ")),
+            (
+                "eng",
+                "The farmer persuades his neighbor to leave.",
+                Some("OBJ"),
+            ),
+            ("eng", "The farmer who bought the tractor left.", None),
+            ("fra", "Le fermier essaie de partir.", Some("SUBJ")),
+            ("gle", "Tosaíonn an tiománaí an tarracóir.", None),
         ]
     } else {
-        vec![(&args[0], &args[1], false)]
+        vec![(&args[0], &args[1], None)]
     };
     let mut records = Vec::new();
     let mut failures = 0;
-    for (iso, text, expect_control) in cases {
+    for (iso, text, expected_controller) in cases {
         eprintln!("Analyzing {iso}: {text}");
         let language = IsoLang::from_639_3(iso).context("Unknown ISO-639-3 code")?;
         let request = ExtractionRequest {
@@ -86,6 +91,13 @@ async fn main() -> Result<()> {
                     .iter()
                     .find(|s| s.id == analysis.root)
                     .unwrap();
+                let controller = root.attributes.get("XCOMP-CONTROLLER").and_then(|value| {
+                    if let LfgValue::Atom(function) = value {
+                        Some(function.as_str())
+                    } else {
+                        None
+                    }
+                });
                 let control_shared = root
                     .attributes
                     .get("XCOMP")
@@ -96,28 +108,40 @@ async fn main() -> Result<()> {
                         _ => None,
                     })
                     .is_some_and(|xcomp| {
-                        matches!(root.attributes.get("SUBJ"), Some(LfgValue::Reference(_)))
-                            && root.attributes.get("SUBJ") == xcomp.attributes.get("SUBJ")
+                        controller.is_some_and(|function| {
+                            matches!(root.attributes.get(function), Some(LfgValue::Reference(_)))
+                                && root.attributes.get(function) == xcomp.attributes.get("SUBJ")
+                        })
                     });
-                if expect_control && !control_shared {
+                if expected_controller.is_some()
+                    && (controller != expected_controller || !control_shared)
+                {
                     failures += 1;
                 }
                 eprintln!(
-                    "  Valid graph: {} structures; shared control subject: {control_shared}",
+                    "  Valid graph: {} structures; controller: {controller:?}; shared control: {control_shared}",
                     analysis.structures.len()
                 );
                 records.push(json!({
                     "language": iso, "text": text, "elapsed_seconds": started.elapsed().as_secs_f64(),
-                    "graph_valid": true, "expected_control": expect_control,
+                    "graph_valid": true, "expected_controller": expected_controller, "controller":controller,
                     "control_shared": control_shared, "result": result.into_raw(),
                 }));
             }
             Err(error) => {
                 failures += 1;
                 let message = error.to_string().replace(&api_key, "<redacted>");
+                let raw_response = error
+                    .downcast_ref::<panini_engine::ExtractionError>()
+                    .and_then(|e| match e {
+                        panini_engine::ExtractionError::Parse(parse) => {
+                            Some(parse.raw_response.replace(&api_key, "<redacted>"))
+                        }
+                        _ => None,
+                    });
                 eprintln!("  Failed: {message}");
                 records
-                    .push(json!({"language":iso,"text":text,"graph_valid":false,"error":message}));
+                    .push(json!({"language":iso,"text":text,"graph_valid":false,"error":message,"raw_response":raw_response}));
             }
         }
     }
